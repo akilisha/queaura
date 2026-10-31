@@ -1,6 +1,6 @@
 # LAN Trivia Game — Design Spec
 
-Working title: TBD. Platform for v1: Android host app. Status: pre-build; Phase 0 (spike) is next.
+Working title: TBD. Platform for v1: Android host app. Status: Phase 0 (spike) complete; Phase 1 is next.
 
 ---
 
@@ -64,9 +64,10 @@ Gameplay is LAN-only. The cloud backend is involved only for AI generation and s
 
 Never fail silently. If players can't connect, the host sees a plain-language helper with the fix, including a hotspot fallback.
 
-### 3.3 Hotspot fallback (decide in Phase 0)
+### 3.3 Hotspot fallback (DECIDED: LocalOnlyHotspot)
 - Option A: Android **LocalOnlyHotspot**. The app creates its own network with generated credentials and shows a Wi-Fi QR code (scan 1: join network), then the game QR code (scan 2: join game). This bypasses venue isolation entirely.
 - Option B: the host enables the regular phone hotspot manually; the app detects it and shows the game QR code.
+- **Decision: Option A.** Phase 0 joined a player through LocalOnlyHotspot on the S21 host. It needs no trip into Android settings, which suits the no-instructions benchmark. Players have no internet while on it, which gameplay does not need (§2). Option B was not tested; revisit only if a phone refuses to stay on a network without internet.
 
 ### 3.4 HTTP vs HTTPS (DECIDED: plain HTTP)
 - **Player and TV pages are served over plain HTTP.** No HTTPS in any form.
@@ -328,7 +329,7 @@ Backend: Clerk auth, subscription and free allowance, metering, provider abstrac
 ## 12. Open decisions
 
 1. ~~HTTPS: Path A vs Path B.~~ Decided in Phase 0: plain HTTP, screens may sleep, no penalty for sleeping (§3.4).
-2. Hotspot fallback: LocalOnlyHotspot vs regular hotspot (Phase 0).
+2. ~~Hotspot fallback.~~ Decided in Phase 0: LocalOnlyHotspot (§3.3).
 3. ~~Embedded server implementation.~~ Decided in Phase 0: the native Kotlin module (NanoHTTPD plus Java-WebSocket in a foreground service). The spike showed no instability, so embedded Node.js was not needed (§2.1).
 4. Payment provider for subscriptions.
 5. Size of the free AI allowance (configurable; set from real cost data).

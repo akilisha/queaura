@@ -25,7 +25,7 @@ each soak run next to this file.
 
 | Measurement | Home Wi-Fi | Phone hotspot | LocalOnlyHotspot |
 |---|---|---|---|
-| Join time, stopwatch (median) | | | |
+| Join time, stopwatch (median) | Under 15 s (owner's observation, scan to Tap button) | | |
 | Join time, page (`joinMs` median) | 9.2 s (one join): page ready to type at 1.3 s, 7.9 s typing, 48 ms submit to seat | | |
 | Round trip (`rttMs` median / p95) | 13 ms / 73 ms | | |
 | Reconnect: refresh | | | |
@@ -37,6 +37,7 @@ each soak run next to this file.
 | Soak `unexpectedCloses` (network drops) | 2, both the desktop browser (TV and diag tabs), within 45 s of it waking from a 39 min sleep; server heartbeat got no reply for ~22 s. Not Jo, not the server | | |
 | Soak `sleepCloses` (screen-sleep drops) | 2: Jo once, the desktop TV tab once (hidden 13 min). Jo's second sleep came after the stats snapshot and was also a clean sleep drop | | |
 | Soak `tickLateMs` max | 2.2 ms over 3,233 ticks | | |
+| Joined through the network | Yes | Not tested | Yes (Wi-Fi QR, then game QR) |
 | TV worked | Yes, desktop Chrome and Samsung TV. The TV view needed scrolling at 749 px tall; fixed so it fits, confirmed on the Samsung TV (see findings) | | |
 
 ## Findings to carry into Phase 1
@@ -78,7 +79,8 @@ device runs above are what count.
 
 ## Decisions (update DESIGN_SPEC.md in the same change)
 
-- §3.3 hotspot fallback:
+- §3.3 hotspot fallback: **decided, LocalOnlyHotspot** (spec updated). A player joined through it
+  on the S21; the regular hotspot was not tested.
 - §3.4 HTTP vs HTTPS: **decided, plain HTTP** (spec updated). Muted video cannot keep Chrome
   Android screens on, Path A is rejected, screen sleep is accepted with no penalty to the player.
 - §12.3 server implementation: **native Kotlin module confirmed**; no instability seen, so no
