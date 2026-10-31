@@ -136,6 +136,7 @@ class Engine(private val now: () -> Long) {
 
   /** Starts [newGame] from the lobby. Returns why it cannot start, or null. */
   fun start(newGame: Game): String? {
+    if (phase == Phase.ENDED) return "This session has ended"
     if (phase != Phase.LOBBY) return "A game is already running"
     newGame.problem()?.let { return it }
     game = newGame

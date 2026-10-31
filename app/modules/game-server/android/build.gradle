@@ -1,0 +1,48 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.triviocity.gameserver'
+version = '0.1.0'
+
+// The game server lives in server/ (plain Kotlin, unit-tested on a desktop JVM). This module
+// compiles those same sources and wraps them in an Android foreground service.
+def serverSources = file("$projectDir/../../../../server/src/main/kotlin")
+// The web client players and the TV load, built by `cd web && npm run build`.
+def webDist = file("$projectDir/../../../../web/dist")
+def webAssets = layout.buildDirectory.dir("generated/webAssets")
+
+android {
+  namespace "com.triviocity.gameserver"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  sourceSets {
+    main {
+      java.srcDirs += serverSources
+      assets.srcDirs += webAssets
+    }
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  implementation 'org.nanohttpd:nanohttpd:2.3.1'
+  implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+  // org.json is part of Android.
+}
+
+def copyWebClient = tasks.register('copyWebClient', Copy) {
+  doFirst {
+    if (!webDist.file('index.html').exists()) {
+      throw new GradleException("The web client is not built. Run: cd web && npm install && npm run build")
+    }
+  }
+  from webDist
+  into webAssets.map { it.dir('web') }
+}
+preBuild.dependsOn copyWebClient
