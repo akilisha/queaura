@@ -1,8 +1,9 @@
 import { useKeepAwake } from 'expo-keep-awake';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { Alert, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import type { GameState, Phase } from '../../../protocol/src';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import type { GameState, Phase, ScoreEntry } from '../../../protocol/src';
+import { useConfirm } from '../components/ConfirmDialog';
 import { PlayerList } from '../components/PlayerList';
 import { Body, Button, Card, ErrorText, Heading, Muted, Screen } from '../components/ui';
 import { host, useHost } from '../host/connection';
@@ -32,6 +33,14 @@ export default function Game() {
   const wide = width >= size.wide;
   const { state, receivedAt, error, connected } = useHost();
   const seconds = useSeconds(state?.remainingMs, receivedAt, state?.paused ?? false);
+  const [dialog, confirm] = useConfirm();
+
+  const confirmStop = () =>
+    confirm({ title: 'Stop the game?', message: 'Everyone goes to the final scores now.', confirmLabel: 'Stop', cancelLabel: 'Keep playing', danger: true, onConfirm: host.stop });
+  const confirmEnd = () =>
+    confirm({ title: 'End the session?', message: 'Players see "Thanks for playing" and the game closes.', confirmLabel: 'End session', danger: true, onConfirm: host.endSession });
+  const confirmRemove = (p: ScoreEntry) =>
+    confirm({ title: `Remove ${p.name}?`, message: 'They will not be able to rejoin this session.', confirmLabel: 'Remove', danger: true, onConfirm: () => host.kick(p.id) });
 
   useEffect(() => {
     if (state?.phase === 'lobby') router.replace('/lobby');
@@ -88,13 +97,14 @@ export default function Game() {
         players={state.scores}
         columns={['lastPoints', 'roundPoints', 'total']}
         answeredIds={state.phase === 'question' ? state.host?.answeredIds : undefined}
-        onKick={final ? undefined : (p) => host.kick(p.id)}
+        onRemoveRequest={final ? undefined : confirmRemove}
       />
     </Card>
   );
 
   return (
     <Screen>
+      {dialog}
       {wide ? (
         <View style={styles.columns}>
           <View style={styles.column}>
@@ -136,20 +146,6 @@ function QuestionPanel({ state }: { state: GameState }) {
       )}
     </View>
   );
-}
-
-function confirmStop() {
-  Alert.alert('Stop the game?', 'Everyone goes to the final scores now.', [
-    { text: 'Keep playing', style: 'cancel' },
-    { text: 'Stop', style: 'destructive', onPress: host.stop },
-  ]);
-}
-
-function confirmEnd() {
-  Alert.alert('End the session?', 'Players are disconnected and see "Thanks for playing".', [
-    { text: 'Cancel', style: 'cancel' },
-    { text: 'End', style: 'destructive', onPress: host.endSession },
-  ]);
 }
 
 const styles = StyleSheet.create({

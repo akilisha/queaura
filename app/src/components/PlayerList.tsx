@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ScoreEntry } from '../../../protocol/src';
 import { color, opacity, radius, size, space, text, weight } from '../theme';
 
@@ -6,20 +6,15 @@ interface Props {
   players: ScoreEntry[];
   /** Columns of numbers to show; the lobby shows none. */
   columns?: ('total' | 'roundPoints' | 'lastPoints')[];
-  /** Long-press to remove a player (spec §5.5). */
-  onKick?: (player: ScoreEntry) => void;
+  /** Long-press asks to remove a player (spec §5.5); the screen confirms. */
+  onRemoveRequest?: (player: ScoreEntry) => void;
   answeredIds?: number[];
 }
 
 const HEADERS = { total: 'Total', roundPoints: 'Round', lastPoints: 'Last' } as const;
 
-export function PlayerList({ players, columns = [], onKick, answeredIds }: Props) {
+export function PlayerList({ players, columns = [], onRemoveRequest, answeredIds }: Props) {
   if (players.length === 0) return <Text style={styles.empty}>No players yet. They join by scanning the code.</Text>;
-  const confirmKick = (p: ScoreEntry) =>
-    Alert.alert(`Remove ${p.name}?`, 'They will not be able to rejoin this session.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => onKick?.(p) },
-    ]);
   return (
     <View style={styles.list}>
       {columns.length > 0 && (
@@ -31,7 +26,7 @@ export function PlayerList({ players, columns = [], onKick, answeredIds }: Props
         </View>
       )}
       {players.map((p) => (
-        <Pressable key={p.id} onLongPress={onKick ? () => confirmKick(p) : undefined} delayLongPress={500}>
+        <Pressable key={p.id} onLongPress={onRemoveRequest ? () => onRemoveRequest(p) : undefined} delayLongPress={500}>
           <View style={[styles.row, styles.item, !p.online && styles.offline]}>
             <Text style={styles.emoji}>{p.emoji}</Text>
             <Text style={styles.name} numberOfLines={1}>
@@ -45,7 +40,7 @@ export function PlayerList({ players, columns = [], onKick, answeredIds }: Props
           </View>
         </Pressable>
       ))}
-      {onKick && <Text style={styles.hint}>Press and hold a player to remove them.</Text>}
+      {onRemoveRequest && <Text style={styles.hint}>Press and hold a player to remove them.</Text>}
     </View>
   );
 }

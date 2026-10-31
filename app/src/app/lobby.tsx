@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import type { LanAddress } from '../../modules/game-server/src/GameServerModule';
+import { useConfirm } from '../components/ConfirmDialog';
 import { PlayerList } from '../components/PlayerList';
 import { Button, Card, ErrorText, Muted, Screen } from '../components/ui';
 import { useLibrary } from '../data/library';
@@ -25,6 +26,7 @@ export default function Lobby() {
   const [chosenIp, setChosenIp] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
+  const [dialog, confirm] = useConfirm();
 
   useEffect(() => {
     ensureServer()
@@ -94,7 +96,12 @@ export default function Lobby() {
   const pick = (
     <>
       <Card title={`Players (${players.filter((p) => p.online).length})`}>
-        <PlayerList players={players} onKick={(p) => host.kick(p.id)} />
+        <PlayerList
+          players={players}
+          onRemoveRequest={(p) =>
+            confirm({ title: `Remove ${p.name}?`, message: 'They will not be able to rejoin this session.', confirmLabel: 'Remove', danger: true, onConfirm: () => host.kick(p.id) })
+          }
+        />
       </Card>
       <Card title="Choose a game">
         {formats.map(({ format, problem }) => (
@@ -116,12 +123,19 @@ export default function Lobby() {
         <Button big label="Start" onPress={start} disabled={!!startBlocker} />
         {startBlocker && <Muted>{startBlocker}</Muted>}
       </Card>
-      <Button tone="secondary" label="End session" onPress={endSession} />
+      <Button
+        tone="secondary"
+        label="End session"
+        onPress={() =>
+          confirm({ title: 'End the session?', message: 'Players see "Thanks for playing" and the lobby closes.', confirmLabel: 'End session', danger: true, onConfirm: endSession })
+        }
+      />
     </>
   );
 
   return (
     <Screen>
+      {dialog}
       {wide ? (
         <View style={styles.columns}>
           <View style={styles.column}>{join}</View>

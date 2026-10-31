@@ -17,6 +17,8 @@ export const color = {
   danger: '#b3261e',
   qrDark: '#000000',
   qrLight: '#ffffff',
+  /** Dims the screen behind a dialog. */
+  scrim: 'rgba(27, 26, 34, 0.55)',
   choice: ['#3a2fd1', '#c2410c', '#0f766e', '#a21caf'],
   onChoice: '#ffffff',
 } as const;
@@ -47,6 +49,7 @@ export const size = {
   numberColumn: 48,
   markColumn: 20,
   controlMin: 140,
+  dialogMax: 420,
 } as const;
 
 export const tracking = { caps: 1 } as const;
