@@ -165,6 +165,8 @@ Controls:
 
 The host cannot play from the hosting device. To host and play, use a tablet to host and a phone to play. The host app needs a proper **tablet layout**.
 
+The host device's screen is kept on while a game runs. The host is watching it anyway, and Android only gives the server's Wi-Fi low latency while the screen is on (Phase 0 measured round-trip spikes up to ~1.3 s with the host screen off, which would distort time-weighted scoring).
+
 ### 5.6 End of game
 - Final scores (tally per player across all rounds).
 - A brief "Play another?" window. If chosen, the host picks from the game list while participants stay connected on a "waiting for the next game" screen. Otherwise, lights out: the session ends.
@@ -180,8 +182,8 @@ Session → Game → Rounds (one presentation style each) → Questions. Rounds 
 
 ```
 LOBBY
-  → GAME_STARTING
-  → ROUND_INTRO        (round number, style name)
+  → GAME_STARTING      (3 s "get ready")
+  → ROUND_INTRO        (4 s: round number, style name)
   → QUESTION           (loop per question in round)
        1. Show question number and content on all screens.
        2. Answer window opens immediately.
@@ -189,19 +191,21 @@ LOBBY
           countdown bar not yet draining. Answers submitted here are accepted.
        4. Countdown runs (if the style is timed).
        5. Window closes on timeout, OR early when every connected player has answered.
+  → TIMES_UP           (3 s "time's up" hold, only when the clock ran out; no answers accepted)
   → REVEAL             (correct answer, explanation if present, points)
        auto mode: hold for the default duration, then advance.
-  → ROUND_SCORES       (after the last question of the round)
+  → ROUND_SCORES       (8 s, after the last question of the round)
   → ROUND_BREAK        (countdown to next round)
   → ... next round ...
   → FINAL_SCORES
-  → PLAY_ANOTHER_WINDOW → LOBBY | ENDED
+  → PLAY_ANOTHER_WINDOW (60 s for the host to choose) → LOBBY | ENDED
 ```
 
 Rules:
 - **Server time is authoritative.** Submission time is when the server receives the answer. Time weighting is measured from when the server opened the window.
 - Pause can occur in QUESTION (freezes timing) and in REVEAL/BREAK (holds).
 - Skip from QUESTION → next QUESTION (or ROUND_SCORES); the question scores for nobody.
+- **Early close** counts only players who are connected with their screen on. A sleeping phone never holds up the room (§3.4). If no such player exists, the window runs to timeout.
 - **Late joiners** enter at the next question with zero points, never mid-question.
 - **Dropouts:** an answer submitted before the window closed counts; a returning player resumes with their score.
 
@@ -215,7 +219,7 @@ Rules:
 
 Outside questionnaire mode, input is tap or numeric only. **No free text in timed modes.**
 
-Durations: every style has defaults (reading buffer, answer window, reveal hold, round break). The host can override any of them per round. Proposed starting defaults, to be tuned in usability tests: reading buffer 5 s (scaled by length), answer window 20 s, reveal 8 s, round break 15 s.
+Durations: every style has defaults (reading buffer, answer window, reveal hold, round break). The host can override any of them per round. Starting defaults, to be tuned in usability tests: reading buffer 2 s + 0.25 s per word of the question, kept between 3 and 10 s; answer window 20 s; reveal 8 s; round break 15 s. Fixed in Phase 1: get-ready 3 s, round intro 4 s, time's-up hold 3 s, round scores 8 s.
 
 ### 6.4 Questionnaire mode (manual progression)
 - A manual-progression game has **exactly one round** containing all its questions. Choosing manual progression implies questionnaire mode; the wizard enforces this.
@@ -229,8 +233,11 @@ Durations: every style has defaults (reading buffer, answer window, reveal hold,
 
 ### 6.5 Scoring
 - `none`, `allOrNothing` (**default**), `timeWeighted`.
-- Time-weighted: answers submitted during the reading buffer earn **full points**; weighting decays only once the countdown starts.
-- Closest-without-going-over: the closest guess not exceeding the answer wins the question; ties share; exact answers may earn a bonus (tune in testing).
+- `allOrNothing`: a correct answer earns **100** points.
+- Time-weighted: answers submitted during the reading buffer earn **full points (100)**; weighting decays only once the countdown starts, falling linearly to **50** at the end of the window. A correct answer never earns less than 50.
+- Closest-without-going-over: the closest guess not exceeding the answer wins the question and earns 100 (time-weighted as above when that scoring is chosen). **Tied winners each earn the full points.** An **exact** answer earns a **50-point bonus**. Guesses over the answer (busts) earn 0; if everyone busts, nobody scores.
+- `none`: answers are collected and revealed but nobody earns points.
+- All values are starting points, to be tuned in usability tests.
 
 ---
 
@@ -333,5 +340,5 @@ Backend: Clerk auth, subscription and free allowance, metering, provider abstrac
 3. ~~Embedded server implementation.~~ Decided in Phase 0: the native Kotlin module (NanoHTTPD plus Java-WebSocket in a foreground service). The spike showed no instability, so embedded Node.js was not needed (§2.1).
 4. Payment provider for subscriptions.
 5. Size of the free AI allowance (configurable; set from real cost data).
-6. Default durations per style (tune in usability tests).
-7. Closest-without-going-over tie and exact-answer rules.
+6. Default durations per style: starting values set (§6.3); tune in usability tests.
+7. ~~Closest-without-going-over tie and exact-answer rules.~~ Decided for Phase 1: tied winners each earn full points, exact answers earn a 50-point bonus (§6.5); tune in testing.
