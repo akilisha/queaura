@@ -15,6 +15,10 @@ export default function Home() {
         <Button big label="Start a game now" onPress={() => router.push('/lobby')} />
         <Muted>Opens a lobby with ready-made sample games. Pick one, let people join, press Start.</Muted>
       </Card>
+      <Card>
+        <Button tone="secondary" label="Your questions" onPress={() => router.push('/questions')} />
+        <Muted>See the questions on this phone, and write your own.</Muted>
+      </Card>
     </Screen>
   );
 }

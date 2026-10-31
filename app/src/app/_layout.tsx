@@ -20,6 +20,8 @@ export default function Layout() {
         <Stack.Screen name="index" options={{ title: 'Triviocity' }} />
         <Stack.Screen name="lobby" options={{ title: 'Lobby' }} />
         <Stack.Screen name="game" options={{ title: 'Hosting', headerBackVisible: false, gestureEnabled: false }} />
+        <Stack.Screen name="questions/index" options={{ title: 'Your questions' }} />
+        <Stack.Screen name="questions/[id]" options={{ title: 'Question' }} />
       </Stack>
     </>
   );

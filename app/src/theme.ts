@@ -50,6 +50,8 @@ export const size = {
   markColumn: 20,
   controlMin: 140,
   dialogMax: 420,
+  radio: 22,
+  radioBorder: 2,
 } as const;
 
 export const tracking = { caps: 1 } as const;
