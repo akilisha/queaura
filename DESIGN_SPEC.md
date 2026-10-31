@@ -102,6 +102,7 @@ GameFormat
   id, title
   progression: auto | manual       (manual = questionnaire; see §6.4)
   scoring: none | allOrNothing | timeWeighted   (default: allOrNothing)
+  closeEarly: boolean   (default: false; close a question once every awake player has answered)
   rounds[]
   status: playable | incomplete    (derived: incomplete if any slot is empty)
 
@@ -190,7 +191,8 @@ LOBBY
        3. Reading buffer (default ~5 s, scaled by question length):
           countdown bar not yet draining. Answers submitted here are accepted.
        4. Countdown runs (if the style is timed).
-       5. Window closes on timeout, OR early when every connected player has answered.
+       5. Window stays open until the clock hits 0. Optional per game (off by default):
+          close early once every connected player has answered.
   → TIMES_UP           (3 s "time's up" hold, only when the clock ran out; no answers accepted)
   → REVEAL             (correct answer, explanation if present, points)
        auto mode: hold for the default duration, then advance.
@@ -205,7 +207,7 @@ Rules:
 - **Server time is authoritative.** Submission time is when the server receives the answer. Time weighting is measured from when the server opened the window.
 - Pause can occur in QUESTION (freezes timing) and in REVEAL/BREAK (holds).
 - Skip from QUESTION → next QUESTION (or ROUND_SCORES); the question scores for nobody.
-- **Early close** counts only players who are connected with their screen on. A sleeping phone never holds up the room (§3.4). If no such player exists, the window runs to timeout.
+- **Early close** is a per-game option, off by default: by default every question runs until the clock hits 0. When on, it counts only players who are connected with their screen on, so a sleeping phone never holds up the room (§3.4); if no such player exists, the window runs to timeout.
 - **Late joiners** enter at the next question with zero points, never mid-question.
 - **Dropouts:** an answer submitted before the window closed counts; a returning player resumes with their score.
 
@@ -234,7 +236,7 @@ Durations: every style has defaults (reading buffer, answer window, reveal hold,
 ### 6.5 Scoring
 - `none`, `allOrNothing` (**default**), `timeWeighted`.
 - `allOrNothing`: a correct answer earns **100** points.
-- Time-weighted: answers submitted during the reading buffer earn **full points (100)**; weighting decays only once the countdown starts, falling linearly to **50** at the end of the window. A correct answer never earns less than 50.
+- Time-weighted: answers submitted during the reading buffer earn **full points (100)**; weighting decays only once the countdown starts, falling linearly to **10** at the end of the window. A correct answer never earns less than 10.
 - Closest-without-going-over: the closest guess not exceeding the answer wins the question and earns 100 (time-weighted as above when that scoring is chosen). **Tied winners each earn the full points.** An **exact** answer earns a **50-point bonus**. Guesses over the answer (busts) earn 0; if everyone busts, nobody scores.
 - `none`: answers are collected and revealed but nobody earns points.
 - All values are starting points, to be tuned in usability tests.
