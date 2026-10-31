@@ -36,12 +36,17 @@ dependencies {
   // org.json is part of Android.
 }
 
-def copyWebClient = tasks.register('copyWebClient', Copy) {
-  doFirst {
-    if (!webDist.file('index.html').exists()) {
+// A separate task, because Gradle silently skips a Copy whose source folder is missing.
+def checkWebClient = tasks.register('checkWebClient') {
+  doLast {
+    if (!new File(webDist, 'index.html').exists()) {
       throw new GradleException("The web client is not built. Run: cd web && npm install && npm run build")
     }
   }
+}
+
+def copyWebClient = tasks.register('copyWebClient', Copy) {
+  dependsOn checkWebClient
   from webDist
   into webAssets.map { it.dir('web') }
 }
