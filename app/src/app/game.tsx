@@ -5,6 +5,7 @@ import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { GameState, Phase, ScoreEntry } from '../../../protocol/src';
 import { useConfirm } from '../components/ConfirmDialog';
 import { PlayerList } from '../components/PlayerList';
+import { STYLES } from '../game/copy';
 import { Body, Button, Card, ErrorText, Heading, Muted, Screen } from '../components/ui';
 import { host, useHost } from '../host/connection';
 import { closeSession } from '../host/session';
@@ -24,7 +25,6 @@ const PHASE_LABEL: Record<Phase, string> = {
   ended: 'Session ended',
 };
 
-const STYLE_NAME = { closestWithoutGoingOver: 'Closest without going over', multipleChoice: 'Multiple choice' } as const;
 
 /** The in-game host screen (spec §5.5) and the end of game (§5.6). The screen stays on (§5.5). */
 export default function Game() {
@@ -81,7 +81,7 @@ export default function Game() {
       </View>
       {state.round && (
         <Muted>
-          {state.title} · Round {state.round.number} of {state.round.count} ({STYLE_NAME[state.round.style]})
+          {state.title} · Round {state.round.number} of {state.round.count} ({STYLES[state.round.style].name})
           {state.question ? ` · Question ${state.question.number} of ${state.round.questionCount}` : ''}
         </Muted>
       )}

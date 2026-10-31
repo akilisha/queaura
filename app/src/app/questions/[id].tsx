@@ -24,10 +24,11 @@ import { color, radius, size, space, text, weight } from '../../theme';
 
 /** Write or edit one question by hand (spec §5.3). `/questions/new` starts a blank one. */
 export default function EditQuestion() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // `type` starts a new question on an answer type (the game wizard asks for numbers in closest-guess rounds).
+  const { id, type } = useLocalSearchParams<{ id: string; type?: string }>();
   const library = useLibrary();
   const existing = id === 'new' ? undefined : library.byId.get(id);
-  const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : emptyDraft()));
+  const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : { ...emptyDraft(), answerType: type === 'multipleChoice' ? 'multipleChoice' : 'numeric' }));
   const [triedSave, setTriedSave] = useState(false);
   const [dialog, confirm] = useConfirm();
   const problems = problemsOf(draft);

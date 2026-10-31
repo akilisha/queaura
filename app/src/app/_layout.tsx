@@ -22,6 +22,9 @@ export default function Layout() {
         <Stack.Screen name="game" options={{ title: 'Hosting', headerBackVisible: false, gestureEnabled: false }} />
         <Stack.Screen name="questions/index" options={{ title: 'Your questions' }} />
         <Stack.Screen name="questions/[id]" options={{ title: 'Question' }} />
+        <Stack.Screen name="games/index" options={{ title: 'Your games' }} />
+        {/* The wizard has its own stack and headers. */}
+        <Stack.Screen name="games/[id]" options={{ headerShown: false }} />
       </Stack>
     </>
   );
