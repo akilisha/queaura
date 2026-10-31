@@ -1,0 +1,29 @@
+/* Element defaults only. Component styles live in their own CSS modules. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--color-bg);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Text size goes on body, not html: on html it would redefine rem, which the tokens are built on. */
+body {
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}

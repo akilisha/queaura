@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "questions": [
+    { "id": "s-n-piano", "text": "How many keys are on a standard piano?", "answerType": "numeric", "correctNumber": 88, "explanation": "52 white keys and 36 black keys." },
+    { "id": "s-n-moon", "text": "In what year did people first walk on the Moon?", "answerType": "numeric", "correctNumber": 1969, "explanation": "Apollo 11 landed on 20 July 1969." },
+    { "id": "s-n-bones", "text": "How many bones are in an adult human body?", "answerType": "numeric", "correctNumber": 206 },
+    { "id": "s-n-minutes", "text": "How many minutes are there in a day?", "answerType": "numeric", "correctNumber": 1440, "explanation": "24 hours × 60 minutes." },
+    { "id": "s-n-titanic", "text": "In what year did the Titanic sink?", "answerType": "numeric", "correctNumber": 1912 },
+    { "id": "s-n-chess", "text": "How many squares are on a chessboard?", "answerType": "numeric", "correctNumber": 64 },
+    { "id": "s-n-octopus", "text": "How many hearts does an octopus have?", "answerType": "numeric", "correctNumber": 3 },
+    { "id": "s-n-boil", "text": "At what temperature in °F does water boil at sea level?", "answerType": "numeric", "correctNumber": 212 },
+    { "id": "s-m-mars", "text": "Which planet is known as the Red Planet?", "answerType": "multipleChoice", "correctChoiceId": "b",
+      "choices": [{ "id": "a", "text": "Venus" }, { "id": "b", "text": "Mars" }, { "id": "c", "text": "Jupiter" }, { "id": "d", "text": "Mercury" }] },
+    { "id": "s-m-ocean", "text": "What is the largest ocean on Earth?", "answerType": "multipleChoice", "correctChoiceId": "d",
+      "choices": [{ "id": "a", "text": "Atlantic" }, { "id": "b", "text": "Indian" }, { "id": "c", "text": "Arctic" }, { "id": "d", "text": "Pacific" }] },
+    { "id": "s-m-gold", "text": "What is the chemical symbol for gold?", "answerType": "multipleChoice", "correctChoiceId": "a",
+      "choices": [{ "id": "a", "text": "Au" }, { "id": "b", "text": "Ag" }, { "id": "c", "text": "Gd" }, { "id": "d", "text": "Go" }] },
+    { "id": "s-m-mona", "text": "Who painted the Mona Lisa?", "answerType": "multipleChoice", "correctChoiceId": "c",
+      "choices": [{ "id": "a", "text": "Michelangelo" }, { "id": "b", "text": "Raphael" }, { "id": "c", "text": "Leonardo da Vinci" }, { "id": "d", "text": "Vincent van Gogh" }] },
+    { "id": "s-m-whale", "text": "What is the largest animal that has ever lived?", "answerType": "multipleChoice", "correctChoiceId": "a",
+      "choices": [{ "id": "a", "text": "Blue whale" }, { "id": "b", "text": "African elephant" }, { "id": "c", "text": "Megalodon" }, { "id": "d", "text": "Brachiosaurus" }] },
+    { "id": "s-m-canberra", "text": "What is the capital of Australia?", "answerType": "multipleChoice", "correctChoiceId": "c",
+      "choices": [{ "id": "a", "text": "Sydney" }, { "id": "b", "text": "Melbourne" }, { "id": "c", "text": "Canberra" }, { "id": "d", "text": "Perth" }] },
+    { "id": "s-m-diamond", "text": "What is the hardest natural substance?", "answerType": "multipleChoice", "correctChoiceId": "b",
+      "choices": [{ "id": "a", "text": "Quartz" }, { "id": "b", "text": "Diamond" }, { "id": "c", "text": "Granite" }, { "id": "d", "text": "Iron" }] },
+    { "id": "s-m-prime", "text": "What is the smallest prime number?", "answerType": "multipleChoice", "correctChoiceId": "b",
+      "choices": [{ "id": "a", "text": "1" }, { "id": "b", "text": "2" }, { "id": "c", "text": "3" }, { "id": "d", "text": "5" }] }
+  ],
+  "games": [
+    {
+      "id": "s-game-warmup",
+      "title": "Warm-up",
+      "scoring": "allOrNothing",
+      "rounds": [
+        { "style": "closestWithoutGoingOver", "questionIds": ["s-n-piano", "s-n-moon", "s-n-minutes", "s-n-octopus"] },
+        { "style": "multipleChoice", "questionIds": ["s-m-mars", "s-m-ocean", "s-m-mona", "s-m-canberra"] }
+      ]
+    },
+    {
+      "id": "s-game-quick",
+      "title": "Quick fire",
+      "scoring": "timeWeighted",
+      "rounds": [
+        { "style": "multipleChoice", "questionIds": ["s-m-gold", "s-m-whale", "s-m-diamond", "s-m-prime", "s-n-chess"] }
+      ]
+    }
+  ]
+}

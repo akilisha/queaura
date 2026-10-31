@@ -1,0 +1,14 @@
+.qr {
+  display: block;
+  width: var(--qr-size);
+  height: var(--qr-size);
+  border-radius: var(--radius-md);
+}
+
+.light {
+  fill: var(--color-qr-light);
+}
+
+.dark {
+  fill: var(--color-qr-dark);
+}

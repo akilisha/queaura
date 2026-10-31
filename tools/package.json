@@ -1,0 +1,11 @@
+{
+  "name": "triviocity-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "simulate": "node simulate.ts"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
+  }
+}

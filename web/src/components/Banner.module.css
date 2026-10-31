@@ -1,0 +1,16 @@
+.banner {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+}
+
+.info {
+  background: var(--color-surface-raised);
+  border: var(--border-width) solid var(--color-border);
+}
+
+.warning {
+  background: var(--color-warning);
+  color: var(--color-on-choice);
+}

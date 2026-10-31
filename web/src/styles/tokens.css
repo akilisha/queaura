@@ -1,0 +1,141 @@
+/* Design tokens. Every color, type, spacing, radius, size and motion value lives here. */
+
+:root {
+  /* Color: warm paper with an indigo primary and amber accent */
+  --color-bg: #f6f4ef;
+  --color-surface: #ffffff;
+  --color-surface-raised: #fbfaf7;
+  --color-text: #1b1a22;
+  --color-text-muted: #5d5a6b;
+  --color-border: #e2dfd6;
+  --color-primary: #3a2fd1;
+  --color-primary-pressed: #2b22a8;
+  --color-on-primary: #ffffff;
+  --color-accent: #f2a900;
+  --color-success: #1c7c4a;
+  --color-warning: #a85f00;
+  --color-danger: #b3261e;
+  --color-focus: #f2a900;
+  --color-correct: var(--color-success);
+  --color-wrong: var(--color-danger);
+
+  /* Choices keep one color each on phone and TV, so players can match them at a glance. */
+  --color-choice-1: #3a2fd1;
+  --color-choice-2: #c2410c;
+  --color-choice-3: #0f766e;
+  --color-choice-4: #a21caf;
+  --color-on-choice: #ffffff;
+
+  /* QR codes stay dark-on-light in every theme so cameras read them. */
+  --color-qr-dark: #000000;
+  --color-qr-light: #ffffff;
+
+  /* Type */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Samsung Sans', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+  --text-display: 4rem;
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 800;
+  --leading-tight: 1.1;
+  --leading-normal: 1.45;
+  --tracking-caps: 0.06em;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+
+  /* Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Sizes */
+  --tap-min: 3rem;
+  --tap-huge: 11rem;
+  --emoji-cell: 3rem;
+  --content-max: 32rem;
+  --score-column-min: 100%;
+  --countdown-height: 0.75rem;
+  --keypad-key: 3.5rem;
+  --qr-size: 18rem;
+  --border-width: 1px;
+  --focus-width: 3px;
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --press-scale: 0.96;
+
+  /* Emphasis */
+  --opacity-disabled: 0.5;
+  --opacity-offline: 0.45;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121118;
+    --color-surface: #1e1c27;
+    --color-surface-raised: #26232f;
+    --color-text: #f4f2fa;
+    --color-text-muted: #a9a5ba;
+    --color-border: #34313f;
+    --color-primary: #8c82ff;
+    --color-primary-pressed: #7368f0;
+    --color-on-primary: #0e0b2b;
+    --color-accent: #ffc233;
+    --color-success: #4cc38a;
+    --color-warning: #f0a847;
+    --color-danger: #ff6b5e;
+    --color-focus: #ffc233;
+  }
+}
+
+/* TV scale: read from across a room, so larger type and space and a high-contrast palette. */
+:root[data-mode='tv'] {
+  --color-bg: #0b0a10;
+  --color-surface: #17151f;
+  --color-surface-raised: #201d2a;
+  --color-text: #ffffff;
+  --color-text-muted: #cfcbe0;
+  --color-border: #3d3949;
+  --color-primary: #9d94ff;
+  --color-on-primary: #0e0b2b;
+  --color-accent: #ffc233;
+  --color-success: #5fe0a0;
+  --color-warning: #ffb85c;
+  --color-danger: #ff7a6e;
+
+  /* Sized from the screen height: TV browsers report anything from ~720 to 1080 CSS px tall. */
+  --text-sm: clamp(1rem, 2.4vh, 1.5rem);
+  --text-md: clamp(1.125rem, 2.9vh, 1.75rem);
+  --text-lg: clamp(1.375rem, 3.6vh, 2.25rem);
+  --text-xl: clamp(1.75rem, 4.8vh, 3rem);
+  --text-2xl: clamp(2.5rem, 8vh, 5rem);
+  --text-display: clamp(5rem, 22vh, 12rem);
+
+  --space-2: clamp(0.375rem, 1vh, 0.75rem);
+  --space-3: clamp(0.5rem, 1.4vh, 1rem);
+  --space-4: clamp(0.75rem, 2vh, 1.5rem);
+  --space-5: clamp(1rem, 2.8vh, 2rem);
+  --space-6: clamp(1.5rem, 4vh, 3rem);
+  --content-max: 100%;
+  --score-column-min: 13rem;
+  --countdown-height: clamp(0.75rem, 2vh, 1.5rem);
+  --qr-size: clamp(14rem, 52vh, 30rem);
+  --border-width: 2px;
+}
