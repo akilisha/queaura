@@ -15,7 +15,7 @@ export default function SlotsStep() {
   const library = useLibrary();
   const empty = emptySlots(draft, library.byId);
   return (
-    <Screen>
+    <Screen form>
       <StepHeader
         name="Questions"
         title="Choose the questions"

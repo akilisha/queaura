@@ -1,16 +1,28 @@
-import type { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Children, type ReactNode } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { color, font, glow, opacity, radius, size, space, text, tracking } from '../theme';
 
 // Shared building blocks for host screens.
 
-export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
-  const body = <View style={styles.content}>{children}</View>;
+/** [form] keeps forms and reading screens narrower on a tablet. */
+export function Screen({ children, scroll = true, form = false }: { children: ReactNode; scroll?: boolean; form?: boolean }) {
+  const body = <View style={[styles.content, form && styles.form]}>{children}</View>;
   return (
     <SafeAreaView style={styles.screen} edges={['bottom', 'left', 'right']}>
       {scroll ? <ScrollView contentContainerStyle={styles.scroll}>{body}</ScrollView> : body}
     </SafeAreaView>
+  );
+}
+
+/** Lists of cards: two columns on a tablet, one on a phone. */
+export function Grid({ children }: { children: ReactNode }) {
+  const { width } = useWindowDimensions();
+  if (width < size.wide) return <>{children}</>;
+  return (
+    <View style={styles.grid}>
+      {Children.map(children, (child) => (child ? <View style={styles.gridItem}>{child}</View> : null))}
+    </View>
   );
 }
 
@@ -76,6 +88,10 @@ export function ErrorText({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
   scroll: { flexGrow: 1 },
+  form: { maxWidth: size.formMax },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[4] },
+  // Two per row with the gap between; a lone last card keeps the same width.
+  gridItem: { flexBasis: '45%', flexGrow: 1, maxWidth: '48%' },
   content: { flex: 1, width: '100%', maxWidth: size.contentMax, alignSelf: 'center', padding: space[4], gap: space[4] },
   card: {
     backgroundColor: color.surface,

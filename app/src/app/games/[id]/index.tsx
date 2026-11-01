@@ -29,7 +29,7 @@ export default function NameStep() {
   };
 
   return (
-    <Screen>
+    <Screen form>
       <StepHeader
         name="Name"
         title="Name your game"

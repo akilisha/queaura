@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Chips, Field } from '../../components/form';
-import { Button, Card, Muted, Screen } from '../../components/ui';
+import { Button, Card, Grid, Muted, Screen } from '../../components/ui';
 import { useLibrary } from '../../data/library';
 import type { BankQuestion } from '../../data/types';
 import { gamesUsing } from '../../data/usage';
@@ -40,9 +40,11 @@ export default function Questions() {
       <Muted>
         {shown.length} {shown.length === 1 ? 'question' : 'questions'}
       </Muted>
-      {shown.map((q) => (
-        <QuestionRow key={q.id} question={q} usedIn={gamesUsing(q.id, library.games).length} />
-      ))}
+      <Grid>
+        {shown.map((q) => (
+          <QuestionRow key={q.id} question={q} usedIn={gamesUsing(q.id, library.games).length} />
+        ))}
+      </Grid>
       {shown.length === 0 && <Muted>No questions match. Try another search, or write a new one.</Muted>}
     </Screen>
   );

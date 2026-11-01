@@ -34,7 +34,7 @@ export default function PickQuestion() {
     router.push(style === 'closestWithoutGoingOver' ? '/questions/new?type=numeric' : style === 'questionnaire' ? '/questions/new?survey=1' : '/questions/new');
 
   return (
-    <Screen>
+    <Screen form>
       <Muted>
         {style === 'questionnaire' ? `Question ${slot + 1}: every kind of question fits.` : `Round ${round + 1}, question ${slot + 1} · ${STYLES[style].name}`}
         {style === 'closestWithoutGoingOver' ? ': only questions with a number answer fit.' : ''}

@@ -24,7 +24,7 @@ export default function BatteryWalkthrough() {
   }, []);
 
   return (
-    <Screen>
+    <Screen form>
       <View style={styles.body}>
         <Text style={styles.title}>Keep the game running</Text>
         <Muted>

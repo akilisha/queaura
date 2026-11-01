@@ -14,7 +14,7 @@ export default function SummaryStep() {
   const { lines, status } = describe(draft, library.byId);
   const ready = problemOf(draft, library.byId) === null;
   return (
-    <Screen>
+    <Screen form>
       <StepHeader name="Summary" title="Check and save" />
       <Card>
         {lines.map((line, i) => (

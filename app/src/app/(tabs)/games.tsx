@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Button, Card, Muted, Screen } from '../../components/ui';
+import { Button, Card, Grid, Muted, Screen } from '../../components/ui';
 import { games } from '../../data/db';
 import { libraryChanged, useLibrary } from '../../data/library';
 import type { GameFormat } from '../../data/types';
@@ -30,26 +30,28 @@ export default function Games() {
     <Screen>
       {dialog}
       <Button big label="Create a game" onPress={() => router.push('/games/new')} />
-      {library.games.map((g) => {
-        const problem = problemOf(g, library.byId);
-        return (
-          <Card key={g.id}>
-            <View style={problem ? styles.unfinished : undefined}>
-              <Text style={styles.title}>{g.title}</Text>
-              <Muted>{sizeOf(g)}</Muted>
-            </View>
-            <Text style={problem ? styles.problem : styles.ready}>{problem ? `Not ready: ${problem}` : 'Ready to play'}</Text>
-            <View style={styles.actions}>
-              <View style={styles.action}>
-                <Button tone="secondary" label={problem ? 'Finish it' : 'Edit'} onPress={() => router.push(`/games/${g.id}`)} />
+      <Grid>
+        {library.games.map((g) => {
+          const problem = problemOf(g, library.byId);
+          return (
+            <Card key={g.id}>
+              <View style={problem ? styles.unfinished : undefined}>
+                <Text style={styles.title}>{g.title}</Text>
+                <Muted>{sizeOf(g)}</Muted>
               </View>
-              <View style={styles.action}>
-                <Button tone="secondary" label="Delete" onPress={() => remove(g)} />
+              <Text style={problem ? styles.problem : styles.ready}>{problem ? `Not ready: ${problem}` : 'Ready to play'}</Text>
+              <View style={styles.actions}>
+                <View style={styles.action}>
+                  <Button tone="secondary" label={problem ? 'Finish it' : 'Edit'} onPress={() => router.push(`/games/${g.id}`)} />
+                </View>
+                <View style={styles.action}>
+                  <Button tone="secondary" label="Delete" onPress={() => remove(g)} />
+                </View>
               </View>
-            </View>
-          </Card>
-        );
-      })}
+            </Card>
+          );
+        })}
+      </Grid>
       {library.games.length === 0 && <Muted>No games yet. Create one above.</Muted>}
     </Screen>
   );

@@ -13,7 +13,7 @@ export default function ScoringStep() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { draft, setDraft } = useWizard();
   return (
-    <Screen>
+    <Screen form>
       <StepHeader name="Scoring" title="Scoring" intro="This applies to every round in the game." />
       <Card title="Points">
         {SCORING_ORDER.map((s) => (

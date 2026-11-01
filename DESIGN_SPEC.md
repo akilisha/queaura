@@ -180,7 +180,7 @@ Controls:
 - **Kick:** long-press a player in the score list. A kicked player's token is blocked for the rest of the session.
 - **Stop:** ends the game.
 
-The host cannot play from the hosting device. To host and play, use a tablet to host and a phone to play. The host app needs a proper **tablet layout**.
+The host cannot play from the hosting device. To host and play, use a tablet to host and a phone to play. The host app needs a proper **tablet layout**. Built: from 768 dp wide, the lobby and hosting screens use two columns and lists (games, questions, results, a result's answers) show two cards per row; forms and reading screens (the wizard, the question editor, help pages) stay 640 dp wide; nothing is wider than 960 dp.
 
 The host device's screen is kept on while a game runs. The host is watching it anyway, and Android only gives the server's Wi-Fi low latency while the screen is on (Phase 0 measured round-trip spikes up to ~1.3 s with the host screen off, which would distort time-weighted scoring).
 

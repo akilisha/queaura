@@ -9,7 +9,7 @@ import { color, font, space, text, tracking } from '../../theme';
 /** Play tab, the first screen: one big way in (spec §5.1). No onboarding carousel. */
 export default function Play() {
   return (
-    <Screen>
+    <Screen form>
       {/* Answers left behind if the app stopped mid-questionnaire (spec §6.4 crash recovery). */}
       <PendingResults />
       <View style={styles.hero}>

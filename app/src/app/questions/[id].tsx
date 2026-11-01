@@ -85,14 +85,14 @@ export default function EditQuestion() {
 
   if (id !== 'new' && !existing) {
     return (
-      <Screen>
+      <Screen form>
         <Muted>This question no longer exists.</Muted>
       </Screen>
     );
   }
 
   return (
-    <Screen>
+    <Screen form>
       <Stack.Screen options={{ title: existing ? 'EDIT QUESTION' : 'NEW QUESTION' }} />
       {dialog}
       <Card>

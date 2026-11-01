@@ -26,7 +26,7 @@ export default function JoinHelp() {
   };
 
   return (
-    <Screen>
+    <Screen form>
       {!onWifi && (
         <Check title="This phone isn't on Wi-Fi">
           <Muted>Players join on the same Wi-Fi as this phone. Connect it to the Wi-Fi everyone's on.</Muted>

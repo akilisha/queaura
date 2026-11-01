@@ -73,6 +73,8 @@ export const size = {
   /** Screens wider than this get the two-column (tablet) layout. */
   wide: 768,
   contentMax: 960,
+  /** Forms and reading screens stay narrower on a tablet, so lines stay easy to read. */
+  formMax: 640,
   borderWidth: 1,
   borderStrong: 2,
   numberColumn: 48,

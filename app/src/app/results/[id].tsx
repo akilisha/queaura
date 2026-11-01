@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Chips } from '../../components/form';
-import { Button, Card, ErrorText, Muted, Screen } from '../../components/ui';
+import { Button, Card, ErrorText, Grid, Muted, Screen } from '../../components/ui';
 import { results } from '../../data/db';
 import { answerText } from '../../results/results';
 import { shareCsv } from '../../results/share';
@@ -71,22 +71,24 @@ export default function Result() {
           onChange={setBy}
         />
       )}
-      {by === 'player'
-        ? r.players.map((p) => (
-            <Card key={p.id} title={`${p.emoji} ${p.name}`}>
-              {r.questions.map((q) => (
-                <Answer key={q.id} label={q.text} value={answerText(q, r.responses[p.id]?.[q.id])} />
-              ))}
-            </Card>
-          ))
-        : r.questions.map((q, i) => (
-            <Card key={q.id} title={`Question ${i + 1}`}>
-              <Text style={styles.question}>{q.text}</Text>
-              {r.players.map((p) => (
-                <Answer key={p.id} label={`${p.emoji} ${p.name}`} value={answerText(q, r.responses[p.id]?.[q.id])} />
-              ))}
-            </Card>
-          ))}
+      <Grid>
+        {by === 'player'
+          ? r.players.map((p) => (
+              <Card key={p.id} title={`${p.emoji} ${p.name}`}>
+                {r.questions.map((q) => (
+                  <Answer key={q.id} label={q.text} value={answerText(q, r.responses[p.id]?.[q.id])} />
+                ))}
+              </Card>
+            ))
+          : r.questions.map((q, i) => (
+              <Card key={q.id} title={`Question ${i + 1}`}>
+                <Text style={styles.question}>{q.text}</Text>
+                {r.players.map((p) => (
+                  <Answer key={p.id} label={`${p.emoji} ${p.name}`} value={answerText(q, r.responses[p.id]?.[q.id])} />
+                ))}
+              </Card>
+            ))}
+      </Grid>
       <Button tone="secondary" label="Delete these results" onPress={remove} />
     </Screen>
   );
