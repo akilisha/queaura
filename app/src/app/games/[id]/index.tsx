@@ -15,7 +15,7 @@ export default function NameStep() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { draft, setDraft } = useWizard();
   const library = useLibrary();
-  // Free-text questions taken out by switching back to a quiz, so the host is told.
+  // Questions without a right answer taken out by switching back to a quiz, so the host is told.
   const [cleared, setCleared] = useState(0);
   const problem = titleProblem(draft);
   const kind = kindOf(draft);
@@ -49,7 +49,7 @@ export default function NameStep() {
         ))}
         {cleared > 0 && (
           <Muted>
-            {plural(cleared, 'free-text question')} {cleared === 1 ? 'was' : 'were'} taken out: only questionnaires take answers in players' own words.
+            {plural(cleared, 'question')} without a right answer {cleared === 1 ? 'was' : 'were'} taken out: {cleared === 1 ? 'it fits' : 'they fit'} questionnaires only.
           </Muted>
         )}
         {kind === 'quiz' ? (

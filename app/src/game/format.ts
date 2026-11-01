@@ -42,8 +42,8 @@ export function maxQuestions(g: GameFormat): number {
 /**
  * Switches between a quiz and a questionnaire (spec §6.4). A questionnaire is exactly one round
  * of style questionnaire with no points; the chosen questions carry over. Going back to a quiz
- * makes one multiple-choice round, and free-text questions, which only questionnaires take, are
- * taken out of their slots; [cleared] says how many.
+ * makes one multiple-choice round, and questions without a right answer (free text, opinions),
+ * which only questionnaires take, are taken out of their slots; [cleared] says how many.
  */
 export function withKind(g: GameFormat, kind: GameKind, bank: ReadonlyMap<string, BankQuestion>): { game: GameFormat; cleared: number } {
   if (kind === kindOf(g)) return { game: g, cleared: 0 };

@@ -60,3 +60,22 @@ describe('free text (questionnaires)', () => {
     expect(toQuestion(d, 'q1')).toEqual({ id: 'q1', text: 'Team name?', answerType: 'freeText', explanation: undefined, source: 'manual' });
   });
 });
+
+describe('no right answer (questionnaires)', () => {
+  it('a number question needs no answer, and stores none', () => {
+    const d: QuestionDraft = { ...emptyDraft(), text: 'Coffees a day?', graded: false, number: '', explanation: 'x' };
+    expect(problemsOf(d)).toEqual([]);
+    const q = toQuestion(d, 'q1');
+    expect(q.correctNumber).toBeUndefined();
+    expect(q.explanation).toBeUndefined();
+    expect(draftOf(q).graded).toBe(false);
+  });
+  it('a choice question still needs its choices, but nothing marked right', () => {
+    const d: QuestionDraft = { ...emptyDraft(), answerType: 'multipleChoice', text: 'Coffee or tea?', graded: false, choices: ['Coffee', ''] };
+    expect(problemsOf(d)).toEqual(['Give at least 2 answers to choose from']);
+    const q = toQuestion({ ...d, choices: ['Coffee', 'Tea'] }, 'q2');
+    expect(q.choices).toHaveLength(2);
+    expect(q.correctChoiceId).toBeUndefined();
+    expect(draftOf(q).graded).toBe(false);
+  });
+});

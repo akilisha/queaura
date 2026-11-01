@@ -7,6 +7,7 @@ import { useLibrary } from '../../data/library';
 import type { BankQuestion } from '../../data/types';
 import { gamesUsing } from '../../data/usage';
 import { ANSWER_TYPES } from '../../game/copy';
+import { isGraded } from '../../game/resolve';
 import { color, font, radius, size, space, text } from '../../theme';
 
 type Filter = 'all' | keyof typeof ANSWER_TYPES;
@@ -51,6 +52,8 @@ function QuestionRow({ question: q, usedIn }: { question: BankQuestion; usedIn: 
   const answer =
     q.answerType === 'freeText'
       ? 'Players write their own (questionnaires only)'
+      : !isGraded(q)
+        ? 'No right answer (questionnaires only)'
       : `Answer: ${q.answerType === 'numeric' ? String(q.correctNumber) : (q.choices?.find((c) => c.id === q.correctChoiceId)?.text ?? '')}`;
   return (
     <Pressable

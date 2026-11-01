@@ -102,7 +102,8 @@ Question
   id
   text
   answerType: numeric | multipleChoice | freeText
-  correctAnswer          (numeric value, or choice id; none for freeText)
+  correctAnswer?         (numeric value, or choice id; none for freeText; optional otherwise:
+                          a question without one fits questionnaires only)
   choices[]              (multipleChoice only)
   explanation?           (optional; AI always fills it)
   category?, difficulty?
@@ -162,7 +163,7 @@ The wizard steps through: title and kind (**quiz** or **questionnaire**) → num
 
 ### 5.3 Question creation
 - A standalone activity, independent of any game.
-- Manual entry: text, answer type, answer (and choices), optional explanation. A free-text question has no answer or explanation and fits questionnaires only.
+- Manual entry: text, answer type, answer (and choices), optional explanation. A free-text question has no answer or explanation and fits questionnaires only. Number and choice questions ask "Is there a right answer?"; with no, they have no answer or explanation and fit questionnaires only. Writing a new question from a questionnaire's slot starts on no.
 - AI generation (signed-in, subscribed users; see §8): pick category, difficulty, answer type, and count → questions go into the bank. Alternatively, inside a game: "fill the empty slots in this round."
 - All questions pass moderation before entering the bank (§9).
 
@@ -239,7 +240,7 @@ Outside questionnaire mode, input is tap or numeric only. **No free text in time
 Durations: every style has defaults (reading buffer, answer window, reveal hold, round break). The host can override any of them per round. Starting defaults, to be tuned in usability tests: reading buffer 2 s + 0.25 s per word of the question, kept between 3 and 10 s; answer window 20 s; reveal 8 s; round break 15 s. Fixed in Phase 1: get-ready 3 s, round intro 4 s, time's-up hold 3 s, round scores 8 s.
 
 ### 6.4 Questionnaire mode (manual progression)
-- A manual-progression game has **exactly one round** containing all its questions (up to 50). Choosing manual progression implies questionnaire mode; the wizard enforces this. Its scoring is none. Every answer type fits; free text fits nothing else. Switching a questionnaire back to a quiz takes free-text questions out of their slots and says how many.
+- A manual-progression game has **exactly one round** containing all its questions (up to 50). Choosing manual progression implies questionnaire mode; the wizard enforces this. Its scoring is none. Every question fits; questions without a right answer (free text, opinions) fit nothing else. Switching a questionnaire back to a quiz takes those out of their slots and says how many.
 - No timers, no flair. Each participant advances at their own pace by tapping. Free text is allowed.
 - **The host ends it.** The host manages pace verbally.
 - TV shows the join QR code and a completion count ("8 of 12 finished"). The host screen shows the same count, each player's progress ("3 of 10", "Finished") and an **End questionnaire** button, confirmed first.

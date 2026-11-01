@@ -30,7 +30,8 @@ export default function PickQuestion() {
   };
 
   // A closest-guess round can only take number questions, so the editor starts there.
-  const writeNew = () => router.push(style === 'closestWithoutGoingOver' ? '/questions/new?type=numeric' : '/questions/new');
+  const writeNew = () =>
+    router.push(style === 'closestWithoutGoingOver' ? '/questions/new?type=numeric' : style === 'questionnaire' ? '/questions/new?survey=1' : '/questions/new');
 
   return (
     <Screen>

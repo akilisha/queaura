@@ -66,6 +66,15 @@ describe('questionnaire', () => {
     expect(problemOf({ ...survey, rounds: [...survey.rounds, ...survey.rounds] }, withFree)).toBe('A questionnaire has exactly one set of questions');
     expect(problemOf({ ...survey, progression: 'auto' }, withFree)).toBe('Only a questionnaire can use the questionnaire style');
   });
+  it('takes questions without a right answer; quiz rounds do not', () => {
+    const opinion: BankQuestion = { id: 'o1', text: 'Coffee or tea?', answerType: 'multipleChoice', choices: [{ id: 'a', text: 'Coffee' }, { id: 'b', text: 'Tea' }], source: 'manual' };
+    const count: BankQuestion = { id: 'o2', text: 'Coffees a day?', answerType: 'numeric', source: 'manual' };
+    const b = new Map([...bank, [opinion.id, opinion], [count.id, count]]);
+    expect(problemOf({ ...survey, rounds: [{ style: 'questionnaire', slots: ['o1', 'o2'] }] }, b)).toBeNull();
+    for (const style of ['multipleChoice', 'fastestFinger', 'closestWithoutGoingOver'] as const) {
+      expect(problemOf({ id: 'g', title: 'T', scoring: 'none', rounds: [{ style, slots: ['o1', 'o2'] }] }, b)).toBe('Round 1 has a question that does not fit its style');
+    }
+  });
   it('a quiz says it progresses automatically', () => {
     expect(resolveGame(starterGames()[0], bank).progression).toBe('auto');
   });

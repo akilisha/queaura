@@ -2,7 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useConfirm } from '../../components/ConfirmDialog';
-import { Field, OptionCard } from '../../components/form';
+import { Chips, Field, OptionCard } from '../../components/form';
 import { Button, Card, ErrorText, Muted, Screen } from '../../components/ui';
 import { questions } from '../../data/db';
 import { libraryChanged, useLibrary } from '../../data/library';
@@ -25,10 +25,11 @@ import { color, font, radius, size, space, text } from '../../theme';
 /** Write or edit one question by hand (spec §5.3). `/questions/new` starts a blank one. */
 export default function EditQuestion() {
   // `type` starts a new question on an answer type (the game wizard asks for numbers in closest-guess rounds).
-  const { id, type } = useLocalSearchParams<{ id: string; type?: string }>();
+  // `survey` starts it without a right answer (written from a questionnaire's slot).
+  const { id, type, survey } = useLocalSearchParams<{ id: string; type?: string; survey?: string }>();
   const library = useLibrary();
   const existing = id === 'new' ? undefined : library.byId.get(id);
-  const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : { ...emptyDraft(), answerType: type === 'multipleChoice' || type === 'freeText' ? type : 'numeric' }));
+  const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : { ...emptyDraft(), answerType: type === 'multipleChoice' || type === 'freeText' ? type : 'numeric', graded: survey !== '1' }));
   const [triedSave, setTriedSave] = useState(false);
   const [dialog, confirm] = useConfirm();
   const problems = problemsOf(draft);
@@ -112,7 +113,17 @@ export default function EditQuestion() {
       </Card>
       {draft.answerType !== 'freeText' && (
         <Card title="The answer">
-          {draft.answerType === 'numeric' ? (
+          <Text style={styles.label}>Is there a right answer?</Text>
+          <Chips
+            options={[
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No, it asks for an opinion' },
+            ]}
+            value={draft.graded ? 'yes' : 'no'}
+            onChange={(v) => set({ graded: v === 'yes' })}
+          />
+          {!draft.graded && <Muted>For questionnaires only: nothing is marked right or wrong.</Muted>}
+          {draft.answerType === 'numeric' && draft.graded && (
             <Field
               label="Correct number"
               value={draft.number}
@@ -121,20 +132,26 @@ export default function EditQuestion() {
               keyboardType="numeric"
               hint="Decimals and negative numbers are fine."
             />
-          ) : (
+          )}
+          {draft.answerType === 'numeric' && !draft.graded && <Muted>Players type any number.</Muted>}
+          {draft.answerType === 'multipleChoice' && (
             <>
-              <Muted>Write the answers players choose from, and tap the circle next to the right one.</Muted>
+              <Muted>
+                {draft.graded ? 'Write the answers players choose from, and tap the circle next to the right one.' : 'Write the answers players choose from.'}
+              </Muted>
               {draft.choices.map((choice, i) => (
                 <View key={i} style={styles.choice}>
-                  <Pressable
-                    accessibilityRole="radio"
-                    accessibilityLabel={`Answer ${i + 1} is right`}
-                    accessibilityState={{ checked: draft.correctIndex === i }}
-                    onPress={() => set({ correctIndex: i })}
-                    style={[styles.mark, draft.correctIndex === i && styles.markChosen]}
-                  >
-                    {draft.correctIndex === i && <Text style={styles.check}>✓</Text>}
-                  </Pressable>
+                  {draft.graded && (
+                    <Pressable
+                      accessibilityRole="radio"
+                      accessibilityLabel={`Answer ${i + 1} is right`}
+                      accessibilityState={{ checked: draft.correctIndex === i }}
+                      onPress={() => set({ correctIndex: i })}
+                      style={[styles.mark, draft.correctIndex === i && styles.markChosen]}
+                    >
+                      {draft.correctIndex === i && <Text style={styles.check}>✓</Text>}
+                    </Pressable>
+                  )}
                   <TextInput
                     style={styles.choiceInput}
                     value={choice}
@@ -148,17 +165,17 @@ export default function EditQuestion() {
                     <Pressable accessibilityRole="button" accessibilityLabel={`Remove answer ${i + 1}`} onPress={() => removeChoice(i)} style={styles.remove}>
                       <Text style={styles.removeLabel}>✕</Text>
                     </Pressable>
-                )}
-              </View>
-            ))}
-            {draft.choices.length < MAX_CHOICES && (
-              <Button tone="secondary" label="Add another answer" onPress={() => set({ choices: [...draft.choices, ''] })} />
-            )}
-          </>
-        )}
-      </Card>
+                  )}
+                </View>
+              ))}
+              {draft.choices.length < MAX_CHOICES && (
+                <Button tone="secondary" label="Add another answer" onPress={() => set({ choices: [...draft.choices, ''] })} />
+              )}
+            </>
+          )}
+        </Card>
       )}
-      {draft.answerType !== 'freeText' && (
+      {draft.answerType !== 'freeText' && draft.graded && (
         <Card>
           <Field
             label="Explanation (optional)"
@@ -179,6 +196,7 @@ export default function EditQuestion() {
 }
 
 const styles = StyleSheet.create({
+  label: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
   choice: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
   mark: {
     width: size.tapMin,

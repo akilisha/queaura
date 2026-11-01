@@ -4,10 +4,17 @@ import type { BankQuestion, GameFormat } from '../data/types';
 // Turns a stored game format plus the question bank into the game the server plays.
 // No runtime imports, so tools/ can run this file directly with Node.
 
+/** Has a right answer to mark. Free text and opinion questions do not; they fit questionnaires only. */
+export function isGraded(q: Pick<BankQuestion, 'answerType' | 'correctNumber' | 'correctChoiceId'>): boolean {
+  if (q.answerType === 'numeric') return q.correctNumber !== undefined;
+  if (q.answerType === 'multipleChoice') return q.correctChoiceId !== undefined;
+  return false;
+}
+
 /** Which answer types fit a style (spec §4 compatibility rule). */
-export function fits(style: Style, question: Pick<BankQuestion, 'answerType'>): boolean {
+export function fits(style: Style, question: Pick<BankQuestion, 'answerType' | 'correctNumber' | 'correctChoiceId'>): boolean {
   if (style === 'questionnaire') return true; // answered as asked, nothing is marked
-  if (question.answerType === 'freeText') return false; // free text is for questionnaires only (spec §6.4)
+  if (!isGraded(question)) return false; // no right answer: questionnaires only (spec §6.4)
   if (style === 'closestWithoutGoingOver') return question.answerType === 'numeric';
   return true; // choice styles take choice questions, and number questions with generated choices
 }

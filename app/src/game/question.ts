@@ -1,5 +1,6 @@
 import type { AnswerType, Choice } from '../../../protocol/src';
 import type { BankQuestion } from '../data/types';
+import { isGraded } from './resolve';
 
 // Rules for writing a question by hand (spec §5.3). Pure, so the editor and tests share them.
 
@@ -17,10 +18,12 @@ export interface QuestionDraft {
   choices: string[];
   correctIndex: number | null;
   explanation: string;
+  /** Has a right answer. Without one, a question fits questionnaires only (spec §6.4). */
+  graded: boolean;
 }
 
 export function emptyDraft(): QuestionDraft {
-  return { text: '', answerType: 'numeric', number: '', choices: ['', ''], correctIndex: null, explanation: '' };
+  return { text: '', answerType: 'numeric', number: '', choices: ['', ''], correctIndex: null, explanation: '', graded: true };
 }
 
 export function draftOf(q: BankQuestion): QuestionDraft {
@@ -32,6 +35,7 @@ export function draftOf(q: BankQuestion): QuestionDraft {
     choices,
     correctIndex: q.choices ? Math.max(0, q.choices.findIndex((c) => c.id === q.correctChoiceId)) : null,
     explanation: q.explanation ?? '',
+    graded: q.answerType === 'freeText' || isGraded(q),
   };
 }
 
@@ -49,6 +53,7 @@ export function problemsOf(d: QuestionDraft): string[] {
   if (!d.text.trim()) problems.push('Write the question');
   if (d.answerType === 'freeText') return problems; // no set answer: players write their own
   if (d.answerType === 'numeric') {
+    if (!d.graded) return problems; // players type any number
     if (!d.number.trim()) problems.push('Enter the answer');
     else if (parseNumber(d.number) === null) problems.push('The answer must be a number, like 42 or 3.5');
   } else {
@@ -57,7 +62,7 @@ export function problemsOf(d: QuestionDraft): string[] {
     else if (filled.some((c) => !c)) problems.push('Fill in or remove the empty answer');
     const lower = filled.filter(Boolean).map((c) => c.toLowerCase());
     if (new Set(lower).size !== lower.length) problems.push('Two answers are the same');
-    if (d.correctIndex === null || !filled[d.correctIndex]) problems.push('Mark which answer is right');
+    if (d.graded && (d.correctIndex === null || !filled[d.correctIndex])) problems.push('Mark which answer is right');
   }
   return problems;
 }
@@ -72,10 +77,10 @@ export function toQuestion(d: QuestionDraft, id: string, previous?: BankQuestion
     source: previous?.source ?? ('manual' as const),
   };
   if (d.answerType === 'freeText') return { ...base, explanation: undefined };
-  if (d.answerType === 'numeric') return { ...base, correctNumber: parseNumber(d.number)! };
+  if (d.answerType === 'numeric') return d.graded ? { ...base, correctNumber: parseNumber(d.number)! } : { ...base, explanation: undefined };
   const ids = ['a', 'b', 'c', 'd'];
   const choices: Choice[] = d.choices.map((text, i) => ({ id: ids[i], text: text.trim() }));
-  return { ...base, choices, correctChoiceId: ids[d.correctIndex!] };
+  return d.graded ? { ...base, choices, correctChoiceId: ids[d.correctIndex!] } : { ...base, choices, explanation: undefined };
 }
 
 export function newQuestionId(): string {
