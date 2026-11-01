@@ -8,6 +8,13 @@
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!-- LocalOnlyHotspot (spec §3.3): Android 13+ needs NEARBY_WIFI_DEVICES, older versions location. -->
+  <uses-permission
+    android:name="android.permission.NEARBY_WIFI_DEVICES"
+    android:usesPermissionFlags="neverForLocation" />
+  <uses-permission
+    android:name="android.permission.ACCESS_FINE_LOCATION"
+    android:maxSdkVersion="32" />
 
   <!-- The host app talks to its own game server over ws://127.0.0.1, and players' pages use plain
        HTTP by design (spec §3.4). Release builds block unencrypted traffic unless this is set;

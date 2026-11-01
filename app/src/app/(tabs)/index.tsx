@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Logo } from '../../components/Logo';
+import { shouldWalkThroughBattery } from '../../host/battery';
 import { Button, Muted, Screen } from '../../components/ui';
 import { color, font, space, text, tracking } from '../../theme';
 
@@ -14,7 +15,7 @@ export default function Play() {
         <Muted>Everyone plays on their own phone. No app for them, just a scan.</Muted>
       </View>
       <View style={styles.actions}>
-        <Button big label="Start a game now" onPress={() => router.push('/lobby')} />
+        <Button big label="Start a game now" onPress={() => router.push(shouldWalkThroughBattery() ? '/battery' : '/lobby')} />
         <Muted>Ready-made games to play straight away.</Muted>
         <Pressable accessibilityRole="link" onPress={() => router.push('/games/new')} style={styles.link}>
           <Text style={styles.linkLabel}>Or create your own game</Text>

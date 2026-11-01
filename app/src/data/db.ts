@@ -36,6 +36,12 @@ function all<T>(table: 'questions' | 'games'): T[] {
   return db.getAllSync<{ json: string }>(`SELECT json FROM ${table} ORDER BY updated DESC`).map((r) => JSON.parse(r.json) as T);
 }
 
+/** Small app settings and one-time flags. */
+export const meta = {
+  get: (key: string): string | null => db.getFirstSync<{ value: string }>('SELECT value FROM meta WHERE key = ?', key)?.value ?? null,
+  set: (key: string, value: string) => db.runSync('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)', key, value),
+};
+
 export const questions = {
   all: () => all<BankQuestion>('questions'),
   save: (q: BankQuestion) => put('questions', q.id, q),

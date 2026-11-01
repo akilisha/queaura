@@ -2,27 +2,32 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
-import type { LanAddress } from '../../modules/game-server/src/GameServerModule';
 import { useConfirm } from '../components/ConfirmDialog';
+import { JoinPanel } from '../components/JoinPanel';
 import { PlayerList } from '../components/PlayerList';
 import { Button, Card, ErrorText, Muted, Screen } from '../components/ui';
 import { useLibrary } from '../data/library';
 import { problemOf, resolveGame } from '../game/resolve';
 import { connectHost, host, useHost } from '../host/connection';
+import { endNetwork } from '../host/hotspot';
+import { joinPath } from '../host/network';
 import { ensureServer } from '../host/server';
 import { closeSession } from '../host/session';
-import { color, font, glow, opacity, radius, size, space, text, tracking } from '../theme';
+import { useNetwork } from '../host/useNetwork';
+import { color, font, glow, opacity, radius, size, space, text } from '../theme';
 
 /** Join code, players, and the game list (spec §5.4). */
+const NOBODY_YET_MS = 60_000;
+
 export default function Lobby() {
   useKeepAwake();
   const { width } = useWindowDimensions();
   const wide = width >= size.wide;
   const { state, error } = useHost();
   const library = useLibrary();
-  const [addresses, setAddresses] = useState<LanAddress[]>([]);
+  const [running, setRunning] = useState(false);
   const [port, setPort] = useState(8080);
+  const [nobodyYet, setNobodyYet] = useState(false);
   const [chosenIp, setChosenIp] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
@@ -31,12 +36,25 @@ export default function Lobby() {
   useEffect(() => {
     ensureServer()
       .then((status) => {
-        setAddresses(status.addresses);
+        setRunning(true);
         setPort(status.httpPort);
         connectHost(status.wsPort, status.hostKey!);
       })
       .catch((e: Error) => setStartError(e.message));
   }, []);
+
+  const { addresses, hotspot } = useNetwork(running);
+  const players = state?.scores ?? [];
+
+  // A minute with the code up and nobody in: make "Players can't join?" hard to miss.
+  useEffect(() => {
+    if (!running || players.length > 0) {
+      setNobodyYet(false);
+      return;
+    }
+    const timer = setTimeout(() => setNobodyYet(true), NOBODY_YET_MS);
+    return () => clearTimeout(timer);
+  }, [running, players.length]);
 
   // Once a game is running the host screen takes over.
   useEffect(() => {
@@ -48,9 +66,6 @@ export default function Lobby() {
     [library],
   );
   const chosen = formats.find((f) => f.format.id === gameId && !f.problem);
-  const players = state?.scores ?? [];
-  const address = addresses.find((a) => a.ip === chosenIp) ?? addresses[0];
-  const base = address ? `http://${address.ip}:${port}` : null;
   const startBlocker = !chosen ? 'Pick a game below' : players.length === 0 ? 'Waiting for players to join' : null;
 
   const start = () => {
@@ -63,35 +78,24 @@ export default function Lobby() {
     closeSession();
   };
 
-  const join = (
-    <Card title="Players join here" style={styles.joinCard}>
-      {startError && <ErrorText>{startError}</ErrorText>}
-      {!startError && !base && <Muted>Starting the game server…</Muted>}
-      {base && (
-        <>
-          <View style={styles.qr}>
-            <QRCode value={`${base}/`} size={size.qr} color={color.qrDark} backgroundColor={color.qrLight} />
-          </View>
-          <Text style={styles.url}>Scan to join</Text>
-          <Text style={styles.tvUrl}>{base}</Text>
-          <Muted>On a TV, open this in the browser to show the game to the room:</Muted>
-          <Text style={styles.tvUrl}>{`${base}/?mode=tv`}</Text>
-          {addresses.length > 1 && (
-            <View style={styles.networks}>
-              <Muted>This phone is on more than one network. Players must be on the same one:</Muted>
-              {addresses.map((a) => (
-                <Button
-                  key={a.ip}
-                  tone={a.ip === address?.ip ? 'primary' : 'secondary'}
-                  label={`${a.kind === 'hotspot' ? 'Hotspot' : a.kind === 'wifi' ? 'Wi-Fi' : a.name} · ${a.ip}`}
-                  onPress={() => setChosenIp(a.ip)}
-                />
-              ))}
-            </View>
-          )}
-        </>
-      )}
+  const join = startError ? (
+    <Card title="Players join here">
+      <ErrorText>{startError}</ErrorText>
     </Card>
+  ) : !running ? (
+    <Card title="Players join here">
+      <Muted>Starting the game server…</Muted>
+    </Card>
+  ) : (
+    <JoinPanel
+      path={joinPath(addresses, hotspot, chosenIp)}
+      port={port}
+      addresses={addresses}
+      onChooseAddress={setChosenIp}
+      onHelp={() => router.push('/join-help')}
+      onEndNetwork={endNetwork}
+      nobodyYet={nobodyYet}
+    />
   );
 
   const pick = (
@@ -154,12 +158,7 @@ export default function Lobby() {
 
 const styles = StyleSheet.create({
   columns: { flexDirection: 'row', gap: space[4], alignItems: 'flex-start' },
-  joinCard: { borderColor: color.violet, borderWidth: size.borderStrong, ...glow.violet },
   column: { flex: 1, gap: space[4] },
-  qr: { alignItems: 'center', padding: space[3], backgroundColor: color.qrLight, borderRadius: radius.md },
-  url: { fontFamily: font.display, fontSize: text.xl, color: color.gold, textAlign: 'center', textTransform: 'uppercase', letterSpacing: tracking.caps, ...glow.softGoldText },
-  tvUrl: { fontFamily: font.bodyBold, fontSize: text.lg, color: color.text, textAlign: 'center' },
-  networks: { gap: space[2] },
   game: { padding: space[3], borderRadius: radius.md, borderWidth: size.borderStrong, borderColor: color.border, gap: space[1] },
   gameChosen: { borderColor: color.gold, backgroundColor: color.surfaceRaised, ...glow.gold },
   gameDisabled: { opacity: opacity.disabled },

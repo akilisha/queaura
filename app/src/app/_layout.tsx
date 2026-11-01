@@ -33,7 +33,9 @@ export default function Layout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="battery" options={{ title: 'BEFORE YOU HOST' }} />
         <Stack.Screen name="lobby" options={{ title: 'LOBBY' }} />
+        <Stack.Screen name="join-help" options={{ title: 'GET PLAYERS IN', presentation: 'modal' }} />
         <Stack.Screen name="game" options={{ title: 'HOSTING', headerBackVisible: false, gestureEnabled: false }} />
         <Stack.Screen name="questions/[id]" options={{ title: 'QUESTION' }} />
         {/* The wizard has its own stack and headers. */}

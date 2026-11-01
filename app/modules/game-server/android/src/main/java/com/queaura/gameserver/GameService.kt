@@ -76,6 +76,8 @@ class GameService : Service() {
   private fun shutdown() {
     server?.stop()
     server = null
+    // The session's own Wi-Fi network goes with it.
+    Hotspot.stop()
     wakeLock?.takeIf { it.isHeld }?.release()
     wifiLock?.takeIf { it.isHeld }?.release()
     wakeLock = null
