@@ -1,0 +1,29 @@
+{
+  "name": "queaura-backend",
+  "private": true,
+  "type": "module",
+  "description": "Cloud backend for AI question generation and AI-game balances (spec §8). Gameplay never touches it.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "dev": "node --watch src/main.ts",
+    "migrate": "node src/migrate-cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "kysely": "^0.29.8",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,42 @@
+import { sql, type Kysely } from 'kysely';
+import { Migrator, type Migration } from 'kysely/migration';
+
+// Schema changes, applied in name order and never edited once deployed: add a new one instead.
+
+const migrations: Record<string, Migration> = {
+  '0001_accounts_and_ledger': {
+    async up(db: Kysely<any>) {
+      await db.schema
+        .createTable('accounts')
+        .addColumn('id', 'text', (c) => c.primaryKey())
+        .addColumn('created_at', 'timestamptz', (c) => c.notNull().defaultTo(sql`now()`))
+        .addColumn('block_remaining', 'integer', (c) => c.notNull().defaultTo(0).check(sql`block_remaining >= 0`))
+        .execute();
+      await db.schema
+        .createTable('ledger')
+        .addColumn('id', 'bigint', (c) => c.primaryKey().generatedAlwaysAsIdentity())
+        .addColumn('account_id', 'text', (c) => c.notNull().references('accounts.id'))
+        .addColumn('delta', 'integer', (c) => c.notNull())
+        .addColumn('kind', 'text', (c) => c.notNull().check(sql`kind in ('allowance', 'purchase', 'refund', 'use', 'adjustment')`))
+        .addColumn('ref', 'text')
+        .addColumn('created_at', 'timestamptz', (c) => c.notNull().defaultTo(sql`now()`))
+        .execute();
+      await db.schema.createIndex('ledger_account').on('ledger').column('account_id').execute();
+      // A purchase is credited once and refunded once, however often Google tells us.
+      await db.schema.createIndex('ledger_kind_ref').on('ledger').columns(['kind', 'ref']).unique().where(sql.ref('ref'), 'is not', null).execute();
+    },
+    async down(db: Kysely<any>) {
+      await db.schema.dropTable('ledger').execute();
+      await db.schema.dropTable('accounts').execute();
+    },
+  },
+};
+
+export async function migrateToLatest(db: Kysely<any>): Promise<void> {
+  const migrator = new Migrator({ db, provider: { getMigrations: async () => migrations } });
+  const { error, results } = await migrator.migrateToLatest();
+  for (const r of results ?? []) {
+    if (r.status === 'Error') console.error(`Migration ${r.migrationName} failed`);
+  }
+  if (error) throw error;
+}

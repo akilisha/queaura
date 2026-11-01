@@ -9,6 +9,7 @@ browser by scanning a QR code; a TV can show the game to the room. Product decis
 | `app/` | Host app (Expo, React Native). `modules/game-server` wraps the server in an Android foreground service. |
 | `server/` | Game server in plain Kotlin: engine, scoring, protocol, HTTP + WebSocket. Compiled into the app; unit-tested on a desktop JVM. |
 | `web/` | Player and TV pages (Preact), served by the host device. |
+| `backend/` | Cloud backend for AI questions and AI-game balances (Node, Express, Postgres). Gameplay never touches it. |
 | `protocol/` | TypeScript types for the messages between them. |
 | `tools/` | `simulate.ts`: bot players and a scripted host for testing. |
 | `spike/` | Phase 0 spike (throwaway) and its results. |
