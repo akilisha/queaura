@@ -27,6 +27,7 @@
       "expo-sqlite",
       "expo-font"
     ],
-    "scheme": "queaura"
+    "scheme": "queaura",
+    "backgroundColor": "#120A1F"
   }
 }
