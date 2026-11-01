@@ -35,7 +35,7 @@ export default function PickQuestion() {
   return (
     <Screen>
       <Muted>
-        Round {round + 1}, question {slot + 1} · {STYLES[style].name}
+        {style === 'questionnaire' ? `Question ${slot + 1}: every kind of question fits.` : `Round ${round + 1}, question ${slot + 1} · ${STYLES[style].name}`}
         {style === 'closestWithoutGoingOver' ? ': only questions with a number answer fit.' : ''}
       </Muted>
       <Button tone="secondary" label="Write a new question" onPress={writeNew} />

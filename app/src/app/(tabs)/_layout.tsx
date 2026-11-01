@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { TabIcon } from '../../components/TabIcon';
 import { color, font, size, text, tracking } from '../../theme';
 
-/** Three jobs, one tap apart: play tonight, your games, your questions. Hidden while hosting. */
+/** Four jobs, one tap apart: play tonight, your games, your questions, questionnaire results. Hidden while hosting. */
 export default function TabsLayout() {
   return (
     <Tabs
@@ -28,6 +28,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="questions"
         options={{ title: 'Questions', headerTitle: 'YOUR QUESTIONS', tabBarIcon: ({ color: c }) => <TabIcon name="questions" color={c} /> }}
+      />
+      <Tabs.Screen
+        name="results"
+        options={{ title: 'Results', headerTitle: 'QUESTIONNAIRE RESULTS', tabBarIcon: ({ color: c }) => <TabIcon name="results" color={c} /> }}
       />
     </Tabs>
   );

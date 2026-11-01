@@ -28,7 +28,7 @@ export default function EditQuestion() {
   const { id, type } = useLocalSearchParams<{ id: string; type?: string }>();
   const library = useLibrary();
   const existing = id === 'new' ? undefined : library.byId.get(id);
-  const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : { ...emptyDraft(), answerType: type === 'multipleChoice' ? 'multipleChoice' : 'numeric' }));
+  const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : { ...emptyDraft(), answerType: type === 'multipleChoice' || type === 'freeText' ? type : 'numeric' }));
   const [triedSave, setTriedSave] = useState(false);
   const [dialog, confirm] = useConfirm();
   const problems = problemsOf(draft);
@@ -103,44 +103,51 @@ export default function EditQuestion() {
           selected={draft.answerType === 'multipleChoice'}
           onPress={() => set({ answerType: 'multipleChoice' })}
         />
+        <OptionCard
+          title="In their own words"
+          description="Players type a short answer. For questionnaires only: nothing is marked right or wrong."
+          selected={draft.answerType === 'freeText'}
+          onPress={() => set({ answerType: 'freeText' })}
+        />
       </Card>
-      <Card title="The answer">
-        {draft.answerType === 'numeric' ? (
-          <Field
-            label="Correct number"
-            value={draft.number}
-            onChangeText={(n) => set({ number: n })}
-            placeholder="88"
-            keyboardType="numeric"
-            hint="Decimals and negative numbers are fine."
-          />
-        ) : (
-          <>
-            <Muted>Write the answers players choose from, and tap the circle next to the right one.</Muted>
-            {draft.choices.map((choice, i) => (
-              <View key={i} style={styles.choice}>
-                <Pressable
-                  accessibilityRole="radio"
-                  accessibilityLabel={`Answer ${i + 1} is right`}
-                  accessibilityState={{ checked: draft.correctIndex === i }}
-                  onPress={() => set({ correctIndex: i })}
-                  style={[styles.mark, draft.correctIndex === i && styles.markChosen]}
-                >
-                  {draft.correctIndex === i && <Text style={styles.check}>✓</Text>}
-                </Pressable>
-                <TextInput
-                  style={styles.choiceInput}
-                  value={choice}
-                  onChangeText={(t) => setChoice(i, t)}
-                  placeholder={`Answer ${i + 1}`}
-                  placeholderTextColor={color.textMuted}
-                  maxLength={MAX_CHOICE}
-                  accessibilityLabel={`Answer ${i + 1}`}
-                />
-                {draft.choices.length > MIN_CHOICES && (
-                  <Pressable accessibilityRole="button" accessibilityLabel={`Remove answer ${i + 1}`} onPress={() => removeChoice(i)} style={styles.remove}>
-                    <Text style={styles.removeLabel}>✕</Text>
+      {draft.answerType !== 'freeText' && (
+        <Card title="The answer">
+          {draft.answerType === 'numeric' ? (
+            <Field
+              label="Correct number"
+              value={draft.number}
+              onChangeText={(n) => set({ number: n })}
+              placeholder="88"
+              keyboardType="numeric"
+              hint="Decimals and negative numbers are fine."
+            />
+          ) : (
+            <>
+              <Muted>Write the answers players choose from, and tap the circle next to the right one.</Muted>
+              {draft.choices.map((choice, i) => (
+                <View key={i} style={styles.choice}>
+                  <Pressable
+                    accessibilityRole="radio"
+                    accessibilityLabel={`Answer ${i + 1} is right`}
+                    accessibilityState={{ checked: draft.correctIndex === i }}
+                    onPress={() => set({ correctIndex: i })}
+                    style={[styles.mark, draft.correctIndex === i && styles.markChosen]}
+                  >
+                    {draft.correctIndex === i && <Text style={styles.check}>✓</Text>}
                   </Pressable>
+                  <TextInput
+                    style={styles.choiceInput}
+                    value={choice}
+                    onChangeText={(t) => setChoice(i, t)}
+                    placeholder={`Answer ${i + 1}`}
+                    placeholderTextColor={color.textMuted}
+                    maxLength={MAX_CHOICE}
+                    accessibilityLabel={`Answer ${i + 1}`}
+                  />
+                  {draft.choices.length > MIN_CHOICES && (
+                    <Pressable accessibilityRole="button" accessibilityLabel={`Remove answer ${i + 1}`} onPress={() => removeChoice(i)} style={styles.remove}>
+                      <Text style={styles.removeLabel}>✕</Text>
+                    </Pressable>
                 )}
               </View>
             ))}
@@ -150,17 +157,20 @@ export default function EditQuestion() {
           </>
         )}
       </Card>
-      <Card>
-        <Field
-          label="Explanation (optional)"
-          value={draft.explanation}
-          onChangeText={(e) => set({ explanation: e })}
-          placeholder="52 white keys and 36 black keys."
-          hint="Shown with the answer, on the TV and players' phones."
-          maxLength={MAX_EXPLANATION}
-          multiline
-        />
-      </Card>
+      )}
+      {draft.answerType !== 'freeText' && (
+        <Card>
+          <Field
+            label="Explanation (optional)"
+            value={draft.explanation}
+            onChangeText={(e) => set({ explanation: e })}
+            placeholder="52 white keys and 36 black keys."
+            hint="Shown with the answer, on the TV and players' phones."
+            maxLength={MAX_EXPLANATION}
+            multiline
+          />
+        </Card>
+      )}
       {triedSave && problems.map((p) => <ErrorText key={p}>{p}</ErrorText>)}
       <Button big label="Save question" onPress={save} />
       {existing && <Button tone="secondary" label="Delete question" onPress={remove} />}

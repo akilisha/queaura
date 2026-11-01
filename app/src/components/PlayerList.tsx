@@ -9,17 +9,20 @@ interface Props {
   /** Long-press asks to remove a player (spec §5.5); the screen confirms. */
   onRemoveRequest?: (player: ScoreEntry) => void;
   answeredIds?: number[];
+  /** A word or two per player instead of numbers, like questionnaire progress ("3 of 10", "Finished"). */
+  status?: { header: string; of: (player: ScoreEntry) => string };
 }
 
 const HEADERS = { total: 'Total', roundPoints: 'Round', lastPoints: 'Last' } as const;
 
-export function PlayerList({ players, columns = [], onRemoveRequest, answeredIds }: Props) {
+export function PlayerList({ players, columns = [], onRemoveRequest, answeredIds, status }: Props) {
   if (players.length === 0) return <Text style={styles.empty}>No players yet. They join by scanning the code.</Text>;
   return (
     <View style={styles.list}>
-      {columns.length > 0 && (
+      {(columns.length > 0 || status) && (
         <View style={styles.row}>
           <Text style={[styles.name, styles.header]}>Player</Text>
+          {status && <Text style={[styles.status, styles.header]}>{status.header}</Text>}
           {columns.map((c) => (
             <Text key={c} style={[styles.number, styles.header]}>{HEADERS[c]}</Text>
           ))}
@@ -34,6 +37,7 @@ export function PlayerList({ players, columns = [], onRemoveRequest, answeredIds
               {!p.online ? '  (away)' : !p.awake ? '  (screen off)' : ''}
             </Text>
             {answeredIds && <Text style={styles.answered}>{answeredIds.includes(p.id) ? '✓' : ''}</Text>}
+            {status && <Text style={styles.status}>{status.of(p)}</Text>}
             {columns.map((c) => (
               <Text key={c} style={styles.number}>{p[c] ?? '–'}</Text>
             ))}
@@ -54,6 +58,7 @@ const styles = StyleSheet.create({
   name: { flex: 1, fontFamily: font.body, fontSize: text.md, color: color.text },
   header: { fontFamily: font.displayBold, fontSize: text.sm, letterSpacing: tracking.caps, textTransform: 'uppercase', color: color.violet },
   number: { minWidth: size.numberColumn, textAlign: 'right', fontFamily: font.display, fontSize: text.lg, color: color.text, fontVariant: ['tabular-nums'] },
+  status: { textAlign: 'right', fontFamily: font.bodySemi, fontSize: text.md, color: color.text },
   answered: { minWidth: size.markColumn, color: color.success, fontFamily: font.bodyBold },
   empty: { fontFamily: font.body, fontSize: text.md, color: color.textMuted },
   hint: { fontFamily: font.body, fontSize: text.xs, color: color.textMuted },

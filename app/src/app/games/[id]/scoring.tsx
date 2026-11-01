@@ -14,7 +14,7 @@ export default function ScoringStep() {
   const { draft, setDraft } = useWizard();
   return (
     <Screen>
-      <StepHeader step={3} title="Scoring" intro="This applies to every round in the game." />
+      <StepHeader name="Scoring" title="Scoring" intro="This applies to every round in the game." />
       <Card title="Points">
         {SCORING_ORDER.map((s) => (
           <OptionCard

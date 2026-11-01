@@ -1,40 +1,79 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Field } from '../../../components/form';
-import { Card, ErrorText, Screen } from '../../../components/ui';
+import { useState } from 'react';
+import { Field, OptionCard } from '../../../components/form';
+import { Card, ErrorText, Muted, Screen } from '../../../components/ui';
 import { NextButton, StepFooter, StepHeader, Stepper } from '../../../components/wizard';
-import { plural } from '../../../game/copy';
-import { MAX_ROUNDS, MAX_TITLE, titleProblem, withRoundCount } from '../../../game/format';
+import { useLibrary } from '../../../data/library';
+import { KINDS, plural } from '../../../game/copy';
+import { kindOf, MAX_ROUNDS, MAX_TITLE, maxQuestions, titleProblem, withKind, withQuestionCount, withRoundCount, type GameKind } from '../../../game/format';
 import { useWizard } from '../../../wizard/draft';
 
-/** Step 1: name and number of rounds. */
+const KIND_ORDER: GameKind[] = ['quiz', 'questionnaire'];
+
+/** Step 1: name, quiz or questionnaire, and how big it is. */
 export default function NameStep() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { draft, setDraft } = useWizard();
+  const library = useLibrary();
+  // Free-text questions taken out by switching back to a quiz, so the host is told.
+  const [cleared, setCleared] = useState(0);
   const problem = titleProblem(draft);
+  const kind = kindOf(draft);
+
+  const chooseKind = (next: GameKind) => {
+    const result = withKind(draft, next, library.byId);
+    setDraft(result.game);
+    setCleared(result.cleared);
+  };
+
   return (
     <Screen>
-      <StepHeader step={1} title="Name your game" intro="A game is made of rounds. Each round has its own style of question." />
+      <StepHeader
+        name="Name"
+        title="Name your game"
+        intro={kind === 'quiz' ? 'A quiz is made of rounds. Each round has its own style of question.' : 'A questionnaire is one set of questions that everyone answers in their own time.'}
+      />
       <Card>
         <Field
           label="Game name"
           value={draft.title}
           onChangeText={(title) => setDraft({ ...draft, title })}
-          placeholder="Friday pub quiz"
+          placeholder={kind === 'quiz' ? 'Friday pub quiz' : 'Team feedback'}
           maxLength={MAX_TITLE}
           autoFocus={!draft.title}
         />
-        <Stepper
-          label="Rounds"
-          value={draft.rounds.length}
-          min={1}
-          max={MAX_ROUNDS}
-          onChange={(n) => setDraft(withRoundCount(draft, n))}
-          unit={(n) => plural(n, 'round')}
-        />
+      </Card>
+      <Card title="What kind of game?">
+        {KIND_ORDER.map((k) => (
+          <OptionCard key={k} title={KINDS[k].name} description={KINDS[k].description} selected={kind === k} onPress={() => chooseKind(k)} />
+        ))}
+        {cleared > 0 && (
+          <Muted>
+            {plural(cleared, 'free-text question')} {cleared === 1 ? 'was' : 'were'} taken out: only questionnaires take answers in players' own words.
+          </Muted>
+        )}
+        {kind === 'quiz' ? (
+          <Stepper
+            label="Rounds"
+            value={draft.rounds.length}
+            min={1}
+            max={MAX_ROUNDS}
+            onChange={(n) => setDraft(withRoundCount(draft, n))}
+            unit={(n) => plural(n, 'round')}
+          />
+        ) : (
+          <Stepper
+            label="Questions"
+            value={draft.rounds[0].slots.length}
+            min={1}
+            max={maxQuestions(draft)}
+            onChange={(n) => setDraft(withQuestionCount(draft, 0, n))}
+          />
+        )}
       </Card>
       <StepFooter>
         {problem && draft.title !== '' && <ErrorText>{problem}</ErrorText>}
-        <NextButton onPress={() => router.push(`/games/${id}/rounds`)} disabled={problem !== null} />
+        <NextButton onPress={() => router.push(`/games/${id}/${kind === 'quiz' ? 'rounds' : 'slots'}`)} disabled={problem !== null} />
       </StepFooter>
     </Screen>
   );

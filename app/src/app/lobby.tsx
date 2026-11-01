@@ -7,6 +7,7 @@ import { JoinPanel } from '../components/JoinPanel';
 import { PlayerList } from '../components/PlayerList';
 import { Button, Card, ErrorText, Muted, Screen } from '../components/ui';
 import { useLibrary } from '../data/library';
+import { sizeOf } from '../game/format';
 import { problemOf, resolveGame } from '../game/resolve';
 import { connectHost, host, useHost } from '../host/connection';
 import { endNetwork } from '../host/hotspot';
@@ -120,7 +121,7 @@ export default function Lobby() {
           >
             <Text style={styles.gameTitle}>{format.title}</Text>
             <Muted>
-              {problem ?? `${format.rounds.length} ${format.rounds.length === 1 ? 'round' : 'rounds'}, ${format.rounds.reduce((n, r) => n + r.slots.length, 0)} questions`}
+              {problem ?? sizeOf(format)}
             </Muted>
           </Pressable>
         ))}

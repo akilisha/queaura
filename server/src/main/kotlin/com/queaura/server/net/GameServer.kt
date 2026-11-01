@@ -46,7 +46,10 @@ class GameServer(
   private var sentVersion = -1L
   private var flushScheduled = false
   private var wake: ScheduledFuture<*>? = null
-  private var journal: QuestionnaireJournal? = null
+  @Volatile private var journal: QuestionnaireJournal? = null
+
+  /** The questionnaire file being written now, if any; the host app must not resolve it yet. */
+  val activeQuestionnaire: String? get() = journal?.file?.name
 
   @Volatile
   var summary = Summary(Phase.LOBBY, 0, 0)

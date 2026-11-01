@@ -4,10 +4,13 @@ import {
   candidates,
   describe,
   emptySlots,
+  kindOf,
+  MAX_QUESTIONNAIRE,
   MAX_ROUNDS,
   newGame,
   titleProblem,
   withDurations,
+  withKind,
   withQuestionCount,
   withRoundCount,
   withSlot,
@@ -81,5 +84,48 @@ group('summary', () => {
     expect(emptySlots(g, bank)).toBe(5);
     expect(describe(g, bank).status).toBe('Not ready yet: Round 1 has 5 empty slots. You can save it now and finish it later.');
     expect(titleProblem({ ...g, title: '  ' })).toBe('Give the game a name');
+  });
+});
+
+group('quiz or questionnaire (spec §6.4)', () => {
+  const free = { id: 'f1', text: 'Team name?', answerType: 'freeText' as const, source: 'manual' as const };
+  const withFree = new Map([...bank, [free.id, free]]);
+
+  it('a questionnaire is one round of every chosen question, with no points', () => {
+    let g = withSlot(newGame('g'), 0, 0, 's-n-piano');
+    g = withRoundCount(g, 2);
+    g = withSlot(g, 1, 0, 's-m-mars');
+    const { game, cleared } = withKind(g, 'questionnaire', bank);
+    expect(cleared).toBe(0);
+    expect(kindOf(game)).toBe('questionnaire');
+    expect(game.scoring).toBe('none');
+    expect(game.rounds).toHaveLength(1);
+    expect(game.rounds[0].style).toBe('questionnaire');
+    expect(game.rounds[0].slots.filter(Boolean)).toEqual(['s-n-piano', 's-m-mars']);
+    expect(withQuestionCount(game, 0, 99).rounds[0].slots).toHaveLength(MAX_QUESTIONNAIRE);
+  });
+  it('going back to a quiz takes out free-text questions and says how many', () => {
+    let g = withKind(newGame('g'), 'questionnaire', withFree).game;
+    g = withSlot(g, 0, 0, 'f1');
+    g = withSlot(g, 0, 1, 's-m-mars');
+    const { game, cleared } = withKind(g, 'quiz', withFree);
+    expect(cleared).toBe(1);
+    expect(kindOf(game)).toBe('quiz');
+    expect(game.scoring).toBe('allOrNothing');
+    expect(game.rounds[0]).toMatchObject({ style: 'multipleChoice', slots: [null, 's-m-mars', null, null, null] });
+  });
+  it('offers free-text questions only to a questionnaire', () => {
+    const quiz = withStyle(newGame('g'), 0, 'multipleChoice', withFree).game;
+    expect(candidates(quiz, 0, [free])).toEqual([]);
+    expect(candidates(withKind(quiz, 'questionnaire', withFree).game, 0, [free])).toEqual([free]);
+  });
+  it('restates a questionnaire without rounds, timing or points', () => {
+    let g = { ...withKind(newGame('g'), 'questionnaire', bank).game, title: 'Office survey' };
+    g = withQuestionCount(g, 0, 1);
+    g = withSlot(g, 0, 0, 's-m-mars');
+    const { lines, status } = describe(g, bank);
+    expect(lines[0]).toBe('"Office survey": a questionnaire, 1 question.');
+    expect(lines.join(' ')).not.toMatch(/seconds|Scoring/);
+    expect(status).toBe('Ready to play.');
   });
 });

@@ -5,7 +5,7 @@ import { Button, Card, Muted, Screen } from '../../components/ui';
 import { games } from '../../data/db';
 import { libraryChanged, useLibrary } from '../../data/library';
 import type { GameFormat } from '../../data/types';
-import { plural } from '../../game/copy';
+import { sizeOf } from '../../game/format';
 import { problemOf } from '../../game/resolve';
 import { color, font, opacity, space, text } from '../../theme';
 
@@ -32,14 +32,11 @@ export default function Games() {
       <Button big label="Create a game" onPress={() => router.push('/games/new')} />
       {library.games.map((g) => {
         const problem = problemOf(g, library.byId);
-        const questions = g.rounds.reduce((n, r) => n + r.slots.length, 0);
         return (
           <Card key={g.id}>
             <View style={problem ? styles.unfinished : undefined}>
               <Text style={styles.title}>{g.title}</Text>
-              <Muted>
-                {plural(g.rounds.length, 'round')}, {plural(questions, 'question')}
-              </Muted>
+              <Muted>{sizeOf(g)}</Muted>
             </View>
             <Text style={problem ? styles.problem : styles.ready}>{problem ? `Not ready: ${problem}` : 'Ready to play'}</Text>
             <View style={styles.actions}>

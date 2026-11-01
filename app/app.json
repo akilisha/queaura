@@ -25,7 +25,8 @@
     "plugins": [
       "expo-router",
       "expo-sqlite",
-      "expo-font"
+      "expo-font",
+      "expo-sharing"
     ],
     "scheme": "queaura",
     "backgroundColor": "#120A1F"

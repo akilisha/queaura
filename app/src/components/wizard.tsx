@@ -1,22 +1,33 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { color, font, glow, opacity, radius, size, space, text, tracking } from '../theme';
+import { kindOf } from '../game/format';
+import { useWizard } from '../wizard/draft';
 import { Button } from './ui';
 
 // Pieces every wizard step shares: where you are, the step's content, and how to move on.
 
-export const STEPS = ['Name', 'Rounds', 'Scoring', 'Questions', 'Summary'] as const;
+/** A questionnaire has no rounds or scoring to set up, so it skips those steps (spec §6.4). */
+export const STEPS = {
+  quiz: ['Name', 'Rounds', 'Scoring', 'Questions', 'Summary'],
+  questionnaire: ['Name', 'Questions', 'Summary'],
+} as const;
 
-export function StepHeader({ step, title, intro }: { step: number; title: string; intro?: string }) {
+export type StepName = (typeof STEPS.quiz)[number];
+
+export function StepHeader({ name, title, intro }: { name: StepName; title: string; intro?: string }) {
+  const { draft } = useWizard();
+  const steps: readonly StepName[] = STEPS[kindOf(draft)];
+  const step = steps.indexOf(name) + 1;
   return (
     <View style={styles.header}>
-      <View style={styles.progress} accessibilityLabel={`Step ${step} of ${STEPS.length}`}>
-        {STEPS.map((name, i) => (
-          <View key={name} style={[styles.dot, i < step && styles.dotDone]} />
+      <View style={styles.progress} accessibilityLabel={`Step ${step} of ${steps.length}`}>
+        {steps.map((s, i) => (
+          <View key={s} style={[styles.dot, i < step && styles.dotDone]} />
         ))}
       </View>
       <Text style={styles.step}>
-        Step {step} of {STEPS.length}
+        Step {step} of {steps.length}
       </Text>
       <Text style={styles.title}>{title}</Text>
       {intro && <Text style={styles.intro}>{intro}</Text>}

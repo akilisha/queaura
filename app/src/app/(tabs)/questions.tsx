@@ -6,14 +6,14 @@ import { Button, Card, Muted, Screen } from '../../components/ui';
 import { useLibrary } from '../../data/library';
 import type { BankQuestion } from '../../data/types';
 import { gamesUsing } from '../../data/usage';
+import { ANSWER_TYPES } from '../../game/copy';
 import { color, font, radius, size, space, text } from '../../theme';
 
-type Filter = 'all' | 'numeric' | 'multipleChoice';
+type Filter = 'all' | keyof typeof ANSWER_TYPES;
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'numeric', label: 'Number' },
-  { value: 'multipleChoice', label: 'Multiple choice' },
+  ...(Object.keys(ANSWER_TYPES) as (keyof typeof ANSWER_TYPES)[]).map((value) => ({ value, label: ANSWER_TYPES[value] })),
 ];
 
 /** The question bank on this device (spec §5.3). */
@@ -49,7 +49,9 @@ export default function Questions() {
 
 function QuestionRow({ question: q, usedIn }: { question: BankQuestion; usedIn: number }) {
   const answer =
-    q.answerType === 'numeric' ? String(q.correctNumber) : (q.choices?.find((c) => c.id === q.correctChoiceId)?.text ?? '');
+    q.answerType === 'freeText'
+      ? 'Players write their own (questionnaires only)'
+      : `Answer: ${q.answerType === 'numeric' ? String(q.correctNumber) : (q.choices?.find((c) => c.id === q.correctChoiceId)?.text ?? '')}`;
   return (
     <Pressable
       accessibilityRole="button"
@@ -58,8 +60,8 @@ function QuestionRow({ question: q, usedIn }: { question: BankQuestion; usedIn: 
     >
       <Text style={styles.text}>{q.text}</Text>
       <View style={styles.meta}>
-        <Text style={styles.badge}>{q.answerType === 'numeric' ? 'Number' : 'Multiple choice'}</Text>
-        <Text style={styles.answer} numberOfLines={1}>Answer: {answer}</Text>
+        <Text style={styles.badge}>{ANSWER_TYPES[q.answerType]}</Text>
+        <Text style={styles.answer} numberOfLines={1}>{answer}</Text>
       </View>
       <Muted>{usedIn === 0 ? 'Not in any game yet' : `In ${usedIn} ${usedIn === 1 ? 'game' : 'games'}`}</Muted>
     </Pressable>

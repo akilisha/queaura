@@ -16,7 +16,29 @@ export const STYLES: Record<Style, { name: string; description: string }> = {
     name: 'Fastest finger',
     description: 'Like multiple choice, but the first right answer scores most: 100, then 90, 80… whatever the scoring below.',
   },
+  questionnaire: {
+    name: 'Questionnaire',
+    description: 'Everyone answers at their own pace. No clock and no points.',
+  },
 };
+
+/** The two kinds of game, chosen in the wizard's first step (spec §6.4). */
+export const KINDS = {
+  quiz: {
+    name: 'Quiz',
+    description: 'Rounds of questions on a clock, with points and a winner.',
+  },
+  questionnaire: {
+    name: 'Questionnaire',
+    description: 'Everyone answers at their own pace, with no clock and no points. You end it when you are ready, and the answers are saved on this phone.',
+  },
+} as const;
+
+export const ANSWER_TYPES = {
+  numeric: 'Number',
+  multipleChoice: 'Multiple choice',
+  freeText: 'Free text',
+} as const;
 
 export const SCORINGS: Record<Scoring, { name: string; description: string }> = {
   allOrNothing: {

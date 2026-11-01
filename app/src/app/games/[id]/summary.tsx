@@ -15,7 +15,7 @@ export default function SummaryStep() {
   const ready = problemOf(draft, library.byId) === null;
   return (
     <Screen>
-      <StepHeader step={5} title="Check and save" />
+      <StepHeader name="Summary" title="Check and save" />
       <Card>
         {lines.map((line, i) => (
           <Text key={i} style={i === 0 ? styles.first : styles.line}>

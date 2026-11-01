@@ -30,7 +30,7 @@ export default function RoundsStep() {
 
   return (
     <Screen>
-      <StepHeader step={2} title="Set up the rounds" intro="Choose how players answer in each round, and how many questions it has." />
+      <StepHeader name="Rounds" title="Set up the rounds" intro="Choose how players answer in each round, and how many questions it has." />
       {draft.rounds.map((round, i) => (
         <Card key={i} title={`Round ${i + 1}`}>
           {STYLE_ORDER.map((style) => (

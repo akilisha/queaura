@@ -6,6 +6,8 @@ import type { BankQuestion, GameFormat } from '../data/types';
 
 /** Which answer types fit a style (spec §4 compatibility rule). */
 export function fits(style: Style, question: Pick<BankQuestion, 'answerType'>): boolean {
+  if (style === 'questionnaire') return true; // answered as asked, nothing is marked
+  if (question.answerType === 'freeText') return false; // free text is for questionnaires only (spec §6.4)
   if (style === 'closestWithoutGoingOver') return question.answerType === 'numeric';
   return true; // choice styles take choice questions, and number questions with generated choices
 }
@@ -13,6 +15,9 @@ export function fits(style: Style, question: Pick<BankQuestion, 'answerType'>): 
 /** Why a format cannot be played yet ("Round 2 has 3 empty slots"), or null if it can. */
 export function problemOf(format: GameFormat, bank: ReadonlyMap<string, BankQuestion>): string | null {
   if (format.rounds.length === 0) return 'Add at least one round';
+  const questionnaire = format.progression === 'manual';
+  if (questionnaire && (format.rounds.length !== 1 || format.rounds[0].style !== 'questionnaire')) return 'A questionnaire has exactly one set of questions';
+  if (!questionnaire && format.rounds.some((r) => r.style === 'questionnaire')) return 'Only a questionnaire can use the questionnaire style';
   for (let i = 0; i < format.rounds.length; i++) {
     const round = format.rounds[i];
     if (round.slots.length === 0) return `Round ${i + 1} has no questions`;
@@ -32,6 +37,7 @@ export function resolveGame(format: GameFormat, bank: ReadonlyMap<string, BankQu
     title: format.title,
     scoring: format.scoring,
     closeEarly: format.closeEarly ?? false,
+    progression: format.progression ?? 'auto',
     rounds: format.rounds.map((round) => ({
       style: round.style,
       durations: round.durations,
@@ -41,7 +47,7 @@ export function resolveGame(format: GameFormat, bank: ReadonlyMap<string, BankQu
 }
 
 function toGameQuestion(q: BankQuestion, style: Style): GameQuestion {
-  if (style !== 'closestWithoutGoingOver' && q.answerType === 'numeric') {
+  if ((style === 'multipleChoice' || style === 'fastestFinger') && q.answerType === 'numeric') {
     const { choices, correctChoiceId } = numericChoices(q.id, q.correctNumber!, isYearQuestion(q.text, q.correctNumber!));
     return { id: q.id, text: q.text, answerType: 'multipleChoice', choices, correctChoiceId, explanation: q.explanation };
   }

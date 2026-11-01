@@ -47,6 +47,30 @@ describe('fastest finger', () => {
   });
 });
 
+describe('questionnaire', () => {
+  const free: BankQuestion = { id: 'f1', text: 'Team name?', answerType: 'freeText', source: 'manual' };
+  const withFree = new Map([...bank, [free.id, free]]);
+  const survey: GameFormat = {
+    id: 'g', title: 'T', scoring: 'none', progression: 'manual',
+    rounds: [{ style: 'questionnaire', slots: ['f1', 's-n-octopus', 's-m-mars'] }],
+  };
+
+  it('plays every answer type as asked, with manual progression', () => {
+    const game = resolveGame(survey, withFree);
+    expect(game.progression).toBe('manual');
+    expect(game.rounds[0].questions.map((q) => q.answerType)).toEqual(['freeText', 'numeric', 'multipleChoice']);
+  });
+  it('refuses free text in a quiz round, and a questionnaire with more than one round', () => {
+    const quiz: GameFormat = { id: 'g', title: 'T', scoring: 'none', rounds: [{ style: 'multipleChoice', slots: ['f1'] }] };
+    expect(problemOf(quiz, withFree)).toBe('Round 1 has a question that does not fit its style');
+    expect(problemOf({ ...survey, rounds: [...survey.rounds, ...survey.rounds] }, withFree)).toBe('A questionnaire has exactly one set of questions');
+    expect(problemOf({ ...survey, progression: 'auto' }, withFree)).toBe('Only a questionnaire can use the questionnaire style');
+  });
+  it('a quiz says it progresses automatically', () => {
+    expect(resolveGame(starterGames()[0], bank).progression).toBe('auto');
+  });
+});
+
 describe('starter versions', () => {
   it('a device that has version 1 gets only what is new in version 2', () => {
     expect(starterGames(1).map((g) => g.id)).toEqual(['s-game-fastest']);

@@ -145,7 +145,7 @@ A slot only accepts questions whose answer type fits the round's style. The ques
 
 ### 5.0 Layout
 
-Bottom tabs separate the host's three jobs: **Play** (the default: start a game tonight), **Games** (your games, create your own) and **Questions** (your question bank). Later phases add tabs as needed (questionnaire Results in Phase 2, account and AI in Phase 3). While hosting, the lobby and in-game screens take the whole screen and the tabs are hidden, so a host cannot wander off mid-game.
+Bottom tabs separate the host's jobs: **Play** (the default: start a game tonight), **Games** (your games, create your own), **Questions** (your question bank) and **Results** (saved questionnaire answers, §6.4). Phase 3 adds account and AI as needed. While hosting, the lobby and in-game screens take the whole screen and the tabs are hidden, so a host cannot wander off mid-game.
 
 ### 5.1 First run
 - **No onboarding carousel.** The app teaches through doing.
@@ -153,7 +153,7 @@ Bottom tabs separate the host's three jobs: **Play** (the default: start a game 
 - The app ships with a small **starter bank**: a handful of sample questions for every presentation style, and at least one prebuilt sample game format using them.
 
 ### 5.2 Game creation (guided)
-The wizard steps through: title → number of rounds → per round: presentation style and number of questions → scoring strategy → plug in questions (from the bank, write new ones, or AI-fill empty slots).
+The wizard steps through: title and kind (**quiz** or **questionnaire**) → number of rounds → per round: presentation style and number of questions → scoring strategy → plug in questions (from the bank, write new ones, or AI-fill empty slots). A questionnaire skips rounds and scoring: title, kind and number of questions → plug in questions → summary (§6.4).
 
 - Every choice is shown with a plain-language explanation of what it does. Don't assume the host knows what's available.
 - Invalid combinations are greyed out with a reason, not allowed and then failed later.
@@ -162,7 +162,7 @@ The wizard steps through: title → number of rounds → per round: presentation
 
 ### 5.3 Question creation
 - A standalone activity, independent of any game.
-- Manual entry: text, answer type, answer (and choices), optional explanation.
+- Manual entry: text, answer type, answer (and choices), optional explanation. A free-text question has no answer or explanation and fits questionnaires only.
 - AI generation (signed-in, subscribed users; see §8): pick category, difficulty, answer type, and count → questions go into the bank. Alternatively, inside a game: "fill the empty slots in this round."
 - All questions pass moderation before entering the bank (§9).
 
@@ -239,14 +239,15 @@ Outside questionnaire mode, input is tap or numeric only. **No free text in time
 Durations: every style has defaults (reading buffer, answer window, reveal hold, round break). The host can override any of them per round. Starting defaults, to be tuned in usability tests: reading buffer 2 s + 0.25 s per word of the question, kept between 3 and 10 s; answer window 20 s; reveal 8 s; round break 15 s. Fixed in Phase 1: get-ready 3 s, round intro 4 s, time's-up hold 3 s, round scores 8 s.
 
 ### 6.4 Questionnaire mode (manual progression)
-- A manual-progression game has **exactly one round** containing all its questions. Choosing manual progression implies questionnaire mode; the wizard enforces this.
+- A manual-progression game has **exactly one round** containing all its questions (up to 50). Choosing manual progression implies questionnaire mode; the wizard enforces this. Its scoring is none. Every answer type fits; free text fits nothing else. Switching a questionnaire back to a quiz takes free-text questions out of their slots and says how many.
 - No timers, no flair. Each participant advances at their own pace by tapping. Free text is allowed.
 - **The host ends it.** The host manages pace verbally.
-- TV shows the join QR code and a completion count ("8 of 12 finished").
+- TV shows the join QR code and a completion count ("8 of 12 finished"). The host screen shows the same count, each player's progress ("3 of 10", "Finished") and an **End questionnaire** button, confirmed first.
 - **Each answer is saved to the host device the moment it's submitted**, so ending mid-way keeps partial responses.
 - On stop: a prompt to **Save results** or **Discard** (discard needs a second confirmation).
 - **Crash recovery:** if the app dies before that prompt, the next launch shows the same save-or-discard prompt for the unresolved game.
-- Saved results appear in a Results list on the device. **Export** builds a CSV and opens the native share sheet (email, Drive, messaging, and so on) using the host's own accounts. The data never passes through our servers.
+- Saved results appear in a Results list on the device, viewable by person or by question, and can be deleted (confirmed). **Export** builds a CSV and opens the native share sheet (email, Drive, messaging, and so on) using the host's own accounts. The data never passes through our servers.
+- Implementation: the server appends each answer to a JSON-lines file on the device (a start line with the questions, an answer line per answer, an end line when the host ends it). Save turns the file into a stored result and deletes the file; Discard deletes it. Any file not being written at launch is unresolved and gets the prompt (on the Play and Results tabs). CSV: one row per player, one column per question, choices as their words, UTF-8 with a byte-order mark; typed text that a spreadsheet would run as a formula gets a leading apostrophe.
 
 ### 6.5 Scoring
 - `none`, `allOrNothing` (**default**), `timeWeighted`.

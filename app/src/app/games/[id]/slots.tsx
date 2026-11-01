@@ -17,12 +17,12 @@ export default function SlotsStep() {
   return (
     <Screen>
       <StepHeader
-        step={4}
+        name="Questions"
         title="Choose the questions"
         intro="Tap a slot to pick a question. You can leave slots empty and fill them later; the game just can't be played until they're full."
       />
       {draft.rounds.map((round, r) => (
-        <Card key={r} title={`Round ${r + 1} · ${STYLES[round.style].name}`}>
+        <Card key={r} title={round.style === 'questionnaire' ? 'Questions' : `Round ${r + 1} · ${STYLES[round.style].name}`}>
           {round.slots.map((qid, s) => {
             const q = qid ? library.byId.get(qid) : undefined;
             return (

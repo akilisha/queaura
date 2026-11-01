@@ -51,3 +51,12 @@ describe('toQuestion and draftOf', () => {
     expect(draftOf(q).number).toBe('1969');
   });
 });
+
+describe('free text (questionnaires)', () => {
+  it('needs only the question, and stores no answer or explanation', () => {
+    const d: QuestionDraft = { ...emptyDraft(), answerType: 'freeText', text: ' Team name? ', explanation: 'left over' };
+    expect(problemsOf(d)).toEqual([]);
+    expect(problemsOf({ ...d, text: ' ' })).toEqual(['Write the question']);
+    expect(toQuestion(d, 'q1')).toEqual({ id: 'q1', text: 'Team name?', answerType: 'freeText', explanation: undefined, source: 'manual' });
+  });
+});

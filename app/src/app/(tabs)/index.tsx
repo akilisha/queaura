@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Logo } from '../../components/Logo';
+import { PendingResults } from '../../components/PendingResults';
 import { shouldWalkThroughBattery } from '../../host/battery';
 import { Button, Muted, Screen } from '../../components/ui';
 import { color, font, space, text, tracking } from '../../theme';
@@ -9,6 +10,8 @@ import { color, font, space, text, tracking } from '../../theme';
 export default function Play() {
   return (
     <Screen>
+      {/* Answers left behind if the app stopped mid-questionnaire (spec §6.4 crash recovery). */}
+      <PendingResults />
       <View style={styles.hero}>
         <Text style={styles.kicker}>Tonight's quiz</Text>
         <Logo />

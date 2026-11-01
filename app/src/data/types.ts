@@ -1,4 +1,4 @@
-import type { AnswerType, Choice, Durations, Scoring, Style } from '../../../protocol/src';
+import type { AnswerType, Choice, Durations, Progression, Scoring, Style } from '../../../protocol/src';
 
 /** A question in the bank on this device (spec §4). */
 export interface BankQuestion {
@@ -27,6 +27,8 @@ export interface GameFormat {
   title: string;
   scoring: Scoring;
   closeEarly?: boolean;
+  /** manual = a questionnaire: one round, no clock, no points (spec §6.4). Missing means auto. */
+  progression?: Progression;
   rounds: RoundFormat[];
   builtIn?: boolean;
 }

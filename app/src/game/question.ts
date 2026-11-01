@@ -47,6 +47,7 @@ export function parseNumber(input: string): number | null {
 export function problemsOf(d: QuestionDraft): string[] {
   const problems: string[] = [];
   if (!d.text.trim()) problems.push('Write the question');
+  if (d.answerType === 'freeText') return problems; // no set answer: players write their own
   if (d.answerType === 'numeric') {
     if (!d.number.trim()) problems.push('Enter the answer');
     else if (parseNumber(d.number) === null) problems.push('The answer must be a number, like 42 or 3.5');
@@ -70,6 +71,7 @@ export function toQuestion(d: QuestionDraft, id: string, previous?: BankQuestion
     explanation: d.explanation.trim() || undefined,
     source: previous?.source ?? ('manual' as const),
   };
+  if (d.answerType === 'freeText') return { ...base, explanation: undefined };
   if (d.answerType === 'numeric') return { ...base, correctNumber: parseNumber(d.number)! };
   const ids = ['a', 'b', 'c', 'd'];
   const choices: Choice[] = d.choices.map((text, i) => ({ id: ids[i], text: text.trim() }));

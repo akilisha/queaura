@@ -25,6 +25,13 @@ export interface ServerStatus {
   hotspot: HotspotInfo | null;
 }
 
+/** A questionnaire's saved answers on the phone (spec §6.4). */
+export interface QuestionnaireFile {
+  name: string;
+  /** Still being written: the questionnaire is running. */
+  active: boolean;
+}
+
 declare class GameServerModule extends NativeModule<{}> {
   start(): void;
   stop(): void;
@@ -36,6 +43,12 @@ declare class GameServerModule extends NativeModule<{}> {
   isBatteryRestricted(): boolean;
   openAppSettings(): void;
   openWifiSettings(): void;
+  /** Oldest first. */
+  listQuestionnaires(): QuestionnaireFile[];
+  readQuestionnaire(name: string): string;
+  deleteQuestionnaire(name: string): boolean;
+  /** Letters, digits, spaces, dots, dashes and underscores, ending in .csv. Returns a file:// URI. */
+  writeShareFile(name: string, content: string): string;
 }
 
 export default requireNativeModule<GameServerModule>('GameServer');
