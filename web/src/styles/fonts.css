@@ -1,0 +1,44 @@
+/* Bundled fonts (SIL Open Font License; see fonts/OFL-*.txt). Never a font CDN: players on a
+   LocalOnlyHotspot have no internet (spec §2.3). swap: text shows at once, the font follows. */
+
+@font-face {
+  font-family: 'Tilt Neon';
+  src: url('../fonts/TiltNeon-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Big Shoulders Display';
+  src: url('../fonts/BigShouldersDisplay-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Big Shoulders Display';
+  src: url('../fonts/BigShouldersDisplay-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-display: swap;
+}

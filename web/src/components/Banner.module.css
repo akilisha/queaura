@@ -1,7 +1,7 @@
 .banner {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   text-align: center;
 }
 
@@ -11,6 +11,7 @@
 }
 
 .warning {
-  background: var(--color-warning);
-  color: var(--color-on-choice);
+  background: var(--color-gold);
+  color: var(--color-on-gold);
+  box-shadow: var(--glow-gold);
 }

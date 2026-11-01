@@ -4,9 +4,8 @@
   justify-content: center;
   min-height: var(--tap-min);
   padding: var(--space-3) var(--space-5);
-  border: var(--border-width) solid transparent;
+  border: var(--border-strong) solid transparent;
   border-radius: var(--radius-md);
-  font-weight: var(--weight-semibold);
   cursor: pointer;
   touch-action: manipulation;
   user-select: none;
@@ -25,32 +24,41 @@
 .button:disabled {
   opacity: var(--opacity-disabled);
   cursor: default;
+  box-shadow: none;
 }
 
+/* The gold sign: the one action that matters on the screen. */
 .primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  box-shadow: var(--glow-gold);
 }
 
 .primary:active:not(:disabled) {
   background: var(--color-primary-pressed);
 }
 
+/* Neon outline on the wall. */
 .secondary {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text);
+  background: transparent;
+  border-color: var(--color-violet);
+  color: var(--color-violet-light);
+  font-weight: var(--weight-bold);
+  box-shadow: var(--glow-violet);
 }
 
 .normal {
   width: 100%;
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
 }
 
 .huge {
   width: var(--tap-huge);
   height: var(--tap-huge);
   border-radius: var(--radius-pill);
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
+  font-size: var(--text-2xl);
 }

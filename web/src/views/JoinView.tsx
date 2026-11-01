@@ -3,10 +3,12 @@ import { Banner } from '../components/Banner';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { EmojiPicker } from '../components/EmojiPicker';
+import { Logo } from '../components/Logo';
 import { Screen } from '../components/Screen';
 import { TextField } from '../components/TextField';
 import { join } from '../state/actions';
 import { connection, joining, notice } from '../state/store';
+import styles from './views.module.css';
 
 const EMOJIS = ['🦊', '🐼', '🐸', '🦉', '🐙', '🦄', '🐝', '🐢', '🦁', '🐧', '🐳', '🦖', '🌵', '🍕', '🚀', '⚡'];
 const MAX_NAME = 20;
@@ -23,7 +25,11 @@ export function JoinView() {
   };
 
   return (
-    <Screen title="Join the game" status={connection.value}>
+    <Screen title={null} status={connection.value}>
+      <div class={styles.hero}>
+        <Logo size="large" />
+        <p class={styles.muted}>Pick a name and you're in.</p>
+      </div>
       <form onSubmit={submit}>
         <Card>
           <TextField label="Your nickname" value={name} onInput={setName} maxLength={MAX_NAME} autoFocus />

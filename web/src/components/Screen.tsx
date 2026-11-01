@@ -4,7 +4,7 @@ import { StatusBadge } from './StatusBadge';
 import styles from './Screen.module.css';
 
 interface Props {
-  title: string;
+  title: ComponentChildren;
   status: ConnectionStatus;
   children: ComponentChildren;
   /** Exactly fill the viewport and never scroll (the TV, which has no way to scroll). */

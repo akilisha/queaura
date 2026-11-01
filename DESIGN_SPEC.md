@@ -1,6 +1,6 @@
-# LAN Trivia Game — Design Spec
+# Queaura — Design Spec
 
-Working title: TBD. Platform for v1: Android host app. Status: Phase 0 (spike) complete; Phase 1 is next.
+Name: **Queaura** ("que" for question, "aura" as in cool; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 (spike) complete; Phase 1 in progress.
 
 ---
 
@@ -43,12 +43,23 @@ Gameplay is LAN-only. The cloud backend is involved only for AI generation and s
 - **Component-based architecture, designed up front.** Small, single-purpose components with clear props; presentational components separated from state and container logic; shared primitives (Button, Card, Countdown, QRPanel, ScoreList, AnswerInput variants) reused across the player and TV views rather than duplicated.
 - **One client, two modes.** The TV display is the same component tree as the player client with input components not rendered, not a second codebase.
 - **State:** game state arrives from the server over WebSocket into a single store (for example Preact Signals); components subscribe and never talk to the socket directly.
-- **Theming through design tokens.** All color, typography, spacing, radius and motion values are defined once as CSS custom properties (a token file), with a deliberately chosen palette and type scale. Components use tokens only; no hard-coded colors or ad-hoc pixel values. Light and dark variants come from tokens. The TV gets its own scale tokens (larger type, higher contrast) rather than separate styles.
+- **Theming through design tokens.** All color, typography, spacing, radius and motion values are defined once as CSS custom properties (a token file), with a deliberately chosen palette and type scale. Components use tokens only; no hard-coded colors or ad-hoc pixel values. The identity is dark-only (§2.3); any future theme comes from tokens. The TV gets its own scale tokens (larger type, higher contrast) rather than separate styles.
 - **CSS discipline:** styles scoped per component (CSS Modules or an equivalent), no inline style sprawl, no global overrides, no `!important`.
 - **Build:** Vite with `@vitejs/plugin-legacy`. JSX is compiled at build time. Current browsers get the modern bundle (Phase 0: the 2025 Samsung TV runs Chromium 130 and gets it). A legacy bundle targeting Chromium 56 (Tizen 4, 2018 TVs) is downloaded only by older browsers, so it costs current devices nothing. No minimum TV model year is set; revisit only if a TV fails to load the game.
 - **Quality bar:** code that reads as deliberately designed. Before building a screen, sketch its component breakdown and the tokens it uses.
 
 ---
+
+### 2.3 Visual identity
+
+The look is a **neon pub quiz night**: a dark bar lit by neon signs. It applies to the host app, the player pages and the TV alike, so they read as one product. Reference mockups: the "Neon pub quiz" design canvas (owner's Claude artifacts).
+
+- **Logo:** "Queaura" in Tilt Neon, "Que" glowing violet and "aura" glowing gold, so the name shows its two halves.
+- **Color:** bar-at-night ground `#120A1F`, table surfaces `#1D1230` / `#2A1B44`, chalk text `#F7F0E1`, smoke for quiet text `#B9A8D6`. **Gold** `#FFC23D` is the light you chase: the main action, scores, winners, the answer reveal. **Neon violet** `#C77DFF` is the sign on the wall: headings, outlines, secondary actions. Right `#5CF2A6`, wrong or over `#FF7A59`.
+- **Answer choices:** gold, cyan, pink and violet, each with a shape (▲ ◆ ● ■); they differ in lightness as well as hue, so color-blind players can tell them apart.
+- **Glow** (layered text and box shadows) is reserved for what matters: the logo, gold actions, the current leader, right answers, the countdown.
+- **Type:** Tilt Neon for the logo and big moments only; Big Shoulders Display (800/900) for headings, numbers and scores; Manrope (400/600/800) for questions and everything else.
+- **Fonts ship with the app and the web bundle** (SIL Open Font License), never from a font CDN: players on a LocalOnlyHotspot have no internet.
 
 ## 3. Networking
 

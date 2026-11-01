@@ -27,6 +27,9 @@
 
 .title {
   margin: 0;
+  min-width: 0;
+  /* No overflow clipping: it would cut the logo's glow into a box. Names are capped at 20 characters. */
+  overflow-wrap: anywhere;
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);

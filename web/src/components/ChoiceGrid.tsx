@@ -1,4 +1,5 @@
 import type { Choice } from '../../../protocol/src';
+import { ChoiceShape } from './ChoiceShape';
 import styles from './ChoiceGrid.module.css';
 
 interface Props {
@@ -13,8 +14,6 @@ interface Props {
   disabled?: boolean;
 }
 
-const SHAPES = ['▲', '◆', '●', '■'];
-
 export function ChoiceGrid({ choices, onPick, picked, correctId, counts, disabled }: Props) {
   return (
     <ul class={styles.grid}>
@@ -23,7 +22,7 @@ export function ChoiceGrid({ choices, onPick, picked, correctId, counts, disable
           correctId != null ? (choice.id === correctId ? styles.correct : styles.dimmed) : picked && picked !== choice.id ? styles.dimmed : '';
         const content = (
           <>
-            <span class={styles.shape} aria-hidden="true">{SHAPES[i % SHAPES.length]}</span>
+            <ChoiceShape index={i} class={styles.shape} />
             <span class={styles.text}>{choice.text}</span>
             {counts && <span class={styles.count}>{counts[choice.id] ?? 0}</span>}
             {picked === choice.id && <span class={styles.mark} aria-label="Your answer">✓</span>}

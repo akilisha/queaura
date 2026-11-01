@@ -1,37 +1,67 @@
-/* Design tokens. Every color, type, spacing, radius, size and motion value lives here. */
+/* Design tokens. Every color, type, spacing, radius, size and motion value lives here.
+   The identity is a neon pub quiz night (spec §2.3): dark only. */
 
 :root {
-  /* Color: warm paper with an indigo primary and amber accent */
-  --color-bg: #f6f4ef;
-  --color-surface: #ffffff;
-  --color-surface-raised: #fbfaf7;
-  --color-text: #1b1a22;
-  --color-text-muted: #5d5a6b;
-  --color-border: #e2dfd6;
-  --color-primary: #3a2fd1;
-  --color-primary-pressed: #2b22a8;
-  --color-on-primary: #ffffff;
-  --color-accent: #f2a900;
-  --color-success: #1c7c4a;
-  --color-warning: #a85f00;
-  --color-danger: #b3261e;
-  --color-focus: #f2a900;
+  /* Ground and surfaces: a bar at night */
+  --color-bg: #120a1f;
+  --color-surface: #1d1230;
+  --color-surface-raised: #2a1b44;
+  --color-border: #3a2a5a;
+
+  /* Text */
+  --color-text: #f7f0e1;
+  --color-text-muted: #b9a8d6;
+
+  /* Gold is the light you chase: main actions, scores, winners. Violet is the sign on the wall. */
+  --color-gold: #ffc23d;
+  --color-gold-pressed: #e6a920;
+  --color-on-gold: #1a0f00;
+  --color-gold-light: #ffe3a3;
+  --color-violet: #c77dff;
+  --color-violet-light: #f0d9ff;
+
+  /* Roles, in terms of the brand colors */
+  --color-primary: var(--color-gold);
+  --color-primary-pressed: var(--color-gold-pressed);
+  --color-on-primary: var(--color-on-gold);
+  --color-accent: var(--color-gold);
+  --color-focus: var(--color-gold);
+  --color-success: #5cf2a6;
+  --color-warning: #ffb27a;
+  --color-danger: #ff7a59;
   --color-correct: var(--color-success);
+  --color-correct-light: #d9ffea;
   --color-wrong: var(--color-danger);
 
-  /* Choices keep one color each on phone and TV, so players can match them at a glance. */
-  --color-choice-1: #3a2fd1;
-  --color-choice-2: #c2410c;
-  --color-choice-3: #0f766e;
-  --color-choice-4: #a21caf;
+  /* Choices keep one color and shape each on phone and TV. They differ in lightness too. */
+  --color-choice-1: #ffc23d;
+  --color-on-choice-1: #1a0f00;
+  --color-choice-2: #3ee6d2;
+  --color-on-choice-2: #04201d;
+  --color-choice-3: #ff4f9e;
+  --color-on-choice-3: #2a0418;
+  --color-choice-4: #8a4dff;
+  --color-on-choice-4: #ffffff;
   --color-on-choice: #ffffff;
 
-  /* QR codes stay dark-on-light in every theme so cameras read them. */
+  /* QR codes stay dark-on-light so cameras read them. */
   --color-qr-dark: #000000;
   --color-qr-light: #ffffff;
 
+  /* Neon glow, used only where it matters (spec §2.3) */
+  --glow-gold: 0 0 24px rgba(255, 194, 61, 0.45);
+  --glow-violet: 0 0 18px rgba(199, 125, 255, 0.35), inset 0 0 12px rgba(199, 125, 255, 0.18);
+  --glow-correct: 0 0 0 3px #5cf2a6, 0 0 22px rgba(92, 242, 166, 0.5);
+  --glow-text-gold: 0 0 4px #ffc23d, 0 0 18px rgba(255, 194, 61, 0.75), 0 0 44px rgba(255, 140, 40, 0.45);
+  --glow-text-violet: 0 0 4px #c77dff, 0 0 18px rgba(199, 125, 255, 0.8), 0 0 44px rgba(199, 125, 255, 0.45);
+  --glow-text-correct: 0 0 4px #5cf2a6, 0 0 20px rgba(92, 242, 166, 0.7), 0 0 44px rgba(92, 242, 166, 0.4);
+  --glow-text-soft: 0 0 10px rgba(255, 194, 61, 0.6);
+  --halo-violet: radial-gradient(closest-side, rgba(199, 125, 255, 0.2), rgba(18, 10, 31, 0));
+
   /* Type */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Samsung Sans', sans-serif;
+  --font-sign: 'Tilt Neon', var(--font-display);
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -43,9 +73,10 @@
   --weight-regular: 400;
   --weight-semibold: 600;
   --weight-bold: 800;
+  --weight-black: 900;
   --leading-tight: 1.1;
   --leading-normal: 1.45;
-  --tracking-caps: 0.06em;
+  --tracking-caps: 0.12em;
 
   /* Space */
   --space-1: 0.25rem;
@@ -59,7 +90,7 @@
 
   /* Radius */
   --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
+  --radius-md: 0.875rem;
   --radius-lg: 1.25rem;
   --radius-pill: 999px;
 
@@ -71,8 +102,11 @@
   --score-column-min: 100%;
   --countdown-height: 0.75rem;
   --keypad-key: 3.5rem;
+  --choice-height: 7rem;
+  --choice-shape: 1.25rem;
   --qr-size: 18rem;
   --border-width: 1px;
+  --border-strong: 2px;
   --focus-width: 3px;
 
   /* Motion */
@@ -84,43 +118,15 @@
   /* Emphasis */
   --opacity-disabled: 0.5;
   --opacity-offline: 0.45;
+
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #121118;
-    --color-surface: #1e1c27;
-    --color-surface-raised: #26232f;
-    --color-text: #f4f2fa;
-    --color-text-muted: #a9a5ba;
-    --color-border: #34313f;
-    --color-primary: #8c82ff;
-    --color-primary-pressed: #7368f0;
-    --color-on-primary: #0e0b2b;
-    --color-accent: #ffc233;
-    --color-success: #4cc38a;
-    --color-warning: #f0a847;
-    --color-danger: #ff6b5e;
-    --color-focus: #ffc233;
-  }
-}
-
-/* TV scale: read from across a room, so larger type and space and a high-contrast palette. */
+/* TV scale: read from across a room. Sized from the screen height: TV browsers report anything
+   from ~720 to 1080 CSS px tall. */
 :root[data-mode='tv'] {
-  --color-bg: #0b0a10;
-  --color-surface: #17151f;
-  --color-surface-raised: #201d2a;
-  --color-text: #ffffff;
-  --color-text-muted: #cfcbe0;
-  --color-border: #3d3949;
-  --color-primary: #9d94ff;
-  --color-on-primary: #0e0b2b;
-  --color-accent: #ffc233;
-  --color-success: #5fe0a0;
-  --color-warning: #ffb85c;
-  --color-danger: #ff7a6e;
+  --color-text-muted: #cfc2e6;
 
-  /* Sized from the screen height: TV browsers report anything from ~720 to 1080 CSS px tall. */
   --text-sm: clamp(1rem, 2.4vh, 1.5rem);
   --text-md: clamp(1.125rem, 2.9vh, 1.75rem);
   --text-lg: clamp(1.375rem, 3.6vh, 2.25rem);
@@ -136,6 +142,7 @@
   --content-max: 100%;
   --score-column-min: 13rem;
   --countdown-height: clamp(0.75rem, 2vh, 1.5rem);
+  --choice-height: clamp(4rem, 12vh, 7rem);
   --qr-size: clamp(14rem, 52vh, 30rem);
   --border-width: 2px;
 }

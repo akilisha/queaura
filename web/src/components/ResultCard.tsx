@@ -1,13 +1,15 @@
 import type { Result, Scoring } from '../../../protocol/src';
 import styles from './ResultCard.module.css';
 
-/** The player's own outcome in the reveal (spec §7.2). */
+/** The player's own outcome in the reveal (spec §7.2): a lit sign when they got it. */
 export function ResultCard({ result, scoring }: { result: Result | null | undefined; scoring?: Scoring }) {
   const { tone, headline } = describe(result);
   return (
-    <div class={`${styles.card} ${styles[tone]}`}>
-      <p class={styles.headline}>{headline}</p>
-      {scoring !== 'none' && result?.answered && <p class={styles.points}>+{result.points}</p>}
+    <div class={styles.card}>
+      <p class={`${styles.headline} ${styles[tone]}`}>{headline}</p>
+      {scoring !== 'none' && result?.answered && (
+        <p class={`${styles.points} ${result.points > 0 ? styles.scored : ''}`}>+{result.points}</p>
+      )}
     </div>
   );
 }

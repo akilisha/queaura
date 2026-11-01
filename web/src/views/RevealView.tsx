@@ -27,7 +27,7 @@ export function RevealView() {
           {closest ? (
             <div class={styles.centered}>
               <p class={styles.muted}>The answer</p>
-              <p class={styles.headline}>{r.correctNumber !== null ? formatNumber(r.correctNumber) : '–'}</p>
+              <p class={styles.answer}>{r.correctNumber !== null ? formatNumber(r.correctNumber) : '–'}</p>
             </div>
           ) : (
             <ChoiceGrid

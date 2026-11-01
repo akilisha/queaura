@@ -18,8 +18,10 @@
 .entry,
 .placeholder {
   flex: 1;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
+  color: var(--color-gold);
   font-variant-numeric: tabular-nums;
   text-align: right;
   overflow: hidden;
@@ -28,6 +30,7 @@
 }
 
 .placeholder {
+  font-family: var(--font-sans);
   color: var(--color-text-muted);
   font-weight: var(--weight-regular);
   font-size: var(--text-lg);
@@ -45,9 +48,10 @@
   min-height: var(--keypad-key);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  font-size: var(--text-lg);
-  font-weight: var(--weight-semibold);
+  background: var(--color-surface-raised);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-black);
   cursor: pointer;
   touch-action: manipulation;
   user-select: none;
@@ -70,6 +74,9 @@
   background: var(--color-primary);
   border-color: transparent;
   color: var(--color-on-primary);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  box-shadow: var(--glow-gold);
 }
 
 .key:disabled,

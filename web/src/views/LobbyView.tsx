@@ -17,7 +17,7 @@ export function LobbyView() {
       <GameScreen>
         <div class={styles.board}>
           <Card fill>
-            <div class={styles.join}>
+            <div class={`${styles.join} ${styles.joinPanel}`}>
               <QRCode text={url} label={`Join at ${url}`} />
               <p class={styles.lead}>Scan to join</p>
               <p class={styles.address}>{location.host}</p>

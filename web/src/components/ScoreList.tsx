@@ -17,7 +17,7 @@ export function ScoreList({ players, highlightId, metric = 'total', limit, ranke
   const shown = limit !== undefined && sorted.length > limit ? sorted.slice(0, limit - 1) : sorted;
   const more = sorted.length - shown.length;
   return (
-    <ol class={styles.list}>
+    <ol class={`${styles.list} ${ranked ? styles.ranked : ''}`}>
       {shown.map((p, i) => (
         <li key={p.id} class={`${styles.row} ${p.id === highlightId ? styles.mine : ''} ${p.online ? '' : styles.offline}`}>
           {ranked && <span class={styles.rank}>{i + 1}</span>}
