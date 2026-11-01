@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Triviocity",
-    "slug": "triviocity",
+    "name": "Queaura",
+    "slug": "queaura",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#120A1F",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -27,6 +27,6 @@
       "expo-sqlite",
       "expo-font"
     ],
-    "scheme": "triviocity"
+    "scheme": "queaura"
   }
 }
