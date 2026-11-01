@@ -20,7 +20,7 @@ import {
   toQuestion,
   type QuestionDraft,
 } from '../../game/question';
-import { color, radius, size, space, text, weight } from '../../theme';
+import { color, font, radius, size, space, text } from '../../theme';
 
 /** Write or edit one question by hand (spec §5.3). `/questions/new` starts a blank one. */
 export default function EditQuestion() {
@@ -77,7 +77,7 @@ export default function EditQuestion() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: existing ? 'Edit question' : 'New question' }} />
+      <Stack.Screen options={{ title: existing ? 'EDIT QUESTION' : 'NEW QUESTION' }} />
       {dialog}
       <Card>
         <Field
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   markChosen: { backgroundColor: color.success, borderColor: color.success },
-  check: { color: color.onPrimary, fontSize: text.lg, fontWeight: weight.bold },
+  check: { color: color.onPrimary, fontSize: text.lg, fontFamily: font.bodyBold },
   choiceInput: {
     flex: 1,
     minHeight: size.tapMin,
@@ -189,9 +189,9 @@ const styles = StyleSheet.create({
     borderColor: color.border,
     borderRadius: radius.md,
     backgroundColor: color.surfaceRaised,
-    fontSize: text.md,
+    fontFamily: font.body, fontSize: text.md,
     color: color.text,
   },
   remove: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
-  removeLabel: { fontSize: text.lg, color: color.textMuted },
+  removeLabel: { fontFamily: font.body, fontSize: text.lg, color: color.textMuted },
 });

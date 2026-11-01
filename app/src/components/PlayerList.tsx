@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ScoreEntry } from '../../../protocol/src';
-import { color, opacity, radius, size, space, text, weight } from '../theme';
+import { color, font, opacity, radius, size, space, text, tracking } from '../theme';
 
 interface Props {
   players: ScoreEntry[];
@@ -50,11 +50,11 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3] },
   item: { paddingVertical: space[2], borderRadius: radius.md, backgroundColor: color.surfaceRaised },
   offline: { opacity: opacity.offline },
-  emoji: { fontSize: text.lg },
-  name: { flex: 1, fontSize: text.md, color: color.text },
-  header: { fontSize: text.xs, color: color.textMuted, fontWeight: weight.semibold },
-  number: { minWidth: size.numberColumn, textAlign: 'right', fontSize: text.md, fontWeight: weight.bold, color: color.text, fontVariant: ['tabular-nums'] },
-  answered: { minWidth: size.markColumn, color: color.success, fontWeight: weight.bold },
-  empty: { fontSize: text.md, color: color.textMuted },
-  hint: { fontSize: text.xs, color: color.textMuted },
+  emoji: { fontFamily: font.body, fontSize: text.lg },
+  name: { flex: 1, fontFamily: font.body, fontSize: text.md, color: color.text },
+  header: { fontFamily: font.displayBold, fontSize: text.sm, letterSpacing: tracking.caps, textTransform: 'uppercase', color: color.violet },
+  number: { minWidth: size.numberColumn, textAlign: 'right', fontFamily: font.display, fontSize: text.lg, color: color.text, fontVariant: ['tabular-nums'] },
+  answered: { minWidth: size.markColumn, color: color.success, fontFamily: font.bodyBold },
+  empty: { fontFamily: font.body, fontSize: text.md, color: color.textMuted },
+  hint: { fontFamily: font.body, fontSize: text.xs, color: color.textMuted },
 });

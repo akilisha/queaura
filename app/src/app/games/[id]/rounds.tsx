@@ -9,7 +9,7 @@ import { useLibrary } from '../../../data/library';
 import type { RoundFormat } from '../../../data/types';
 import { plural, STYLES } from '../../../game/copy';
 import { ANSWER_SECONDS, DEFAULT_SECONDS, MAX_QUESTIONS, READING_SECONDS, withDurations, withQuestionCount, withStyle } from '../../../game/format';
-import { color, text, weight } from '../../../theme';
+import { color, font, text } from '../../../theme';
 import { useWizard } from '../../../wizard/draft';
 
 const STYLE_ORDER: Style[] = ['closestWithoutGoingOver', 'multipleChoice'];
@@ -111,5 +111,5 @@ function Timing({ round, onChange }: { round: RoundFormat; onChange: (patch: Dur
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: text.md, fontWeight: weight.semibold, color: color.text },
+  label: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
 });

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { color, opacity, radius, size, space, text, tracking, weight } from '../theme';
+import { color, font, glow, opacity, radius, size, space, text, tracking } from '../theme';
 
 // Shared building blocks for host screens.
 
@@ -52,7 +52,7 @@ export function Button({
         disabled && styles.disabled,
       ]}
     >
-      <Text style={[styles.buttonLabel, big && styles.bigLabel, tone === 'secondary' && styles.secondaryLabel]}>{label}</Text>
+      <Text style={[styles.buttonLabel, tone !== 'secondary' && styles.signLabel, big && styles.bigLabel, styles[`${tone}Label`]]}>{label}</Text>
     </Pressable>
   );
 }
@@ -85,27 +85,32 @@ const styles = StyleSheet.create({
     padding: space[4],
     gap: space[3],
   },
-  cardTitle: { fontSize: text.sm, fontWeight: weight.semibold, color: color.textMuted, textTransform: 'uppercase', letterSpacing: tracking.caps },
+  cardTitle: { fontFamily: font.displayBold, fontSize: text.lg, color: color.violet, textTransform: 'uppercase', letterSpacing: tracking.caps },
   button: {
     minHeight: size.tapMin,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: space[4],
-    borderWidth: size.borderWidth,
+    borderWidth: size.borderStrong,
     borderColor: 'transparent',
   },
-  big: { minHeight: size.tapMin * 1.5, borderRadius: radius.lg },
-  primary: { backgroundColor: color.primary },
-  secondary: { backgroundColor: color.surface, borderColor: color.border },
+  big: { minHeight: size.tapMin * 1.4, borderRadius: radius.lg },
+  // The gold sign: the one action that matters on a screen.
+  primary: { backgroundColor: color.primary, ...glow.gold },
+  // Neon outline on the wall.
+  secondary: { backgroundColor: 'transparent', borderColor: color.violet, ...glow.violet },
   danger: { backgroundColor: color.danger },
   pressed: { opacity: opacity.pressed },
   disabled: { opacity: opacity.disabled },
-  buttonLabel: { color: color.onPrimary, fontSize: text.md, fontWeight: weight.semibold },
-  bigLabel: { fontSize: text.lg, fontWeight: weight.bold },
-  secondaryLabel: { color: color.text },
-  heading: { fontSize: text.xl, fontWeight: weight.bold, color: color.text },
-  muted: { fontSize: text.sm, color: color.textMuted },
-  body: { fontSize: text.md, color: color.text },
-  error: { fontSize: text.md, color: color.danger },
+  buttonLabel: { fontFamily: font.bodyBold, fontSize: text.md },
+  signLabel: { fontFamily: font.display, fontSize: text.lg, textTransform: 'uppercase', letterSpacing: tracking.caps },
+  bigLabel: { fontSize: text.xl },
+  primaryLabel: { color: color.onPrimary },
+  secondaryLabel: { color: color.violetLight },
+  dangerLabel: { color: color.onDanger },
+  heading: { fontFamily: font.bodyBold, fontSize: text.xl, color: color.text },
+  muted: { fontFamily: font.body, fontSize: text.sm, color: color.textMuted },
+  body: { fontFamily: font.body, fontSize: text.md, color: color.text },
+  error: { fontFamily: font.bodySemi, fontSize: text.md, color: color.danger },
 });

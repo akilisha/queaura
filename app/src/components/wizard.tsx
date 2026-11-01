@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { color, opacity, radius, size, space, text, weight } from '../theme';
+import { color, font, glow, opacity, radius, size, space, text, tracking } from '../theme';
 import { Button } from './ui';
 
 // Pieces every wizard step shares: where you are, the step's content, and how to move on.
@@ -80,26 +80,26 @@ const styles = StyleSheet.create({
   header: { gap: space[2], paddingTop: space[2] },
   progress: { flexDirection: 'row', gap: space[2] },
   dot: { flex: 1, height: space[1], borderRadius: radius.pill, backgroundColor: color.border },
-  dotDone: { backgroundColor: color.primary },
-  step: { fontSize: text.sm, color: color.textMuted, fontWeight: weight.semibold },
-  title: { fontSize: text.xl, fontWeight: weight.bold, color: color.text },
-  intro: { fontSize: text.md, color: color.textMuted },
+  dotDone: { backgroundColor: color.gold, ...glow.gold },
+  step: { fontFamily: font.displayBold, fontSize: text.md, letterSpacing: tracking.caps, textTransform: 'uppercase', color: color.violet },
+  title: { fontFamily: font.display, fontSize: text.xxl, lineHeight: text.xxl * 1.05, textTransform: 'uppercase', color: color.text },
+  intro: { fontFamily: font.body, fontSize: text.md, color: color.textMuted },
   footer: { gap: space[3], paddingBottom: space[4] },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[3] },
-  stepperLabel: { flex: 1, fontSize: text.md, fontWeight: weight.semibold, color: color.text },
+  stepperLabel: { flex: 1, fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
   stepperControls: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   stepperButton: {
     width: size.tapMin,
     height: size.tapMin,
     borderRadius: radius.pill,
     borderWidth: size.borderWidth,
-    borderColor: color.border,
-    backgroundColor: color.surface,
+    borderColor: color.violet,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepperSymbol: { fontSize: text.xl, color: color.text, fontWeight: weight.semibold },
-  stepperValue: { minWidth: size.numberColumn, textAlign: 'center', fontSize: text.lg, fontWeight: weight.bold, color: color.text },
+  stepperSymbol: { fontFamily: font.display, fontSize: text.xl, color: color.violetLight },
+  stepperValue: { minWidth: size.numberColumn, textAlign: 'center', fontFamily: font.display, fontSize: text.xl, color: color.gold, ...glow.softGoldText },
   pressed: { backgroundColor: color.surfaceRaised },
   disabled: { opacity: opacity.disabled },
 });

@@ -1,28 +1,41 @@
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { View } from 'react-native';
 import { initDatabase } from '../data/db';
-import { color, text, weight } from '../theme';
+import { color, font, text, tracking } from '../theme';
 
 initDatabase();
 
+/** Fonts ship inside the app (spec §2.3); screens wait for them so nothing flashes in a system font. */
+const FONTS = {
+  [font.sign]: require('../../assets/fonts/TiltNeon-Regular.ttf'),
+  [font.display]: require('../../assets/fonts/BigShouldersDisplay-Black.ttf'),
+  [font.displayBold]: require('../../assets/fonts/BigShouldersDisplay-ExtraBold.ttf'),
+  [font.body]: require('../../assets/fonts/Manrope-Regular.ttf'),
+  [font.bodySemi]: require('../../assets/fonts/Manrope-SemiBold.ttf'),
+  [font.bodyBold]: require('../../assets/fonts/Manrope-ExtraBold.ttf'),
+};
+
 export default function Layout() {
+  const [loaded] = useFonts(FONTS);
+  if (!loaded) return <View style={{ flex: 1, backgroundColor: color.bg }} />;
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: color.bg },
-          headerTitleStyle: { fontSize: text.lg, fontWeight: weight.bold, color: color.text },
+          headerTintColor: color.violetLight,
+          headerTitleStyle: { fontFamily: font.display, fontSize: text.xl, color: color.text },
           headerShadowVisible: false,
           contentStyle: { backgroundColor: color.bg },
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'Triviocity' }} />
-        <Stack.Screen name="lobby" options={{ title: 'Lobby' }} />
-        <Stack.Screen name="game" options={{ title: 'Hosting', headerBackVisible: false, gestureEnabled: false }} />
-        <Stack.Screen name="questions/index" options={{ title: 'Your questions' }} />
-        <Stack.Screen name="questions/[id]" options={{ title: 'Question' }} />
-        <Stack.Screen name="games/index" options={{ title: 'Your games' }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="lobby" options={{ title: 'LOBBY' }} />
+        <Stack.Screen name="game" options={{ title: 'HOSTING', headerBackVisible: false, gestureEnabled: false }} />
+        <Stack.Screen name="questions/[id]" options={{ title: 'QUESTION' }} />
         {/* The wizard has its own stack and headers. */}
         <Stack.Screen name="games/[id]" options={{ headerShown: false }} />
       </Stack>

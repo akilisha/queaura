@@ -5,7 +5,7 @@ import { NextButton, StepFooter, StepHeader } from '../../../components/wizard';
 import { useLibrary } from '../../../data/library';
 import { plural, STYLES } from '../../../game/copy';
 import { emptySlots, withSlot } from '../../../game/format';
-import { color, radius, size, space, text, weight } from '../../../theme';
+import { color, font, radius, size, space, text } from '../../../theme';
 import { useWizard } from '../../../wizard/draft';
 
 /** Step 4: plug questions from the bank into each round's slots. Empty slots are allowed. */
@@ -63,7 +63,7 @@ export default function SlotsStep() {
 
 const styles = StyleSheet.create({
   slot: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
-  number: { minWidth: size.markColumn, fontSize: text.sm, fontWeight: weight.bold, color: color.textMuted },
+  number: { minWidth: size.markColumn, fontSize: text.sm, fontFamily: font.bodyBold, color: color.textMuted },
   pick: {
     flex: 1,
     minHeight: size.tapMin,
@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
   },
   empty: { borderStyle: 'dashed', backgroundColor: color.surface },
   pressed: { borderColor: color.primary },
-  question: { fontSize: text.md, color: color.text },
-  placeholder: { fontSize: text.md, color: color.primary, fontWeight: weight.semibold },
+  question: { fontFamily: font.body, fontSize: text.md, color: color.text },
+  placeholder: { fontSize: text.md, color: color.primary, fontFamily: font.bodySemi },
   clear: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
-  clearLabel: { fontSize: text.lg, color: color.textMuted },
+  clearLabel: { fontFamily: font.body, fontSize: text.lg, color: color.textMuted },
 });

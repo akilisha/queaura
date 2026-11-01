@@ -4,7 +4,7 @@ import { NextButton, StepFooter, StepHeader } from '../../../components/wizard';
 import { useLibrary } from '../../../data/library';
 import { describe } from '../../../game/format';
 import { problemOf } from '../../../game/resolve';
-import { color, space, text, weight } from '../../../theme';
+import { color, font, space, text } from '../../../theme';
 import { useWizard } from '../../../wizard/draft';
 
 /** Step 5: every choice restated in plain language before saving (spec §5.2). */
@@ -34,8 +34,8 @@ export default function SummaryStep() {
 }
 
 const styles = StyleSheet.create({
-  first: { fontSize: text.lg, fontWeight: weight.bold, color: color.text, marginBottom: space[1] },
-  line: { fontSize: text.md, color: color.text },
-  ready: { fontSize: text.md, fontWeight: weight.semibold, color: color.success },
-  notReady: { fontSize: text.md, fontWeight: weight.semibold, color: color.warning },
+  first: { fontSize: text.lg, fontFamily: font.bodyBold, color: color.text, marginBottom: space[1] },
+  line: { fontFamily: font.body, fontSize: text.md, color: color.text },
+  ready: { fontSize: text.md, fontFamily: font.bodySemi, color: color.success },
+  notReady: { fontSize: text.md, fontFamily: font.bodySemi, color: color.warning },
 });

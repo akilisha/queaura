@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
-import { color, opacity, radius, size, space, text, weight } from '../theme';
+import { color, font, glow, opacity, radius, size, space, text } from '../theme';
 
 // Form controls shared by the question editor and the game wizard.
 
@@ -105,7 +105,7 @@ export function Chips<T extends string>({
 
 const styles = StyleSheet.create({
   field: { gap: space[2] },
-  label: { fontSize: text.md, fontWeight: weight.semibold, color: color.text },
+  label: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
   input: {
     minHeight: size.tapMin,
     paddingHorizontal: space[3],
@@ -114,27 +114,27 @@ const styles = StyleSheet.create({
     borderColor: color.border,
     borderRadius: radius.md,
     backgroundColor: color.surfaceRaised,
-    fontSize: text.md,
+    fontFamily: font.body, fontSize: text.md,
     color: color.text,
   },
   multiline: { minHeight: size.tapMin * 2, textAlignVertical: 'top' },
-  hint: { fontSize: text.sm, color: color.textMuted },
+  hint: { fontFamily: font.body, fontSize: text.sm, color: color.textMuted },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[3],
     padding: space[3],
-    borderWidth: size.borderWidth,
+    borderWidth: size.borderStrong,
     borderColor: color.border,
     borderRadius: radius.md,
     backgroundColor: color.surface,
   },
-  optionSelected: { borderColor: color.primary, backgroundColor: color.surfaceRaised },
+  optionSelected: { borderColor: color.gold, backgroundColor: color.surfaceRaised, ...glow.gold },
   optionDisabled: { opacity: opacity.disabled },
   radio: { width: size.radio, height: size.radio, borderRadius: radius.pill, borderWidth: size.radioBorder, borderColor: color.border },
-  radioSelected: { borderColor: color.primary, backgroundColor: color.primary },
+  radioSelected: { borderColor: color.gold, backgroundColor: color.gold },
   optionText: { flex: 1, gap: space[1] },
-  optionTitle: { fontSize: text.md, fontWeight: weight.semibold, color: color.text },
+  optionTitle: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   chip: {
     paddingHorizontal: space[3],
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     borderColor: color.border,
     backgroundColor: color.surface,
   },
-  chipSelected: { backgroundColor: color.primary, borderColor: color.primary },
-  chipLabel: { fontSize: text.sm, fontWeight: weight.semibold, color: color.text },
-  chipLabelSelected: { color: color.onPrimary },
+  chipSelected: { backgroundColor: color.gold, borderColor: color.gold },
+  chipLabel: { fontSize: text.sm, fontFamily: font.bodySemi, color: color.text },
+  chipLabelSelected: { color: color.onGold },
 });

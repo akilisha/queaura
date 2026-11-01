@@ -6,7 +6,7 @@ import { Button, Card, Muted, Screen } from '../../components/ui';
 import { useLibrary } from '../../data/library';
 import type { BankQuestion } from '../../data/types';
 import { gamesUsing } from '../../data/usage';
-import { color, radius, size, space, text, weight } from '../../theme';
+import { color, font, radius, size, space, text } from '../../theme';
 
 type Filter = 'all' | 'numeric' | 'multipleChoice';
 
@@ -76,17 +76,17 @@ const styles = StyleSheet.create({
     gap: space[2],
   },
   pressed: { backgroundColor: color.surfaceRaised },
-  text: { fontSize: text.md, fontWeight: weight.semibold, color: color.text },
+  text: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
   meta: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   badge: {
     fontSize: text.xs,
-    fontWeight: weight.semibold,
-    color: color.primary,
+    fontFamily: font.bodySemi,
+    color: color.violet,
     paddingHorizontal: space[2],
     paddingVertical: space[1],
     borderRadius: radius.pill,
     borderWidth: size.borderWidth,
-    borderColor: color.primary,
+    borderColor: color.violet,
   },
-  answer: { flex: 1, fontSize: text.sm, color: color.success, fontWeight: weight.semibold },
+  answer: { flex: 1, fontSize: text.sm, color: color.success, fontFamily: font.bodySemi },
 });

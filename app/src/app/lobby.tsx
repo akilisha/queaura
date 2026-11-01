@@ -12,7 +12,7 @@ import { problemOf, resolveGame } from '../game/resolve';
 import { connectHost, host, useHost } from '../host/connection';
 import { ensureServer } from '../host/server';
 import { closeSession } from '../host/session';
-import { color, opacity, radius, size, space, text, weight } from '../theme';
+import { color, font, glow, opacity, radius, size, space, text, tracking } from '../theme';
 
 /** Join code, players, and the game list (spec §5.4). */
 export default function Lobby() {
@@ -64,7 +64,7 @@ export default function Lobby() {
   };
 
   const join = (
-    <Card title="Players join here">
+    <Card title="Players join here" style={styles.joinCard}>
       {startError && <ErrorText>{startError}</ErrorText>}
       {!startError && !base && <Muted>Starting the game server…</Muted>}
       {base && (
@@ -72,7 +72,8 @@ export default function Lobby() {
           <View style={styles.qr}>
             <QRCode value={`${base}/`} size={size.qr} color={color.qrDark} backgroundColor={color.qrLight} />
           </View>
-          <Text style={styles.url}>{base}</Text>
+          <Text style={styles.url}>Scan to join</Text>
+          <Text style={styles.tvUrl}>{base}</Text>
           <Muted>On a TV, open this in the browser to show the game to the room:</Muted>
           <Text style={styles.tvUrl}>{`${base}/?mode=tv`}</Text>
           {addresses.length > 1 && (
@@ -153,13 +154,14 @@ export default function Lobby() {
 
 const styles = StyleSheet.create({
   columns: { flexDirection: 'row', gap: space[4], alignItems: 'flex-start' },
+  joinCard: { borderColor: color.violet, borderWidth: size.borderStrong, ...glow.violet },
   column: { flex: 1, gap: space[4] },
   qr: { alignItems: 'center', padding: space[3], backgroundColor: color.qrLight, borderRadius: radius.md },
-  url: { fontSize: text.xl, fontWeight: weight.bold, color: color.text, textAlign: 'center' },
-  tvUrl: { fontSize: text.lg, fontWeight: weight.semibold, color: color.text, textAlign: 'center' },
+  url: { fontFamily: font.display, fontSize: text.xl, color: color.gold, textAlign: 'center', textTransform: 'uppercase', letterSpacing: tracking.caps, ...glow.softGoldText },
+  tvUrl: { fontFamily: font.bodyBold, fontSize: text.lg, color: color.text, textAlign: 'center' },
   networks: { gap: space[2] },
-  game: { padding: space[3], borderRadius: radius.md, borderWidth: size.borderWidth, borderColor: color.border, gap: space[1] },
-  gameChosen: { borderColor: color.primary, backgroundColor: color.surfaceRaised },
+  game: { padding: space[3], borderRadius: radius.md, borderWidth: size.borderStrong, borderColor: color.border, gap: space[1] },
+  gameChosen: { borderColor: color.gold, backgroundColor: color.surfaceRaised, ...glow.gold },
   gameDisabled: { opacity: opacity.disabled },
-  gameTitle: { fontSize: text.lg, fontWeight: weight.semibold, color: color.text },
+  gameTitle: { fontSize: text.lg, fontFamily: font.bodySemi, color: color.text },
 });

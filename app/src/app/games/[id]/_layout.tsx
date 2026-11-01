@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { useLibrary } from '../../../data/library';
 import { newGame, newGameId } from '../../../game/format';
-import { color, text, weight } from '../../../theme';
+import { color, font, text } from '../../../theme';
 import { WizardProvider, useWizard } from '../../../wizard/draft';
 
 /** The game wizard (spec §5.2). `/games/new` creates a game; `/games/<id>` edits one. */
@@ -24,7 +24,7 @@ function WizardStack() {
   const { dirty, isNew, closing } = useWizard();
   const [dialog, confirm] = useConfirm();
   const navigation = useNavigation();
-  const title = isNew ? 'New game' : 'Edit game';
+  const title = isNew ? 'NEW GAME' : 'EDIT GAME';
 
   // Leaving with unsaved changes asks first; the draft is never saved by accident.
   usePreventRemove(dirty, ({ data }) =>
@@ -47,7 +47,8 @@ function WizardStack() {
   const options = useMemo(
     () => ({
       headerStyle: { backgroundColor: color.bg },
-      headerTitleStyle: { fontSize: text.lg, fontWeight: weight.bold, color: color.text },
+      headerTintColor: color.violetLight,
+      headerTitleStyle: { fontFamily: font.display, fontSize: text.xl, color: color.text },
       headerShadowVisible: false,
       contentStyle: { backgroundColor: color.bg },
       title,
@@ -58,7 +59,7 @@ function WizardStack() {
   return (
     <>
       <Stack screenOptions={options}>
-        <Stack.Screen name="pick" options={{ title: 'Choose a question', presentation: 'modal' }} />
+        <Stack.Screen name="pick" options={{ title: 'CHOOSE A QUESTION', presentation: 'modal' }} />
       </Stack>
       {dialog}
     </>

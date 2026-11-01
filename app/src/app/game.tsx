@@ -10,7 +10,7 @@ import { Body, Button, Card, ErrorText, Heading, Muted, Screen } from '../compon
 import { host, useHost } from '../host/connection';
 import { closeSession } from '../host/session';
 import { useSeconds } from '../host/useSeconds';
-import { color, radius, size, space, text, weight } from '../theme';
+import { color, font, glow, radius, size, space, text, tracking } from '../theme';
 
 const PHASE_LABEL: Record<Phase, string> = {
   lobby: 'Lobby',
@@ -152,11 +152,11 @@ const styles = StyleSheet.create({
   columns: { flexDirection: 'row', gap: space[4], alignItems: 'flex-start' },
   column: { flex: 1, gap: space[4] },
   status: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space[3] },
-  phase: { fontSize: text.lg, fontWeight: weight.bold, color: color.text },
-  seconds: { fontSize: text.xxl, fontWeight: weight.bold, color: color.accent, fontVariant: ['tabular-nums'] },
+  phase: { fontFamily: font.display, fontSize: text.xl, textTransform: 'uppercase', letterSpacing: tracking.caps, color: color.text },
+  seconds: { fontFamily: font.display, fontSize: text.xxl, color: color.gold, fontVariant: ['tabular-nums'], ...glow.softGoldText },
   question: { gap: space[3] },
   answer: { padding: space[3], borderRadius: radius.md, backgroundColor: color.surfaceRaised, gap: space[1] },
-  answerText: { fontSize: text.xl, fontWeight: weight.bold, color: color.success },
+  answerText: { fontFamily: font.display, fontSize: text.xl, color: color.success },
   controls: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
   control: { flexGrow: 1, flexBasis: size.controlMin },
 });

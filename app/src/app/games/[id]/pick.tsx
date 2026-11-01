@@ -6,7 +6,7 @@ import { Button, Card, Muted, Screen } from '../../../components/ui';
 import { useLibrary } from '../../../data/library';
 import { STYLES } from '../../../game/copy';
 import { candidates, withSlot } from '../../../game/format';
-import { color, radius, size, space, text, weight } from '../../../theme';
+import { color, font, radius, size, space, text } from '../../../theme';
 import { useWizard } from '../../../wizard/draft';
 
 /** Picks a question for one slot. Only questions that fit the round's style are offered (spec §4). */
@@ -69,5 +69,5 @@ const styles = StyleSheet.create({
     gap: space[1],
   },
   pressed: { borderColor: color.primary, backgroundColor: color.surfaceRaised },
-  text: { fontSize: text.md, fontWeight: weight.semibold, color: color.text },
+  text: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
 });

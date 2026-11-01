@@ -143,9 +143,13 @@ A slot only accepts questions whose answer type fits the round's style. The ques
 
 ## 5. Host app
 
+### 5.0 Layout
+
+Bottom tabs separate the host's three jobs: **Play** (the default: start a game tonight), **Games** (your games, create your own) and **Questions** (your question bank). Later phases add tabs as needed (questionnaire Results in Phase 2, account and AI in Phase 3). While hosting, the lobby and in-game screens take the whole screen and the tabs are hidden, so a host cannot wander off mid-game.
+
 ### 5.1 First run
 - **No onboarding carousel.** The app teaches through doing.
-- First screen offers **"Start a game now"** with built-in sample games, plus "Create your own." A new host can play within seconds.
+- First screen (the Play tab) offers **"Start a game now"** with built-in sample games, plus "Create your own." A new host can play within seconds.
 - The app ships with a small **starter bank**: a handful of sample questions for every presentation style, and at least one prebuilt sample game format using them.
 
 ### 5.2 Game creation (guided)

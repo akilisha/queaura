@@ -7,7 +7,7 @@ import { libraryChanged, useLibrary } from '../../data/library';
 import type { GameFormat } from '../../data/types';
 import { plural } from '../../game/copy';
 import { problemOf } from '../../game/resolve';
-import { color, opacity, space, text, weight } from '../../theme';
+import { color, font, opacity, space, text } from '../../theme';
 
 /** Saved games. Unfinished ones are greyed out with the reason (spec §5.2). */
 export default function Games() {
@@ -60,9 +60,9 @@ export default function Games() {
 
 const styles = StyleSheet.create({
   unfinished: { opacity: opacity.offline },
-  title: { fontSize: text.lg, fontWeight: weight.bold, color: color.text },
-  ready: { fontSize: text.sm, fontWeight: weight.semibold, color: color.success },
-  problem: { fontSize: text.sm, fontWeight: weight.semibold, color: color.warning },
+  title: { fontSize: text.lg, fontFamily: font.bodyBold, color: color.text },
+  ready: { fontSize: text.sm, fontFamily: font.bodySemi, color: color.success },
+  problem: { fontSize: text.sm, fontFamily: font.bodySemi, color: color.warning },
   actions: { flexDirection: 'row', gap: space[3] },
   action: { flex: 1 },
 });
