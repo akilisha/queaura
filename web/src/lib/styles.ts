@@ -10,4 +10,8 @@ export const STYLE_INFO: Record<Style, { name: string; howTo: string }> = {
     name: 'Multiple choice',
     howTo: 'Tap the right answer before the time runs out.',
   },
+  fastestFinger: {
+    name: 'Fastest finger',
+    howTo: 'Tap the right answer first. The quicker you are, the more points.',
+  },
 };

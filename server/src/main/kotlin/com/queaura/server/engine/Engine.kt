@@ -30,7 +30,7 @@ data class Outcome(
   val style: Style,
   val voided: Boolean,
   val results: Map<Int, PlayerResult>,
-  /** Closest guesses in reveal order (player ids); empty for multiple choice. */
+  /** Reveal order (player ids): closest guesses nearest first, or fastest correct answers first; empty for multiple choice. */
   val ranking: List<Int>,
   val choiceCounts: Map<String, Int>,
 )
@@ -204,7 +204,7 @@ class Engine(private val now: () -> Long) {
     val q = question!!
     val valid = when (round!!.style) {
       Style.CLOSEST_WITHOUT_GOING_OVER -> value is AnswerValue.Number && value.value.isFinite()
-      Style.MULTIPLE_CHOICE -> value is AnswerValue.Pick && q.choices.any { it.id == value.choiceId }
+      Style.MULTIPLE_CHOICE, Style.FASTEST_FINGER -> value is AnswerValue.Pick && q.choices.any { it.id == value.choiceId }
     }
     if (!valid) return "That answer does not fit this question"
     answers[playerId] = Answer(value, elapsed())
@@ -291,6 +291,7 @@ class Engine(private val now: () -> Long) {
     val ids = eligible.filter { it in roster }
     val results = when (r.style) {
       Style.MULTIPLE_CHOICE -> ScoringRules.multipleChoice(q, ids, answers, scoring, readingMs, answerMs)
+      Style.FASTEST_FINGER -> ScoringRules.fastestFinger(q, ids, answers, scoring)
       Style.CLOSEST_WITHOUT_GOING_OVER -> ScoringRules.closest(q, ids, answers, scoring, readingMs, answerMs)
     }
     for ((id, result) in results) {
@@ -300,7 +301,11 @@ class Engine(private val now: () -> Long) {
       p.lastPoints = result.points
     }
     val counts = answers.values.mapNotNull { (it.value as? AnswerValue.Pick)?.choiceId }.groupingBy { it }.eachCount()
-    val ranking = if (r.style == Style.CLOSEST_WITHOUT_GOING_OVER) ScoringRules.closestRanking(q, results) else emptyList()
+    val ranking = when (r.style) {
+      Style.CLOSEST_WITHOUT_GOING_OVER -> ScoringRules.closestRanking(q, results)
+      Style.FASTEST_FINGER -> ScoringRules.fastestRanking(answers, results)
+      Style.MULTIPLE_CHOICE -> emptyList()
+    }
     outcome = Outcome(questionSeq, q, r.style, voided = false, results = results, ranking = ranking, choiceCounts = counts)
     // A "time's up" breather only when the clock ran out (spec §6.2).
     if (ranOut) enter(Phase.TIMES_UP, Timing.TIMES_UP) else enter(Phase.REVEAL, Timing.reveal(r.durations))

@@ -1,5 +1,6 @@
 import { Card } from '../components/Card';
 import { ChoiceGrid } from '../components/ChoiceGrid';
+import { FastestList } from '../components/FastestList';
 import { PhaseHeader } from '../components/PhaseHeader';
 import { RankedGuesses } from '../components/RankedGuesses';
 import { ResultCard } from '../components/ResultCard';
@@ -18,9 +19,12 @@ export function RevealView() {
   const isTv = store.mode.value === 'tv';
   const you = g.you;
   const closest = q.answerType === 'numeric';
+  const fastest = g.round?.style === 'fastestFinger';
+  // The TV shows a second column when there is a ranking to show.
+  const ranked = isTv && (closest || fastest);
   return (
     <GameScreen>
-      <div class={isTv && closest ? styles.board : styles.column}>
+      <div class={ranked ? styles.board : styles.column}>
         <Card fill={isTv}>
           <PhaseHeader round={g.round!.number} roundCount={g.round!.count} question={q.number} questionCount={g.round!.questionCount} />
           <p class={styles.question}>{q.text}</p>
@@ -43,6 +47,11 @@ export function RevealView() {
         {isTv && closest && (
           <Card title="Guesses" fill>
             <RankedGuesses entries={r.ranking} players={g.scores} limit={TV_LIMIT} />
+          </Card>
+        )}
+        {isTv && fastest && (
+          <Card title="Fastest fingers" fill>
+            <FastestList entries={r.ranking} players={g.scores} limit={TV_LIMIT} />
           </Card>
         )}
       </div>

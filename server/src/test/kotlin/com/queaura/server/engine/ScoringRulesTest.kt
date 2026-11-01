@@ -70,4 +70,36 @@ class ScoringRulesTest {
     val r = closest(1 to 50.0, 2 to 130.0, 3 to 99.0, 4 to 101.0)
     assertEquals(listOf(3, 1, 4, 2), ScoringRules.closestRanking(q, r))
   }
+
+  private val mc = Question(
+    "m", "Pick", AnswerType.MULTIPLE_CHOICE, correctChoiceId = "a",
+    choices = listOf(com.queaura.server.model.Choice("a", "Right"), com.queaura.server.model.Choice("b", "Wrong")),
+  )
+
+  /** Answers in arrival order: a LinkedHashMap, as the engine keeps them. */
+  private fun race(vararg picks: Pair<Int, String>) =
+    LinkedHashMap<Int, Answer>().apply { picks.forEach { (id, c) -> put(id, Answer(AnswerValue.Pick(c), 0)) } }
+
+  @Test
+  fun `fastest finger scores correct answers by arrival order`() {
+    val answers = race(3 to "a", 1 to "b", 2 to "a", 4 to "a")
+    val r = ScoringRules.fastestFinger(mc, listOf(1, 2, 3, 4, 5), answers, Scoring.ALL_OR_NOTHING)
+    assertEquals(100, r[3]!!.points)
+    assertEquals(90, r[2]!!.points)
+    assertEquals(80, r[4]!!.points)
+    assertEquals(0, r[1]!!.points)
+    assertEquals(false, r[5]!!.answered)
+    assertEquals(listOf(3, 2, 4, 1), ScoringRules.fastestRanking(answers, r))
+  }
+
+  @Test
+  fun `fastest finger never drops below the floor and gives nothing under scoring none`() {
+    val answers = race(*(1..15).map { it to "a" }.toTypedArray())
+    val r = ScoringRules.fastestFinger(mc, (1..15).toList(), answers, Scoring.TIME_WEIGHTED)
+    assertEquals(10, r[10]!!.points)
+    assertEquals(10, r[15]!!.points)
+    val none = ScoringRules.fastestFinger(mc, listOf(1), race(1 to "a"), Scoring.NONE)
+    assertTrue(none[1]!!.correct)
+    assertEquals(0, none[1]!!.points)
+  }
 }

@@ -37,6 +37,24 @@ describe('resolveGame', () => {
   });
 });
 
+describe('fastest finger', () => {
+  it('takes choice questions and number questions with generated choices', () => {
+    const format: GameFormat = { id: 'g', title: 'T', scoring: 'allOrNothing', rounds: [{ style: 'fastestFinger', slots: ['s-m-mars', 's-n-octopus'] }] };
+    expect(problemOf(format, bank)).toBeNull();
+    const octopus = resolveGame(format, bank).rounds[0].questions[1];
+    expect(octopus.answerType).toBe('multipleChoice');
+    expect(octopus.choices).toHaveLength(4);
+  });
+});
+
+describe('starter versions', () => {
+  it('a device that has version 1 gets only what is new in version 2', () => {
+    expect(starterGames(1).map((g) => g.id)).toEqual(['s-game-fastest']);
+    expect(starterBank(1)).toEqual([]);
+    expect(starterGames(0).length).toBeGreaterThan(starterGames(1).length);
+  });
+});
+
 describe('numericChoices', () => {
   it('spots year questions from the wording', () => {
     expect(isYearQuestion('In what year did the Titanic sink?', 1912)).toBe(true);

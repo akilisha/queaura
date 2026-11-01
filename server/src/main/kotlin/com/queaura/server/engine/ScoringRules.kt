@@ -79,6 +79,35 @@ object ScoringRules {
     }
   }
 
+  /** Fastest finger points: by arrival order among correct answers (spec §6.5). */
+  const val FASTEST_STEP = 10
+
+  /**
+   * Correct answers score by the order the server received them: 100, 90, 80... never below the
+   * floor. [answers] must iterate in arrival order. Time weighting does not apply: order is the
+   * weighting.
+   */
+  fun fastestFinger(
+    question: Question,
+    players: Collection<Int>,
+    answers: Map<Int, Answer>,
+    scoring: Scoring,
+  ): Map<Int, PlayerResult> {
+    val correctInOrder = answers.filter { (_, a) -> (a.value as? AnswerValue.Pick)?.choiceId == question.correctChoiceId }.keys.toList()
+    return players.associateWith { id ->
+      val answer = answers[id] ?: return@associateWith PlayerResult(answered = false, value = null, correct = false)
+      val place = correctInOrder.indexOf(id)
+      val points = if (place < 0 || scoring == Scoring.NONE) 0 else maxOf(FLOOR, FULL - place * FASTEST_STEP)
+      PlayerResult(answered = true, value = answer.value, correct = place >= 0, points = points)
+    }
+  }
+
+  /** Reveal order for fastest finger: correct answers in arrival order (the race), then the rest. */
+  fun fastestRanking(answers: Map<Int, Answer>, results: Map<Int, PlayerResult>): List<Int> {
+    val arrived = answers.keys.filter { it in results }
+    return arrived.filter { results[it]!!.correct } + arrived.filterNot { results[it]!!.correct }
+  }
+
   /** Reveal order for closest guesses: valid guesses nearest first, then busts least-over first. */
   fun closestRanking(question: Question, results: Map<Int, PlayerResult>): List<Int> {
     val target = question.correctNumber ?: return emptyList()

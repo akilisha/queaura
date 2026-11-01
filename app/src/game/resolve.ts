@@ -7,7 +7,7 @@ import type { BankQuestion, GameFormat } from '../data/types';
 /** Which answer types fit a style (spec §4 compatibility rule). */
 export function fits(style: Style, question: Pick<BankQuestion, 'answerType'>): boolean {
   if (style === 'closestWithoutGoingOver') return question.answerType === 'numeric';
-  return true; // multiple choice takes choice questions, and number questions with generated choices
+  return true; // choice styles take choice questions, and number questions with generated choices
 }
 
 /** Why a format cannot be played yet ("Round 2 has 3 empty slots"), or null if it can. */
@@ -41,7 +41,7 @@ export function resolveGame(format: GameFormat, bank: ReadonlyMap<string, BankQu
 }
 
 function toGameQuestion(q: BankQuestion, style: Style): GameQuestion {
-  if (style === 'multipleChoice' && q.answerType === 'numeric') {
+  if (style !== 'closestWithoutGoingOver' && q.answerType === 'numeric') {
     const { choices, correctChoiceId } = numericChoices(q.id, q.correctNumber!, isYearQuestion(q.text, q.correctNumber!));
     return { id: q.id, text: q.text, answerType: 'multipleChoice', choices, correctChoiceId, explanation: q.explanation };
   }

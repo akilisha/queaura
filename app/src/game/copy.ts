@@ -12,6 +12,10 @@ export const STYLES: Record<Style, { name: string; description: string }> = {
     name: 'Multiple choice',
     description: 'Players tap one of up to four answers before time runs out.',
   },
+  fastestFinger: {
+    name: 'Fastest finger',
+    description: 'Like multiple choice, but the first right answer scores most: 100, then 90, 80… whatever the scoring below.',
+  },
 };
 
 export const SCORINGS: Record<Scoring, { name: string; description: string }> = {

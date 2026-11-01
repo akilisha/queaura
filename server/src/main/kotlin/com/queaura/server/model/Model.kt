@@ -4,7 +4,7 @@ package com.queaura.server.model
 
 enum class AnswerType { NUMERIC, MULTIPLE_CHOICE }
 
-enum class Style { CLOSEST_WITHOUT_GOING_OVER, MULTIPLE_CHOICE }
+enum class Style { CLOSEST_WITHOUT_GOING_OVER, MULTIPLE_CHOICE, FASTEST_FINGER }
 
 enum class Scoring { NONE, ALL_OR_NOTHING, TIME_WEIGHTED }
 
@@ -51,7 +51,7 @@ data class Game(
             if (q.answerType != AnswerType.NUMERIC || q.correctNumber == null) {
               return "Round ${i + 1} needs number answers for \"${q.text}\""
             }
-          Style.MULTIPLE_CHOICE ->
+          Style.MULTIPLE_CHOICE, Style.FASTEST_FINGER ->
             if (q.choices.size < 2 || q.choices.none { it.id == q.correctChoiceId }) {
               return "Round ${i + 1} needs choices with a right answer for \"${q.text}\""
             }

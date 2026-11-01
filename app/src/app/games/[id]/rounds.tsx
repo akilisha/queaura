@@ -12,7 +12,7 @@ import { ANSWER_SECONDS, DEFAULT_SECONDS, MAX_QUESTIONS, READING_SECONDS, withDu
 import { color, font, text } from '../../../theme';
 import { useWizard } from '../../../wizard/draft';
 
-const STYLE_ORDER: Style[] = ['closestWithoutGoingOver', 'multipleChoice'];
+const STYLE_ORDER: Style[] = ['closestWithoutGoingOver', 'multipleChoice', 'fastestFinger'];
 
 /** Step 2: each round's style, number of questions and (optionally) timing. */
 export default function RoundsStep() {

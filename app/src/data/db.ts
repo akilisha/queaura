@@ -17,13 +17,17 @@ export function initDatabase(): void {
   seedStarter();
 }
 
-/** Adds or refreshes the built-in questions and games when the app ships new starter content. */
+/**
+ * Adds the starter content this device hasn't seen yet. Items already added are never rewritten
+ * or brought back, so a host's edits and deletions of built-ins stick.
+ */
 function seedStarter(): void {
   const row = db.getFirstSync<{ value: string }>('SELECT value FROM meta WHERE key = ?', 'starterVersion');
-  if (row && Number(row.value) >= STARTER_VERSION) return;
+  const seen = row ? Number(row.value) : 0;
+  if (seen >= STARTER_VERSION) return;
   db.withTransactionSync(() => {
-    for (const q of starterBank()) put('questions', q.id, q);
-    for (const g of starterGames()) put('games', g.id, g);
+    for (const q of starterBank(seen)) put('questions', q.id, q);
+    for (const g of starterGames(seen)) put('games', g.id, g);
     db.runSync('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)', 'starterVersion', String(STARTER_VERSION));
   });
 }

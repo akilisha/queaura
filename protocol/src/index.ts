@@ -4,7 +4,7 @@
  * Keep in step with Codec.kt.
  */
 
-export type Style = 'closestWithoutGoingOver' | 'multipleChoice';
+export type Style = 'closestWithoutGoingOver' | 'multipleChoice' | 'fastestFinger';
 export type Scoring = 'none' | 'allOrNothing' | 'timeWeighted';
 export type AnswerType = 'numeric' | 'multipleChoice';
 
@@ -103,7 +103,7 @@ export interface Reveal {
   correctChoiceId: string | null;
   explanation: string | null;
   choiceCounts: Record<string, number>;
-  /** Closest guesses in reveal order: valid nearest first, then busts. */
+  /** Reveal order: closest guesses (valid nearest first, then busts), or fastest finger (correct in arrival order, then the rest). */
   ranking: (Result & { playerId: number })[];
 }
 
