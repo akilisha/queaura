@@ -49,7 +49,7 @@ class GameService : Service() {
   /** Returns false if the server could not start, for example because a port is taken. */
   private fun startServer(): Boolean {
     val assets = AssetSource { path -> runCatching { this.assets.open("web/$path") }.getOrNull() }
-    val s = GameServer(HTTP_PORT, WS_PORT, assets, File(getExternalFilesDir(null) ?: filesDir, "logs"))
+    val s = GameServer(HTTP_PORT, WS_PORT, assets, File(dataDir(this), "logs"), questionnaireDir(this))
     try {
       s.start()
     } catch (e: Exception) {
@@ -129,6 +129,12 @@ class GameService : Service() {
     @Volatile
     var lastError: String? = null
       private set
+
+    /** App storage that survives restarts; also reachable over USB for diagnosis. */
+    fun dataDir(context: Context): File = context.getExternalFilesDir(null) ?: context.filesDir
+
+    /** Questionnaire answers saved as they arrive; the module reads and clears these. */
+    fun questionnaireDir(context: Context): File = File(dataDir(context), "questionnaires")
 
     fun start(context: Context) {
       val intent = Intent(context, GameService::class.java)

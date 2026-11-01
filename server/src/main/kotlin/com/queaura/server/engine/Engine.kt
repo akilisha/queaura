@@ -1,14 +1,16 @@
 package com.queaura.server.engine
 
 import com.queaura.server.model.AnswerValue
+import com.queaura.server.model.AnswerType
 import com.queaura.server.model.Game
+import com.queaura.server.model.Progression
 import com.queaura.server.model.Question
 import com.queaura.server.model.Round
 import com.queaura.server.model.Style
 import java.util.UUID
 
 /** Phases of spec §6.2. FINAL_SCORES also carries the play-another window. */
-enum class Phase { LOBBY, GAME_STARTING, ROUND_INTRO, QUESTION, TIMES_UP, REVEAL, ROUND_SCORES, ROUND_BREAK, FINAL_SCORES, ENDED }
+enum class Phase { LOBBY, GAME_STARTING, ROUND_INTRO, QUESTION, TIMES_UP, REVEAL, ROUND_SCORES, ROUND_BREAK, QUESTIONNAIRE, FINAL_SCORES, ENDED }
 
 /** Game events that sound can attach to later (spec §10). */
 enum class Cue { QUESTION_SHOWN, COUNTDOWN_STARTED, LAST_SECONDS, REVEAL, ROUND_END }
@@ -80,6 +82,10 @@ class Engine(private val now: () -> Long) {
   private val answers = LinkedHashMap<Int, Answer>()
   private val cues = ArrayList<Cue>()
 
+  // Questionnaire (spec §6.4): where each player is, and their latest answer to each question.
+  private val positions = HashMap<Int, Int>()
+  private val responses = HashMap<Int, LinkedHashMap<Int, AnswerValue>>()
+
   val players: Collection<Player> get() = roster.values
   val paused: Boolean get() = pausedAt != null
   val round: Round? get() = game?.rounds?.getOrNull(roundIndex)
@@ -91,6 +97,13 @@ class Engine(private val now: () -> Long) {
   fun playerByToken(token: String): Player? = byToken[token]
   fun isKicked(token: String) = token in kickedTokens
   fun answerOf(id: Int): Answer? = if (phase == Phase.QUESTION || phase == Phase.TIMES_UP) answers[id] else null
+
+  val isQuestionnaire: Boolean get() = game?.progression == Progression.MANUAL
+  val questionnaireLength: Int get() = if (isQuestionnaire) round!!.questions.size else 0
+  /** The question index a player is on; equal to the length once they are done. */
+  fun positionOf(id: Int): Int = positions[id] ?: 0
+  fun responseOf(id: Int, index: Int): AnswerValue? = responses[id]?.get(index)
+  fun finishedCount(): Int = roster.keys.count { positionOf(it) >= questionnaireLength }
 
   /** Milliseconds left in the current phase (frozen while paused), or null for untimed phases. */
   fun remainingMs(): Long? = phaseDuration?.let { (it - elapsed()).coerceAtLeast(0) }
@@ -126,6 +139,7 @@ class Engine(private val now: () -> Long) {
     byToken.remove(player.token)
     kickedTokens.add(player.token)
     answers.remove(id)
+    positions.remove(id)
     eligible = eligible - id
     changed()
     closeEarlyIfAllAnswered()
@@ -147,7 +161,15 @@ class Engine(private val now: () -> Long) {
       p.roundPoints = 0
       p.lastPoints = null
     }
-    enter(Phase.GAME_STARTING, Timing.GET_READY)
+    if (newGame.progression == Progression.MANUAL) {
+      // No timers, no flair: straight in, everyone from the first question.
+      positions.clear()
+      responses.clear()
+      roundIndex = 0
+      enter(Phase.QUESTIONNAIRE, null)
+    } else {
+      enter(Phase.GAME_STARTING, Timing.GET_READY)
+    }
     return null
   }
 
@@ -176,7 +198,8 @@ class Engine(private val now: () -> Long) {
 
   fun stop() {
     if (phase == Phase.LOBBY || phase == Phase.FINAL_SCORES || phase == Phase.ENDED) return
-    stopped = true
+    // The host ending a questionnaire is its normal end, not an interruption.
+    stopped = phase != Phase.QUESTIONNAIRE
     enter(Phase.FINAL_SCORES, Timing.PLAY_ANOTHER_WINDOW)
   }
 
@@ -205,12 +228,44 @@ class Engine(private val now: () -> Long) {
     val valid = when (round!!.style) {
       Style.CLOSEST_WITHOUT_GOING_OVER -> value is AnswerValue.Number && value.value.isFinite()
       Style.MULTIPLE_CHOICE, Style.FASTEST_FINGER -> value is AnswerValue.Pick && q.choices.any { it.id == value.choiceId }
+      // Questionnaire answers go through questionnaireAnswer(); there are no timed questions.
+      Style.QUESTIONNAIRE -> false
     }
     if (!valid) return "That answer does not fit this question"
     answers[playerId] = Answer(value, elapsed())
     changed()
     closeEarlyIfAllAnswered()
     return null
+  }
+
+  // --- Questionnaire -----------------------------------------------------------------------
+
+  /**
+   * Saves a player's answer to question [index] (replacing an earlier one) and moves them to the
+   * next question. Returns why it was refused, or null.
+   */
+  fun questionnaireAnswer(playerId: Int, index: Int, value: AnswerValue): String? {
+    if (phase != Phase.QUESTIONNAIRE) return "The questionnaire has ended"
+    if (playerId !in roster) return "You are not in this game"
+    val q = round!!.questions.getOrNull(index) ?: return "That question doesn't exist"
+    val valid = when (q.answerType) {
+      AnswerType.FREE_TEXT -> value is AnswerValue.Text && value.value.isNotBlank() && value.value.length <= MAX_TEXT
+      AnswerType.NUMERIC -> value is AnswerValue.Number && value.value.isFinite()
+      AnswerType.MULTIPLE_CHOICE -> value is AnswerValue.Pick && q.choices.any { it.id == value.choiceId }
+    }
+    if (!valid) return "That answer does not fit this question"
+    val stored = if (value is AnswerValue.Text) AnswerValue.Text(value.value.trim()) else value
+    responses.getOrPut(playerId) { LinkedHashMap() }[index] = stored
+    positions[playerId] = index + 1
+    changed()
+    return null
+  }
+
+  /** Back, or to review: a player can revisit any question until the host ends it. */
+  fun questionnaireGo(playerId: Int, index: Int) {
+    if (phase != Phase.QUESTIONNAIRE || playerId !in roster) return
+    positions[playerId] = index.coerceIn(0, questionnaireLength)
+    changed()
   }
 
   // --- Time ---------------------------------------------------------------------------------
@@ -259,7 +314,7 @@ class Engine(private val now: () -> Long) {
         else enter(Phase.FINAL_SCORES, Timing.PLAY_ANOTHER_WINDOW)
       Phase.ROUND_BREAK -> startRound(roundIndex + 1)
       Phase.FINAL_SCORES -> enter(Phase.ENDED, null)
-      Phase.LOBBY, Phase.ENDED -> Unit
+      Phase.LOBBY, Phase.QUESTIONNAIRE, Phase.ENDED -> Unit
     }
   }
 
@@ -293,6 +348,7 @@ class Engine(private val now: () -> Long) {
       Style.MULTIPLE_CHOICE -> ScoringRules.multipleChoice(q, ids, answers, scoring, readingMs, answerMs)
       Style.FASTEST_FINGER -> ScoringRules.fastestFinger(q, ids, answers, scoring)
       Style.CLOSEST_WITHOUT_GOING_OVER -> ScoringRules.closest(q, ids, answers, scoring, readingMs, answerMs)
+      Style.QUESTIONNAIRE -> error("A questionnaire has no timed questions to close")
     }
     for ((id, result) in results) {
       val p = roster[id] ?: continue
@@ -304,7 +360,7 @@ class Engine(private val now: () -> Long) {
     val ranking = when (r.style) {
       Style.CLOSEST_WITHOUT_GOING_OVER -> ScoringRules.closestRanking(q, results)
       Style.FASTEST_FINGER -> ScoringRules.fastestRanking(answers, results)
-      Style.MULTIPLE_CHOICE -> emptyList()
+      Style.MULTIPLE_CHOICE, Style.QUESTIONNAIRE -> emptyList()
     }
     outcome = Outcome(questionSeq, q, r.style, voided = false, results = results, ranking = ranking, choiceCounts = counts)
     // A "time's up" breather only when the clock ran out (spec §6.2).
@@ -345,5 +401,10 @@ class Engine(private val now: () -> Long) {
 
   private fun changed() {
     version++
+  }
+
+  companion object {
+    /** Longest free-text answer kept (spec §6.4). */
+    const val MAX_TEXT = 500
   }
 }

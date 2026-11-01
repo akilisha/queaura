@@ -22,6 +22,8 @@ class GameServer(
   val wsPort: Int,
   assets: AssetSource,
   logDir: File,
+  /** Where questionnaire answers are saved as they arrive (spec §6.4). */
+  private val questionnaireDir: File,
 ) : WsServer.Handler {
   /** The host app proves itself with this key; players and the TV never see it. */
   val hostKey: String = ByteArray(16).also { SecureRandom().nextBytes(it) }.joinToString("") { "%02x".format(it) }
@@ -44,6 +46,7 @@ class GameServer(
   private var sentVersion = -1L
   private var flushScheduled = false
   private var wake: ScheduledFuture<*>? = null
+  private var journal: QuestionnaireJournal? = null
 
   @Volatile
   var summary = Summary(Phase.LOBBY, 0, 0)
@@ -64,6 +67,8 @@ class GameServer(
 
   fun stop() {
     log.write("server_stop")
+    // A questionnaire still running stays unfinished on disk, for the host app's recovery prompt.
+    journal?.close()
     runCatching { http.stop() }
     runCatching { ws.stop(1000) }
     loop.shutdownNow()
@@ -91,6 +96,8 @@ class GameServer(
       "hello" -> hello(client, msg)
       "join" -> join(client, msg)
       "answer" -> answer(client, msg)
+      "qAnswer" -> questionnaireAnswer(client, msg)
+      "qGo" -> client.playerId?.let { engine.questionnaireGo(it, msg.optInt("index")) }
       "visibility" -> visibility(client, msg.optBoolean("hidden"))
       "ping" -> send(client, JSONObject().put("t", "pong").put("c", msg.opt("c") ?: 0))
       "host" -> if (client.role == Role.HOST) hostCommand(client, msg)
@@ -164,6 +171,19 @@ class GameServer(
     if (refused != null) send(client, JSONObject().put("t", "error").put("message", refused))
   }
 
+  private fun questionnaireAnswer(client: Client, msg: JSONObject) {
+    val id = client.playerId ?: return
+    val index = msg.optInt("index", -1)
+    val value = Codec.answerValue(msg)
+    val refused = if (value == null) "That answer does not fit this question" else engine.questionnaireAnswer(id, index, value)
+    if (refused != null) {
+      send(client, JSONObject().put("t", "error").put("message", refused))
+      return
+    }
+    // Saved to the device before anything else happens (spec §6.4).
+    journal?.answer(engine.player(id)!!, engine.round!!.questions[index].id, value!!)
+  }
+
   private fun visibility(client: Client, hidden: Boolean) {
     client.awake = !hidden
     client.playerId?.let { engine.setPresence(it, connected = true, awake = client.awake) }
@@ -175,6 +195,7 @@ class GameServer(
         val problem = runCatching { engine.start(Codec.game(msg.getJSONObject("game"))) }
           .getOrElse { "That game could not be read (${it.message})" }
         if (problem != null) send(client, JSONObject().put("t", "error").put("message", problem))
+        else if (engine.phase == Phase.QUESTIONNAIRE) journal = QuestionnaireJournal(questionnaireDir, engine.game!!)
       }
       "pause" -> engine.pause()
       "resume" -> engine.resume()
@@ -206,6 +227,11 @@ class GameServer(
 
   private fun flush() {
     flushScheduled = false
+    // The host ended the questionnaire: mark its saved answers complete.
+    if (journal != null && engine.phase != Phase.QUESTIONNAIRE) {
+      journal?.end()
+      journal = null
+    }
     val cues = engine.drainCues()
     if (engine.version != sentVersion) {
       sentVersion = engine.version

@@ -9,6 +9,7 @@ import com.queaura.server.model.AnswerValue
 import com.queaura.server.model.Choice
 import com.queaura.server.model.Durations
 import com.queaura.server.model.Game
+import com.queaura.server.model.Progression
 import com.queaura.server.model.Question
 import com.queaura.server.model.Round
 import com.queaura.server.model.Scoring
@@ -30,6 +31,7 @@ object Codec {
     scoring = enumOf<Scoring>(json.getString("scoring")),
     rounds = json.getJSONArray("rounds").objects().map(::round),
     closeEarly = json.optBoolean("closeEarly", false),
+    progression = json.optString("progression").ifEmpty { null }?.let { enumOf<Progression>(it) } ?: Progression.AUTO,
   )
 
   private fun round(json: JSONObject) = Round(
@@ -50,10 +52,11 @@ object Codec {
     explanation = json.optString("explanation").ifEmpty { null },
   )
 
-  /** `{"number": 42}` or `{"choice": "b"}`. */
+  /** `{"number": 42}`, `{"choice": "b"}` or `{"text": "..."}`. */
   fun answerValue(json: JSONObject): AnswerValue? = when {
     json.has("number") -> json.optDouble("number").takeIf { it.isFinite() }?.let { AnswerValue.Number(it) }
     json.has("choice") -> AnswerValue.Pick(json.getString("choice"))
+    json.has("text") -> AnswerValue.Text(json.getString("text"))
     else -> null
   }
 
@@ -84,6 +87,13 @@ object Codec {
         "round",
         JSONObject().put("number", engine.roundIndex + 1).put("count", game.rounds.size)
           .put("style", camel(round.style.name)).put("questionCount", round.questions.size),
+      )
+    }
+    if (engine.isQuestionnaire) {
+      json.put("progression", "manual")
+      json.put(
+        "questionnaire",
+        JSONObject().put("count", engine.questionnaireLength).put("finished", engine.finishedCount()),
       )
     }
     if (engine.phase in QUESTION_PHASES) {
@@ -144,6 +154,15 @@ object Codec {
     json.put("waitingForNextQuestion", engine.phase in QUESTION_PHASES && p.id !in engine.eligibleIds)
     engine.answerOf(p.id)?.let { json.put("answer", valueJson(it.value)) }
     if (engine.phase == Phase.REVEAL) engine.outcome?.results?.get(p.id)?.let { json.put("result", resultJson(it)) }
+    if (engine.phase == Phase.QUESTIONNAIRE) {
+      val position = engine.positionOf(p.id)
+      val mine = JSONObject().put("position", position)
+      engine.round!!.questions.getOrNull(position)?.let { q ->
+        mine.put("question", questionnaireQuestion(q, position))
+        engine.responseOf(p.id, position)?.let { mine.put("answer", valueJson(it)) }
+      }
+      json.put("questionnaire", mine)
+    }
     return json
   }
 
@@ -155,8 +174,17 @@ object Codec {
       json.put("explanation", q.explanation ?: JSONObject.NULL)
     }
     json.put("answeredIds", JSONArray(engine.answeredIds.toList()))
+    if (engine.phase == Phase.QUESTIONNAIRE) {
+      json.put("progress", JSONObject(engine.players.associate { it.id.toString() to engine.positionOf(it.id) } as Map<*, *>))
+    }
     return json
   }
+
+  private fun questionnaireQuestion(q: Question, index: Int) = JSONObject()
+    .put("index", index)
+    .put("text", q.text)
+    .put("answerType", camel(q.answerType.name))
+    .put("choices", JSONArray(q.choices.map { JSONObject().put("id", it.id).put("text", it.text) }))
 
   private fun playerJson(p: Player) = JSONObject()
     .put("id", p.id).put("name", p.name).put("emoji", p.emoji)
@@ -170,6 +198,7 @@ object Codec {
   private fun valueJson(v: AnswerValue) = when (v) {
     is AnswerValue.Number -> JSONObject().put("number", v.value)
     is AnswerValue.Pick -> JSONObject().put("choice", v.choiceId)
+    is AnswerValue.Text -> JSONObject().put("text", v.value)
   }
 
   private val QUESTION_PHASES = setOf(Phase.QUESTION, Phase.TIMES_UP, Phase.REVEAL)
