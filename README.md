@@ -32,6 +32,18 @@ cd app && npm install && npx expo run:android --device
 Choose the phone (not an emulator) at the prompt. If Expo can't reach its servers, set
 `EXPO_OFFLINE=1`.
 
+If the app on the phone shows "Host unreachable" or `NoRouteToHostException` at start, Metro
+handed it a network address the phone cannot reach (on Windows often a virtual adapter's, from WSL,
+Hyper-V, Docker or a VPN). Serve over the USB cable instead, then press `a` in the Metro window:
+
+```bash
+cd app && npx expo start --localhost
+```
+
+```bash
+adb reverse tcp:8081 tcp:8081
+```
+
 `app/android/` is generated from `app/app.json` the first time and then reused. After a change to
 `app.json` (the app's name, icon, ID or plugins), regenerate it, or the old values stay:
 
