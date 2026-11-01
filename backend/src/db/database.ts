@@ -26,9 +26,30 @@ export interface LedgerTable {
   created_at: ColumnType<Date, never, never>;
 }
 
+export type GenerationOutcome = 'ok' | 'declined' | 'refused' | 'failed' | 'unusable';
+
+/** One request to the AI provider: the measured cost data prices are set from (spec §8). */
+export interface GenerationTable {
+  id: Generated<string>;
+  account_id: string;
+  created_at: ColumnType<Date, never, never>;
+  provider: string;
+  model: string;
+  requested: number;
+  delivered: number;
+  /** Returned but failing a check, by reason, as JSON ({"word list": 1}). */
+  rejected: ColumnType<Record<string, number>, string, string>;
+  input_tokens: number;
+  output_tokens: number;
+  cost_micro_usd: number;
+  duration_ms: number;
+  outcome: GenerationOutcome;
+}
+
 export interface Database {
   accounts: AccountTable;
   ledger: LedgerTable;
+  generations: GenerationTable;
 }
 
 export function createDb(url: string): Kysely<Database> {

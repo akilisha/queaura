@@ -13,9 +13,23 @@ over Postgres for the records, zod to check what comes in.
 | `src/credits/ledger.ts` | Balances: every change is a ledger entry; charges lock the account |
 | `src/db/migrations.ts` | Schema changes, applied at start; add new ones, never edit old ones |
 | `src/config.ts` | Settings from the environment, checked at start (see `.env.example`) |
+| `src/generation/` | Writing questions: the prompt, the provider adapters, and the checks on what comes back |
+| `src/moderation/wordFilter.ts` | The word list (spec §9), a port of the server's; same lists (`moderation/`), same test cases |
 
-Stored here: accounts (by Clerk user id), their ledger of AI games, and, later, purchases and
-per-request cost records. Never stored here: questions, games, players or answers (spec §4).
+## API
+
+| Route | What |
+|---|---|
+| `GET /health` | The service and its database are up |
+| `GET /v1/balance` | The signed-in host's AI games and questions left in the open one |
+| `POST /v1/generate` | `{topic, difficulty, answerType, count, avoid}` → checked questions in the app's shape, and the new balance |
+
+Generation pays before calling the model and gives back whatever isn't delivered, so a failure
+or a rejected question costs the host nothing. Every call is recorded in `generations` with its
+model, tokens and cost: the data prices are set from.
+
+Stored here: accounts (by Clerk user id), their ledger of AI games, per-request cost records,
+and, later, purchases. Never stored here: questions, games, players or answers (spec §4).
 
 ## Run locally
 

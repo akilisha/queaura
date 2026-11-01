@@ -30,6 +30,30 @@ const migrations: Record<string, Migration> = {
       await db.schema.dropTable('accounts').execute();
     },
   },
+  '0002_generations': {
+    async up(db: Kysely<any>) {
+      await db.schema
+        .createTable('generations')
+        .addColumn('id', 'bigint', (c) => c.primaryKey().generatedAlwaysAsIdentity())
+        .addColumn('account_id', 'text', (c) => c.notNull().references('accounts.id'))
+        .addColumn('created_at', 'timestamptz', (c) => c.notNull().defaultTo(sql`now()`))
+        .addColumn('provider', 'text', (c) => c.notNull())
+        .addColumn('model', 'text', (c) => c.notNull())
+        .addColumn('requested', 'integer', (c) => c.notNull())
+        .addColumn('delivered', 'integer', (c) => c.notNull())
+        .addColumn('rejected', 'jsonb', (c) => c.notNull())
+        .addColumn('input_tokens', 'integer', (c) => c.notNull())
+        .addColumn('output_tokens', 'integer', (c) => c.notNull())
+        .addColumn('cost_micro_usd', 'bigint', (c) => c.notNull())
+        .addColumn('duration_ms', 'integer', (c) => c.notNull())
+        .addColumn('outcome', 'text', (c) => c.notNull())
+        .execute();
+      await db.schema.createIndex('generations_account').on('generations').columns(['account_id', 'created_at']).execute();
+    },
+    async down(db: Kysely<any>) {
+      await db.schema.dropTable('generations').execute();
+    },
+  },
 };
 
 export async function migrateToLatest(db: Kysely<any>): Promise<void> {

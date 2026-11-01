@@ -10,6 +10,19 @@ const schema = z.object({
   FREE_AI_GAMES: z.coerce.number().int().min(0).default(2),
   /** Generated questions in one AI game, regenerations included (spec §8: starting value 50). */
   QUESTIONS_PER_AI_GAME: z.coerce.number().int().min(1).default(50),
+
+  /** Which provider and model write questions (spec §8): configuration, never an app change. */
+  AI_PROVIDER: z.enum(['anthropic', 'openai', 'deepseek', 'moonshot']).default('anthropic'),
+  AI_MODEL: z.string().min(1).default('claude-sonnet-5-5'),
+  /** Claude only: how hard the model thinks. Higher is slower and costs more. */
+  AI_EFFORT: z.enum(['low', 'medium', 'high']).default('medium'),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  DEEPSEEK_API_KEY: z.string().optional(),
+  MOONSHOT_API_KEY: z.string().optional(),
+  /** The active model's list prices in US dollars per million tokens, for the cost records. */
+  AI_PRICE_INPUT: z.coerce.number().min(0).default(2),
+  AI_PRICE_OUTPUT: z.coerce.number().min(0).default(10),
 });
 
 export type Config = z.infer<typeof schema>;

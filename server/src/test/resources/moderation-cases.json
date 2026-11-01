@@ -1,0 +1,11 @@
+{
+  "_about": "Shared by the Kotlin word filter (server) and its TypeScript port (backend); both must agree.",
+  "blocked": ["fuck you", "What the SHIT", "Sh1t happens", "a55hole", "fuuuuck", "f.u.c.k", "F U C K", "fuckface", "big tits", "Big   Tits!", "Shït", "🖕"],
+  "clean": [
+    "Who wrote Moby Dick?", "Scunthorpe United", "Cassandra", "Which bird is a blue tit?", "Ford Escort",
+    "Super Bowl XXX", "Which Bond film is Octopussy?", "Apollo 11", "Push it", "Uranus", "The Girl on the Train",
+    "shiitake", "Hitchcock", "a cocktail", "class assessment", "How many chromosomes? XX or XY", "Rio Negro",
+    "What is 3 + 4?", "Skeet shooting", "Alan Cumming", "Barenaked Ladies", "Sexual reproduction in plants"
+  ],
+  "found": { "You a55hole": "asshole" }
+}
