@@ -25,9 +25,9 @@ If someone installs the app and can't figure out how to create or run a game, th
 | Embedded game server | HTTP + WebSocket server inside the host app; authoritative game state | Host device |
 | Player client | Web page served by the host device; joined by QR code; no install | Players' phone browsers |
 | TV display | Same web client in a read-only display mode, no input controls | Samsung / LG smart TV browser |
-| Cloud backend | AI question generation, moderation, metering, subscriptions | Cloud (Node.js; DigitalOcean acceptable) |
+| Cloud backend | AI question generation, moderation, metering, AI game balances and purchases | Cloud (Node.js; DigitalOcean acceptable) |
 
-Gameplay is LAN-only. The cloud backend is involved only for AI generation and subscription; a game with manual questions never touches it.
+Gameplay is LAN-only. The cloud backend is involved only for AI generation and buying AI games; a game with manual questions never touches it.
 
 ### 2.1 Stack guidance
 
@@ -164,7 +164,7 @@ The wizard steps through: title and kind (**quiz** or **questionnaire**) → num
 ### 5.3 Question creation
 - A standalone activity, independent of any game.
 - Manual entry: text, answer type, answer (and choices), optional explanation. A free-text question has no answer or explanation and fits questionnaires only. Number and choice questions ask "Is there a right answer?"; with no, they have no answer or explanation and fit questionnaires only. Writing a new question from a questionnaire's slot starts on no.
-- AI generation (signed-in, subscribed users; see §8): pick category, difficulty, answer type, and count → questions go into the bank. Alternatively, inside a game: "fill the empty slots in this round."
+- AI generation (signed-in users with AI games available; see §8): pick category, difficulty, answer type, and count → questions go into the bank. Alternatively, inside a game: "fill the empty slots in this round."
 - All questions pass moderation before entering the bank (§9).
 
 ### 5.4 Lobby
@@ -281,9 +281,14 @@ Waiting/lobby, question with input, "answer locked in," reveal (own result: corr
 
 - **Not required to play.** Signing in happens only when a host chooses AI generation.
 - **Identity:** Clerk.
-- **Billing:** a subscription, with a **free allowance of generations** for new users so they can see the value before paying. The allowance is **server-side configuration**, expressed in generations (not tokens), because model costs fluctuate and the provider may change. Users never see tokens. The platform absorbs the spread.
-- **Payment provider:** OPEN (Stripe was used previously).
-- **Architecture:** host app → backend (authenticated with the Clerk session) → the backend checks the subscription or allowance, meters usage per user, calls the model, moderates the output, and returns structured questions. The host app never calls the AI provider directly.
+- **Billing unit: the AI game.** One AI game is a block of generated questions, regenerations included (starting value 50, enough to fill a typical game with room to regenerate, so the worst case costs about twice a typical game). Filling a game's empty slots and generating into the bank both draw from it; a started block is used up before the next one starts. Hosts see "AI games" because that is how they think about it. Most hosts want AI for one night, not every month, so they pay for what they use and a light user never pays for a heavy one. Users never see tokens; the platform absorbs the spread.
+  - **Packs of AI games, prepaid, never expiring** (for example 1, 5 and 10). This is the main way to pay.
+  - **An optional monthly subscription for regulars** (weekly quiz venues), with a fair-use limit of AI games per month.
+  - **A free allowance** of AI games for new users so they see the value before paying (starting value 1 to 2).
+  - Pack sizes, prices, the subscription's limit, the questions per AI game and the free allowance are all **server-side configuration**, never an app update. They are set from measured cost data (tokens, regenerations and model per generation, logged from the first test users), aiming at a 70 to 80% gross margin after the store's cut. Model choice dominates the cost (roughly 40x between the cheapest and the most capable tier), so models are compared on factual accuracy of generated questions before prices are set.
+  - The balance of AI games lives on our backend, tied to the host's account (Clerk), not to the store, so another store or a web checkout can be added later without changing anything else.
+- **Payment provider: Google Play Billing** (DECIDED). Credits are digital goods used in a Play app, so Play Billing is required in most countries; it is one tap for the host, and Google is the merchant of record (it collects and remits VAT and sales tax, and handles refunds and fraud). Fee: 15% on the first $1M a year. Stripe was considered and set aside for now: allowed only in Google's billing-choice regions (US, UK, EEA), Google still charges a service fee on external purchases, Stripe adds about 2.9% + 30¢ per payment (heavy on small packs), we would be the merchant of record for tax and chargebacks, and a web checkout loses the one-tap purchase. Revisit with real numbers if a web or iOS version arrives. Purchases are verified by the backend with Google before credits are added.
+- **Architecture:** host app → backend (authenticated with the Clerk session) → the backend checks the host's AI games (allowance, packs or subscription), meters usage per user, calls the model, moderates the output, and returns structured questions. The host app never calls the AI provider directly.
 - **Provider credentials:** a direct provider API key kept in a secrets manager on the backend and rotated, with per-user spending ceilings in our metering. Workload identity federation (for example Claude through Bedrock or Vertex) only becomes worthwhile if the backend moves to AWS or GCP; DigitalOcean doesn't offer the identity tokens it needs.
 - **Provider abstraction:** model and provider behind an interface, so swapping them changes only config and the spread calculation. It must be easy to move between providers; starting set: **Claude, ChatGPT, Kimi, DeepSeek**. Two adapters cover them: one for Anthropic's Messages API (Claude), and one for the OpenAI-compatible Chat Completions format, configured by base URL, model name and key (ChatGPT, DeepSeek and Kimi all offer it, as do many others). Adding a provider that speaks either format is configuration only; a provider with its own format needs one new adapter. The active provider and model are backend configuration, never a client change.
 - **Output contract:** strict JSON per question matching the Question model (text, answerType, correctAnswer, choices when multiple choice, explanation, category, difficulty). Validate and reject malformed output; never trust it blindly.
@@ -348,7 +353,7 @@ Embedded server (production-quality), session/lobby, join flow, player and TV cl
 Fastest finger, questionnaire mode with save-as-tapped, the save/discard prompt, crash recovery, CSV export through the share sheet, the on-device moderation tier, tablet layout polish, battery-optimization walkthrough, connection-trouble helper and hotspot fallback.
 
 ### Phase 3 — AI
-Backend: Clerk auth, subscription and free allowance, metering, provider abstraction, generation into the bank and slot-filling, model-based moderation.
+Backend: Clerk auth, AI games (free allowance, packs through Google Play Billing, optional subscription), metering, provider abstraction, generation into the bank and slot-filling, model-based moderation.
 
 → **Usability test with the remaining 2 testers.**
 
@@ -359,7 +364,7 @@ Backend: Clerk auth, subscription and free allowance, metering, provider abstrac
 1. ~~HTTPS: Path A vs Path B.~~ Decided in Phase 0: plain HTTP, screens may sleep, no penalty for sleeping (§3.4).
 2. ~~Hotspot fallback.~~ Decided in Phase 0: LocalOnlyHotspot (§3.3).
 3. ~~Embedded server implementation.~~ Decided in Phase 0: the native Kotlin module (NanoHTTPD plus Java-WebSocket in a foreground service). The spike showed no instability, so embedded Node.js was not needed (§2.1).
-4. Payment provider for subscriptions.
-5. Size of the free AI allowance (configurable; set from real cost data).
+4. ~~Payment provider.~~ Decided: Google Play Billing, with AI games as the unit, sold mainly in packs (§8).
+5. Prices, pack sizes, the subscription's limit and the size of the free allowance: configurable, set from measured cost data (§8).
 6. Default durations per style: starting values set (§6.3); tune in usability tests.
 7. ~~Closest-without-going-over tie and exact-answer rules.~~ Decided for Phase 1: tied winners each earn full points, exact answers earn a 50-point bonus (§6.5); tune in testing.
