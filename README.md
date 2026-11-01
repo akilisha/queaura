@@ -32,6 +32,13 @@ cd app && npm install && npx expo run:android --device
 Choose the phone (not an emulator) at the prompt. If Expo can't reach its servers, set
 `EXPO_OFFLINE=1`.
 
+`app/android/` is generated from `app/app.json` the first time and then reused. After a change to
+`app.json` (the app's name, icon, ID or plugins), regenerate it, or the old values stay:
+
+```bash
+cd app && npx expo prebuild --platform android --clean
+```
+
 ## Installable test build (no laptop needed)
 
 ```bash
