@@ -1,6 +1,6 @@
 # Queaura — Design Spec
 
-Name: **Queaura** ("que" for question, "aura" as in cool; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 complete; Phase 1 built and awaiting its usability test; Phase 2 in progress.
+Name: **Queaura** ("que" for question, "aura" as in cool; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 complete; Phase 1 built and tested; Phase 2 built and awaiting device testing.
 
 ---
 
