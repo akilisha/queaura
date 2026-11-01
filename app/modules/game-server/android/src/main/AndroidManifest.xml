@@ -9,7 +9,10 @@
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-  <application>
+  <!-- The host app talks to its own game server over ws://127.0.0.1, and players' pages use plain
+       HTTP by design (spec §3.4). Release builds block unencrypted traffic unless this is set;
+       development builds set it anyway, which is why only a release build would break. -->
+  <application android:usesCleartextTraffic="true">
     <service
       android:name="com.queaura.gameserver.GameService"
       android:exported="false"

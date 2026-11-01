@@ -32,6 +32,15 @@ cd app && npm install && npx expo run:android --device
 Choose the phone (not an emulator) at the prompt. If Expo can't reach its servers, set
 `EXPO_OFFLINE=1`.
 
+## Installable test build (no laptop needed)
+
+```bash
+cd app && npx expo run:android --variant release --device
+```
+
+The APK lands in `app/android/app/build/outputs/apk/release/`. Running a usability test:
+[docs/USABILITY_TEST.md](docs/USABILITY_TEST.md).
+
 ## Tests
 
 ```bash
