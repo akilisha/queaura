@@ -21,6 +21,7 @@ over Postgres for the records, zod to check what comes in.
 | Route | What |
 |---|---|
 | `GET /health` | The service and its database are up |
+| (all `/v1/` routes) | Need `Authorization: Bearer <Clerk session token>`; checked with Clerk's JWT public key, no network call |
 | `GET /v1/balance` | The signed-in host's AI games and questions left in the open one |
 | `POST /v1/generate` | `{topic, difficulty, answerType, count, avoid}` → checked questions in the app's shape, and the new balance |
 

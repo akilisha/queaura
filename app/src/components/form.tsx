@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions, type TextInputProps } from 'react-native';
 import { color, font, glow, opacity, radius, size, space, text } from '../theme';
 
 // Form controls shared by the question editor and the game wizard.
@@ -13,6 +13,8 @@ export function Field({
   multiline,
   keyboardType,
   autoFocus,
+  autoCapitalize,
+  autoComplete,
 }: {
   label: string;
   value: string;
@@ -23,6 +25,8 @@ export function Field({
   multiline?: boolean;
   keyboardType?: KeyboardTypeOptions;
   autoFocus?: boolean;
+  autoCapitalize?: TextInputProps['autoCapitalize'];
+  autoComplete?: TextInputProps['autoComplete'];
 }) {
   return (
     <View style={styles.field}>
@@ -37,6 +41,8 @@ export function Field({
         multiline={multiline}
         keyboardType={keyboardType}
         autoFocus={autoFocus}
+        autoCapitalize={autoCapitalize}
+        autoComplete={autoComplete}
         accessibilityLabel={label}
       />
       {hint && <Text style={styles.hint}>{hint}</Text>}

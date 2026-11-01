@@ -104,4 +104,14 @@ describe.skipIf(!url)('HTTP API (needs TEST_DATABASE_URL)', () => {
     expect((await generate(who, { ...ask, count: 99 })).status).toBe(400);
     expect((await generate(who, { topic: 'Space' })).status).toBe(400);
   });
+
+  it('limits how often one host can generate, with a plain message', async () => {
+    const who = newId();
+    provider = fakeProvider({ declined: 'No', questions: [] });
+    for (let i = 0; i < 6; i++) expect((await generate(who, ask)).status).toBe(422);
+    const res = await generate(who, ask);
+    expect(res.status).toBe(429);
+    expect((await res.json()).error).toContain('wait a minute');
+    expect((await generate(newId(), ask)).status).toBe(422); // other hosts are unaffected
+  });
 });

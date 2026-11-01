@@ -34,6 +34,20 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
     return id;
   }
 
+  /** A guard against runaway use (a stuck button, a bug, a leaked session), counted from the records. */
+  async function withinLimits(id: string): Promise<void> {
+    const since = (ms: number) =>
+      db
+        .selectFrom('generations')
+        .select((eb) => eb.fn.countAll<number>().as('n'))
+        .where('account_id', '=', id)
+        .where('created_at', '>', new Date(Date.now() - ms))
+        .executeTakeFirstOrThrow()
+        .then((r) => Number(r.n));
+    if ((await since(60_000)) >= config.GENERATE_PER_MINUTE) throw new HttpError(429, 'That was a lot of questions at once. Please wait a minute and try again.');
+    if ((await since(86_400_000)) >= config.GENERATE_PER_DAY) throw new HttpError(429, "You've reached today's limit for AI questions. Please try again tomorrow.");
+  }
+
   app.get('/health', async (_req, res) => {
     await sql`select 1`.execute(db);
     res.json({ ok: true });
@@ -57,6 +71,7 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
     const word = filter.find(request.topic);
     if (word) throw new HttpError(400, `"${word}" can't be used in a topic: questions show on shared screens like the TV.`);
     if (!provider) throw new HttpError(503, 'AI questions are not available right now. Please try again later.');
+    await withinLimits(id);
 
     const paid = await charge(db, id, request.count, config.QUESTIONS_PER_AI_GAME);
     if (!paid.ok) {

@@ -52,6 +52,15 @@ adb reverse tcp:8081 tcp:8081
 cd app && npx expo prebuild --platform android --clean
 ```
 
+## AI questions (optional)
+
+The app works without them. To turn them on in your build, copy `app/.env.example` to
+`app/.env.local`, fill in the Clerk publishable key and the backend's address, then rebuild. The
+backend is in `backend/` (see its README).
+
+In the Clerk dashboard, sign-in must allow **email address** with **email verification code**,
+for both sign-in and sign-up, and require nothing else (no password, no username).
+
 ## Installable test build (no laptop needed)
 
 ```bash

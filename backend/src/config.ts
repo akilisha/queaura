@@ -20,6 +20,12 @@ const schema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   DEEPSEEK_API_KEY: z.string().optional(),
   MOONSHOT_API_KEY: z.string().optional(),
+  /** Sign-in (Clerk): the JWT public key (PEM, checks without a network call) and/or the secret key. */
+  CLERK_JWT_KEY: z.string().optional(),
+  CLERK_SECRET_KEY: z.string().optional(),
+  /** Generation requests one host may make, as a guard against runaway use; failures count too. */
+  GENERATE_PER_MINUTE: z.coerce.number().int().min(1).default(6),
+  GENERATE_PER_DAY: z.coerce.number().int().min(1).default(100),
   /** The active model's list prices in US dollars per million tokens, for the cost records. */
   AI_PRICE_INPUT: z.coerce.number().min(0).default(2),
   AI_PRICE_OUTPUT: z.coerce.number().min(0).default(10),

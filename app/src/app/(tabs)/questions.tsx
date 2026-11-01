@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AiAccount } from '../../components/AiAccount';
 import { Chips, Field } from '../../components/form';
 import { Button, Card, Grid, Muted, Screen } from '../../components/ui';
 import { useLibrary } from '../../data/library';
@@ -33,6 +34,7 @@ export default function Questions() {
   return (
     <Screen>
       <Button big label="New question" onPress={() => router.push('/questions/new')} />
+      <AiAccount />
       <Card>
         <Field label="Search" value={search} onChangeText={setSearch} placeholder="Find a question" />
         <Chips options={FILTERS} value={filter} onChange={setFilter} />
