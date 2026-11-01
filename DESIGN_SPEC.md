@@ -1,6 +1,6 @@
 # Queaura — Design Spec
 
-Name: **Queaura** ("que" for question, "aura" as in cool; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 (spike) complete; Phase 1 in progress.
+Name: **Queaura** ("que" for question, "aura" as in cool; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 complete; Phase 1 built and awaiting its usability test; Phase 2 in progress.
 
 ---
 
@@ -66,7 +66,7 @@ The look is a **neon pub quiz night**: a dark bar lit by neon signs. It applies 
 ### 3.1 Joining
 - The host device runs the server. Players scan a QR code encoding the game URL (`<scheme>://<host-ip>:<port>/`).
 - The QR code appears on the host device and, if connected, on the TV.
-- Android: the server runs in a foreground service. On first host, detect battery optimization and walk the host through exempting the app once, in plain language (Samsung, Xiaomi and other OEMs kill background work aggressively).
+- Android: the server runs in a foreground service. On first host, detect battery optimization and walk the host through exempting the app once, in plain language (Samsung, Xiaomi and other OEMs kill background work aggressively). The walkthrough opens the app's settings page with one line on what to tap (Battery → Unrestricted); it does not use the direct "ignore battery optimizations" request, which Google Play restricts to certain kinds of apps.
 
 ### 3.2 Failure modes the app must handle
 - **Venue Wi-Fi client isolation:** phones on the same network can't reach each other. This is common on bar and guest networks.
@@ -252,6 +252,7 @@ Durations: every style has defaults (reading buffer, answer window, reveal hold,
 - `none`, `allOrNothing` (**default**), `timeWeighted`.
 - `allOrNothing`: a correct answer earns **100** points.
 - Time-weighted: answers submitted during the reading buffer earn **full points (100)**; weighting decays only once the countdown starts, falling linearly to **10** at the end of the window. A correct answer never earns less than 10.
+- Fastest finger: correct answers score by the order the server receives them: the first earns 100, each later one 10 fewer, never below 10. Wrong answers earn 0. Under `none`, nobody earns points.
 - Closest-without-going-over: the closest guess not exceeding the answer wins the question and earns 100 (time-weighted as above when that scoring is chosen). **Tied winners each earn the full points.** An **exact** answer earns a **50-point bonus**. Guesses over the answer (busts) earn 0; if everyone busts, nobody scores.
 - `none`: answers are collected and revealed but nobody earns points.
 - All values are starting points, to be tuned in usability tests.
@@ -298,7 +299,7 @@ Purpose: guard against harmful or illegal content, because content appears on sh
 | Model-based | Backend | AI-generated questions, in the same request as generation | Metered with the generation |
 
 - The AI generation prompt carries guardrails (no hateful, sexual, violent or illegal content; age-appropriate defaults). Output is checked again after generation.
-- The on-device tier (word list plus a small classifier) will miss things. **Kick** and **Skip** are the human backstops.
+- The on-device tier is, for now, an openly licensed English word list. A small on-device classifier is deferred to a later phase. It will miss things either way: **Kick** and **Skip** are the human backstops.
 - Manual questions are never published, which is why on-device moderation is proportionate for them.
 
 ---
