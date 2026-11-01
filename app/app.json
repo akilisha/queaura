@@ -28,7 +28,8 @@
       "expo-font",
       "expo-sharing",
       "@clerk/expo",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@clerk/expo-google-signin"
     ],
     "scheme": "queaura",
     "backgroundColor": "#120A1F"

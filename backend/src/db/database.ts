@@ -52,8 +52,20 @@ export interface Database {
   generations: GenerationTable;
 }
 
-export function createDb(url: string): Kysely<Database> {
+/**
+ * [caCert] is the database's certificate authority (DigitalOcean provides it): with it the
+ * connection is encrypted and the server's certificate is checked against it.
+ */
+export function createDb(url: string, caCert?: string): Kysely<Database> {
   // BIGINT sums come back as strings by default; balances are small, so read them as numbers.
   pg.types.setTypeParser(pg.types.builtins.INT8, (v) => Number(v));
-  return new Kysely<Database>({ dialect: new PostgresDialect({ pool: new pg.Pool({ connectionString: url, max: 10 }) }) });
+  return new Kysely<Database>({ dialect: new PostgresDialect({ pool: new pg.Pool({ ...connection(url, caCert), max: 10 }) }) });
+}
+
+/** pg lets `sslmode` in the URL override the ssl option, so with a certificate it is taken out. */
+export function connection(url: string, caCert?: string): pg.PoolConfig {
+  if (!caCert) return { connectionString: url };
+  const u = new URL(url);
+  u.searchParams.delete('sslmode');
+  return { connectionString: u.toString(), ssl: { ca: caCert, rejectUnauthorized: true } };
 }

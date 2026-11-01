@@ -59,7 +59,9 @@ The app works without them. To turn them on in your build, copy `app/.env.exampl
 backend is in `backend/` (see its README).
 
 In the Clerk dashboard, sign-in must allow **email address** with **email verification code**,
-for both sign-in and sign-up, and require nothing else (no password, no username).
+for both sign-in and sign-up, and require nothing else (no password, no username). Google
+sign-in also needs `EXPO_PUBLIC_CLERK_GOOGLE_WEB_CLIENT_ID` (see `app/.env.example`) and Google
+set up in Clerk.
 
 ## Installable test build (no laptop needed)
 

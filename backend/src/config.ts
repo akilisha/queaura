@@ -6,6 +6,8 @@ import { z } from 'zod';
 const schema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
   DATABASE_URL: z.string().url(),
+  /** The database's certificate authority (PEM); set it for managed databases that require TLS. */
+  DATABASE_CA_CERT: z.string().optional(),
   /** AI games a new account starts with (spec §8: starting value 1 to 2). */
   FREE_AI_GAMES: z.coerce.number().int().min(0).default(2),
   /** Generated questions in one AI game, regenerations included (spec §8: starting value 50). */

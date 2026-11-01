@@ -1,0 +1,61 @@
+# DigitalOcean App Platform: the backend service and its Postgres database (spec §2, §8).
+# Create once with `doctl apps create --spec backend/.do/app.yaml` (see backend/README.md).
+# Secrets have no value here on purpose: enter them in the app's settings on DigitalOcean.
+name: queaura-backend
+region: nyc
+services:
+  - name: api
+    github:
+      repo: akilisha/triviocity
+      # The branch Phase 3 is built on; switch to the main branch once it is merged.
+      branch: claude/sleepy-mayer-6dff0q
+      deploy_on_push: true
+    source_dir: backend
+    environment_slug: node-js
+    run_command: npm start
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    health_check:
+      http_path: /health
+    envs:
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: DATABASE_CA_CERT
+        scope: RUN_TIME
+        value: ${db.CA_CERT}
+      - key: AI_PROVIDER
+        scope: RUN_TIME
+        value: anthropic
+      - key: AI_MODEL
+        scope: RUN_TIME
+        value: claude-sonnet-5-5
+      - key: AI_EFFORT
+        scope: RUN_TIME
+        value: medium
+      - key: AI_PRICE_INPUT
+        scope: RUN_TIME
+        value: "2"
+      - key: AI_PRICE_OUTPUT
+        scope: RUN_TIME
+        value: "10"
+      - key: FREE_AI_GAMES
+        scope: RUN_TIME
+        value: "2"
+      - key: QUESTIONS_PER_AI_GAME
+        scope: RUN_TIME
+        value: "50"
+      # Secrets: set in the dashboard (Settings → api → Environment Variables), encrypted there.
+      - key: ANTHROPIC_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: CLERK_JWT_KEY
+        scope: RUN_TIME
+        type: SECRET
+databases:
+  # A development database: enough for testing. Move to a managed cluster before real users.
+  - name: db
+    engine: PG
+    version: "16"
+    production: false

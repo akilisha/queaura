@@ -8,4 +8,7 @@ export const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_K
 /** The cloud backend, e.g. https://api.queaura.app (no trailing slash). */
 export const AI_BACKEND_URL = (process.env.EXPO_PUBLIC_AI_BACKEND_URL ?? '').replace(/\/+$/, '');
 
+/** The Google OAuth web client ID that Clerk's Google sign-in uses; without it the Google button is hidden. */
+export const googleSignInConfigured = (process.env.EXPO_PUBLIC_CLERK_GOOGLE_WEB_CLIENT_ID ?? '') !== '';
+
 export const aiConfigured = CLERK_PUBLISHABLE_KEY !== '' && AI_BACKEND_URL !== '';

@@ -56,3 +56,45 @@ TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/queaura_test npm test
 ```bash
 npm run typecheck
 ```
+
+## Deploy (DigitalOcean App Platform)
+
+`.do/app.yaml` describes the service and its Postgres database. One-time setup, from the
+repository root:
+
+1. In the DigitalOcean dashboard, connect GitHub (Apps → Create App → GitHub) and give it access
+   to this repository. You can leave the wizard once GitHub is connected.
+2. Install `doctl` (on Windows: `winget install DigitalOcean.Doctl`) and sign it in with a token
+   from API → Tokens:
+
+   ```bash
+   doctl auth init
+   ```
+
+3. Check the spec, then create the app (it starts building straight away):
+
+   ```bash
+   doctl apps spec validate backend/.do/app.yaml
+   ```
+
+   ```bash
+   doctl apps create --spec backend/.do/app.yaml
+   ```
+
+4. In the dashboard, open the app → Settings → `api` → Environment Variables, fill in the two
+   secrets, and save (it redeploys):
+   - `CLERK_JWT_KEY`: Clerk dashboard → API keys → JWT public key (the PEM text).
+   - `ANTHROPIC_API_KEY`: from the Anthropic console. Set a spending limit there.
+5. Find the app's address and check it:
+
+   ```bash
+   doctl apps list --format Spec.Name,DefaultIngress
+   ```
+
+   ```bash
+   curl https://<address>/health
+   ```
+
+   It answers `{"ok":true}`. Put the address in `app/.env.local` as `EXPO_PUBLIC_AI_BACKEND_URL`.
+
+Later pushes to the branch named in the spec deploy automatically.

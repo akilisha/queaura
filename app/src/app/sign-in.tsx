@@ -1,14 +1,18 @@
-import { useSignIn, useSignUp } from '@clerk/expo';
+import { useClerk, useSignIn, useSignUp } from '@clerk/expo';
+import { useSignInWithGoogle } from '@clerk/expo/google';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Field } from '../components/form';
 import { Body, Button, Card, ErrorText, Muted, Screen } from '../components/ui';
+import { googleSignInConfigured } from '../ai/settings';
 
 /**
  * Sign-in for AI questions (spec §8), and only for them: the rest of the app needs no account.
  * One flow for new and returning hosts: an email address, then the code Clerk emails to it.
  */
 export default function SignIn() {
+  const { setActive } = useClerk();
+  const { startGoogleAuthenticationFlow } = useSignInWithGoogle();
   const { signIn } = useSignIn();
   const { signUp } = useSignUp();
   const [email, setEmail] = useState('');
@@ -29,6 +33,15 @@ export default function SignIn() {
       setBusy(false);
     }
   };
+
+  /** Google's own account picker; new and returning hosts alike. Cancelling just closes it. */
+  const google = () =>
+    run(async () => {
+      const result = await startGoogleAuthenticationFlow();
+      if (!result.createdSessionId) return;
+      await setActive({ session: result.createdSessionId });
+      router.back();
+    });
 
   const sendCode = () =>
     run(async () => {
@@ -68,6 +81,12 @@ export default function SignIn() {
         <Body>AI writes questions for you. Signing in keeps track of your AI games. Everything else in the app works without an account.</Body>
         {mode === null ? (
           <>
+            {googleSignInConfigured && (
+              <>
+                <Button big label="Continue with Google" onPress={google} disabled={busy} />
+                <Muted>Or get a code by email:</Muted>
+              </>
+            )}
             <Field
               label="Email address"
               value={email}
@@ -78,7 +97,7 @@ export default function SignIn() {
               autoComplete="email"
               autoFocus
             />
-            <Button big label={busy ? 'Sending…' : 'Email me a code'} onPress={sendCode} disabled={busy || !email.includes('@')} />
+            <Button big={!googleSignInConfigured} tone={googleSignInConfigured ? 'secondary' : 'primary'} label={busy ? 'Sending…' : 'Email me a code'} onPress={sendCode} disabled={busy || !email.includes('@')} />
           </>
         ) : (
           <>

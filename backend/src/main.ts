@@ -7,7 +7,7 @@ import { providerFrom } from './generation/index.ts';
 import { WordFilter } from './moderation/wordFilter.ts';
 
 const config = loadConfig();
-const db = createDb(config.DATABASE_URL);
+const db = createDb(config.DATABASE_URL, config.DATABASE_CA_CERT);
 const signIn = config.CLERK_JWT_KEY || config.CLERK_SECRET_KEY;
 if (!signIn) console.warn(JSON.stringify({ level: 'warn', message: 'No Clerk keys: every signed-in request will be refused.' }));
 // PEM keys set as one-line environment variables carry literal \n; turn them back into newlines.
