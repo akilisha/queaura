@@ -15,7 +15,8 @@ export function ScoresView() {
   const me = store.you.value;
   const final = g.phase === 'finalScores';
   const roundOnly = g.phase === 'roundScores';
-  const title = final ? (g.stopped ? 'Game stopped: final scores' : 'Final scores') : roundOnly ? `Round ${g.round!.number} scores` : 'Scores so far';
+  const questionnaire = g.progression === 'manual';
+  const title = questionnaire ? 'Thanks! Your answers are in' : final ? (g.stopped ? 'Game stopped: final scores' : 'Final scores') : roundOnly ? `Round ${g.round!.number} scores` : 'Scores so far';
   const place = me ? g.scores.findIndex((p) => p.id === me.id) + 1 : 0;
 
   return (
@@ -23,7 +24,7 @@ export function ScoresView() {
       <div class={styles.column}>
         <Card>
           <p class={styles.headline}>{title}</p>
-          {!isTv && me && final && (
+          {!isTv && me && final && !questionnaire && (
             <p class={styles.lead}>
               You finished {ordinal(place)} with {me.total} points
             </p>
@@ -39,15 +40,17 @@ export function ScoresView() {
             </>
           )}
         </Card>
-        <Card fill={isTv}>
-          <ScoreList
-            players={g.scores}
-            highlightId={me?.id}
-            metric={roundOnly ? 'roundPoints' : 'total'}
-            ranked
-            limit={isTv ? TV_LIMIT : undefined}
-          />
-        </Card>
+        {!questionnaire && (
+          <Card fill={isTv}>
+            <ScoreList
+              players={g.scores}
+              highlightId={me?.id}
+              metric={roundOnly ? 'roundPoints' : 'total'}
+              ranked
+              limit={isTv ? TV_LIMIT : undefined}
+            />
+          </Card>
+        )}
       </div>
     </GameScreen>
   );

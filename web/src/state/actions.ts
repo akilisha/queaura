@@ -1,3 +1,4 @@
+import type { AnswerValue } from '../../../protocol/src';
 import { game, joining, notice } from './store';
 import { send } from './transport';
 
@@ -12,6 +13,16 @@ export function join(name: string, emoji: string): void {
 export function answerNumber(value: number): void {
   const seq = game.value?.question?.seq;
   if (seq !== undefined) send({ t: 'answer', seq, number: value });
+}
+
+/** Questionnaire: save the answer to question [index]; the server moves the player on. */
+export function questionnaireAnswer(index: number, value: AnswerValue): void {
+  send({ t: 'qAnswer', index, ...value });
+}
+
+/** Questionnaire: back, or to review from the start. */
+export function questionnaireGo(index: number): void {
+  send({ t: 'qGo', index });
 }
 
 export function answerChoice(choiceId: string): void {

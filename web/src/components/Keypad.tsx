@@ -6,13 +6,15 @@ interface Props {
   onChange: (value: string) => void;
   onSubmit: (value: number) => void;
   disabled?: boolean;
+  /** The submit button's words; "Lock in" in a timed round. */
+  submitLabel?: string;
 }
 
 const KEYS: Key[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'sign', '0', '.'];
 const LABELS: Partial<Record<Key, string>> = { sign: '±', '.': '.' };
 
 /** Numeric entry for closest-without-going-over (spec §6.3). No free text in timed modes. */
-export function Keypad({ value, onChange, onSubmit, disabled }: Props) {
+export function Keypad({ value, onChange, onSubmit, disabled, submitLabel = 'Lock in' }: Props) {
   const number = parse(value);
   return (
     <div class={styles.keypad}>
@@ -41,7 +43,7 @@ export function Keypad({ value, onChange, onSubmit, disabled }: Props) {
         disabled={disabled || number === null}
         onClick={() => number !== null && onSubmit(number)}
       >
-        Lock in
+        {submitLabel}
       </button>
     </div>
   );

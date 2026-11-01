@@ -68,7 +68,7 @@ function LockedIn({ answer, choices }: { answer: AnswerValue; choices: Choice[] 
   return (
     <div class={styles.centered}>
       <p class={styles.muted}>Locked in</p>
-      <p class={styles.headline}>{formatNumber(answer.number)}</p>
+      <p class={styles.headline}>{'number' in answer ? formatNumber(answer.number) : answer.text}</p>
     </div>
   );
 }

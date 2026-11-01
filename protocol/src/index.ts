@@ -4,9 +4,12 @@
  * Keep in step with Codec.kt.
  */
 
-export type Style = 'closestWithoutGoingOver' | 'multipleChoice' | 'fastestFinger';
+export type Style = 'closestWithoutGoingOver' | 'multipleChoice' | 'fastestFinger' | 'questionnaire';
 export type Scoring = 'none' | 'allOrNothing' | 'timeWeighted';
-export type AnswerType = 'numeric' | 'multipleChoice';
+export type AnswerType = 'numeric' | 'multipleChoice' | 'freeText';
+
+/** Auto: timed rounds. Manual: a questionnaire, each player at their own pace (spec §6.4). */
+export type Progression = 'auto' | 'manual';
 
 export type Phase =
   | 'lobby'
@@ -17,6 +20,7 @@ export type Phase =
   | 'reveal'
   | 'roundScores'
   | 'roundBreak'
+  | 'questionnaire'
   | 'finalScores'
   | 'ended';
 
@@ -58,12 +62,13 @@ export interface GameDefinition {
   title: string;
   scoring: Scoring;
   closeEarly?: boolean;
+  progression?: Progression;
   rounds: GameRound[];
 }
 
 // --- State -------------------------------------------------------------------------------------
 
-export type AnswerValue = { number: number } | { choice: string };
+export type AnswerValue = { number: number } | { choice: string } | { text: string };
 
 export interface ScoreEntry {
   id: number;
@@ -107,12 +112,22 @@ export interface Reveal {
   ranking: (Result & { playerId: number })[];
 }
 
+/** One questionnaire question as a player sees it. */
+export interface QuestionnaireQuestion {
+  index: number;
+  text: string;
+  answerType: AnswerType;
+  choices: Choice[];
+}
+
 export interface You extends ScoreEntry {
   canAnswer: boolean;
   /** Joined mid-question: may answer from the next one (spec §6.2). */
   waitingForNextQuestion: boolean;
   answer?: AnswerValue;
   result?: Result;
+  /** Questionnaire: where this player is; no question once they're done. */
+  questionnaire?: { position: number; question?: QuestionnaireQuestion; answer?: AnswerValue };
 }
 
 export interface HostView {
@@ -120,6 +135,8 @@ export interface HostView {
   correctChoiceId?: string | null;
   explanation?: string | null;
   answeredIds: number[];
+  /** Questionnaire: each player's position, by player id. */
+  progress?: Record<string, number>;
 }
 
 export interface GameState {
@@ -140,6 +157,8 @@ export interface GameState {
   answeredCount?: number;
   eligibleCount?: number;
   reveal?: Reveal;
+  progression?: Progression;
+  questionnaire?: { count: number; finished: number };
   you?: You;
   host?: HostView;
 }
@@ -166,6 +185,8 @@ export type ClientMessage =
   | { t: 'hello'; role: 'player' | 'tv' | 'host'; token?: string | null; hostKey?: string; hidden: boolean }
   | { t: 'join'; name: string; emoji: string }
   | ({ t: 'answer'; seq: number } & AnswerValue)
+  | ({ t: 'qAnswer'; index: number } & AnswerValue)
+  | { t: 'qGo'; index: number }
   | { t: 'visibility'; hidden: boolean }
   | { t: 'ping'; c: number }
   | ({ t: 'host' } & HostCommand);

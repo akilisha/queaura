@@ -6,7 +6,7 @@ import styles from './QRCode.module.css';
 const QUIET_ZONE = 4;
 
 /** A scannable QR code drawn as one SVG path from uqr's module matrix. */
-export function QRCode({ text, label }: { text: string; label: string }) {
+export function QRCode({ text, label, scale = 'normal' }: { text: string; label: string; scale?: 'normal' | 'small' }) {
   const { size, path } = useMemo(() => {
     const qr = encode(text, { ecc: 'M', border: QUIET_ZONE });
     let d = '';
@@ -19,7 +19,7 @@ export function QRCode({ text, label }: { text: string; label: string }) {
   }, [text]);
 
   return (
-    <svg class={styles.qr} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={label} shape-rendering="crispEdges">
+    <svg class={`${styles.qr} ${scale === 'small' ? styles.small : ''}`} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={label} shape-rendering="crispEdges">
       <rect class={styles.light} width={size} height={size} />
       <path class={styles.dark} d={path} />
     </svg>

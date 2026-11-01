@@ -72,6 +72,17 @@
   text-align: center;
 }
 
+/* A running count on the TV, like "3 of 8". */
+.tally {
+  margin: 0;
+  font-family: var(--font-sign);
+  font-size: var(--text-2xl);
+  line-height: 1;
+  color: var(--color-gold-light);
+  text-shadow: var(--glow-text-gold);
+  text-align: center;
+}
+
 /* The number the room waits for: the closest-guess answer. */
 .answer {
   margin: 0;
@@ -81,6 +92,16 @@
   color: var(--color-gold-light);
   text-shadow: var(--glow-text-gold);
   text-align: center;
+}
+
+.progress {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--color-violet);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
 }
 
 .question {

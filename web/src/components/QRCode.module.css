@@ -5,6 +5,11 @@
   border-radius: var(--radius-md);
 }
 
+.small {
+  width: var(--qr-size-small);
+  height: var(--qr-size-small);
+}
+
 .light {
   fill: var(--color-qr-light);
 }

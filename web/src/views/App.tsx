@@ -3,6 +3,7 @@ import { InterludeView } from './InterludeView';
 import { JoinView } from './JoinView';
 import { LobbyView } from './LobbyView';
 import { NoticeView } from './NoticeView';
+import { QuestionnaireView } from './QuestionnaireView';
 import { QuestionView } from './QuestionView';
 import { RevealView } from './RevealView';
 import { ScoresView } from './ScoresView';
@@ -32,6 +33,8 @@ export function App() {
       return <QuestionView />;
     case 'reveal':
       return <RevealView />;
+    case 'questionnaire':
+      return <QuestionnaireView />;
     case 'roundScores':
     case 'roundBreak':
     case 'finalScores':
