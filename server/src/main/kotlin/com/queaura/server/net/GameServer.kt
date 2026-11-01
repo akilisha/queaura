@@ -2,6 +2,7 @@ package com.queaura.server.net
 
 import com.queaura.server.engine.Engine
 import com.queaura.server.engine.Phase
+import com.queaura.server.moderation.WordFilter
 import com.queaura.server.protocol.Codec
 import fi.iki.elonen.NanoHTTPD
 import org.java_websocket.WebSocket
@@ -148,7 +149,13 @@ class GameServer(
       send(client, JSONObject().put("t", "error").put("message", "Please enter a nickname"))
       return
     }
-    val player = engine.join(name, msg.optString("emoji").take(MAX_EMOJI))
+    val emoji = msg.optString("emoji").take(MAX_EMOJI)
+    // Names show on the TV (spec §9). Kick is the backstop for what the list misses.
+    if (WordFilter.english.find("$name $emoji") != null) {
+      send(client, JSONObject().put("t", "error").put("message", "That nickname isn't allowed here. Please choose another."))
+      return
+    }
+    val player = engine.join(name, emoji)
     seat(client, player.id, resumed = false)
   }
 

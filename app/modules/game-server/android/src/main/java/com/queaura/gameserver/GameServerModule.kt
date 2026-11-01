@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import com.queaura.server.moderation.WordFilter
 import com.queaura.server.net.lanAddresses
 import java.io.File
 import expo.modules.kotlin.Promise
@@ -66,6 +67,11 @@ class GameServerModule : Module() {
 
     Function("openWifiSettings") {
       open(Intent(Settings.ACTION_WIFI_SETTINGS))
+    }
+
+    /** The first word in [text] not allowed on shared screens (spec §9), or null. */
+    Function("findBlocked") { text: String ->
+      WordFilter.english.find(text)
     }
 
     /**

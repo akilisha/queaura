@@ -9,6 +9,8 @@ version = '0.1.0'
 // The game server lives in server/ (plain Kotlin, unit-tested on a desktop JVM). This module
 // compiles those same sources and wraps them in an Android foreground service.
 def serverSources = file("$projectDir/../../../../server/src/main/kotlin")
+// The moderation word list (spec §9) the server code reads from the class path.
+def serverResources = file("$projectDir/../../../../server/src/main/resources")
 // The web client players and the TV load, built by `cd web && npm run build`.
 def webDist = file("$projectDir/../../../../web/dist")
 def webAssets = layout.buildDirectory.dir("generated/webAssets")
@@ -23,6 +25,7 @@ android {
   sourceSets {
     main {
       java.srcDirs += serverSources
+      resources.srcDirs += serverResources
       assets.srcDirs += webAssets
     }
   }

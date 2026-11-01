@@ -63,3 +63,8 @@ export const CLOSE_EARLY = {
 export function plural(n: number, one: string, many = `${one}s`): string {
   return `${n} ${n === 1 ? one : many}`;
 }
+
+/** Why a word was refused (spec §9). The host sees the word so a false alarm is easy to reword. */
+export function blockedMessage(word: string, what: string): string {
+  return `"${word}" can't be used: ${what} show on shared screens like the TV. Please reword.`;
+}

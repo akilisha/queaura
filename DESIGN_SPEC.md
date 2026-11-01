@@ -302,6 +302,7 @@ Purpose: guard against harmful or illegal content, because content appears on sh
 
 - The AI generation prompt carries guardrails (no hateful, sexual, violent or illegal content; age-appropriate defaults). Output is checked again after generation.
 - The on-device tier is, for now, an openly licensed English word list. A small on-device classifier is deferred to a later phase. It will miss things either way: **Kick** and **Skip** are the human backstops.
+- Built (Phase 2): the LDNOOBW English list (CC BY 4.0), shipped unmodified, plus our own exclusions file of entries that are ordinary trivia (titles, names, places, anatomy, everyday words, each with its reason). One matcher, in the server code, used by the server for nicknames and by the host app (through the native module) for questions and game names. Whole words and phrases, ignoring case and accents, and undoing digits for letters, stretched letters and spaced-out letters; a few unambiguous roots also match inside words. A refused nickname gets "That nickname isn't allowed here. Please choose another."; a refused question or game name cannot be saved, and the host is told which word, so a false alarm is easy to reword. Questionnaire free-text answers are not shown on any shared screen, so they are not checked. Questions saved before this tier existed are not re-checked.
 - Manual questions are never published, which is why on-device moderation is proportionate for them.
 
 ---

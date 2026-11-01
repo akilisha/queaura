@@ -43,6 +43,8 @@ declare class GameServerModule extends NativeModule<{}> {
   isBatteryRestricted(): boolean;
   openAppSettings(): void;
   openWifiSettings(): void;
+  /** The first word in the text not allowed on shared screens (spec §9), or null. */
+  findBlocked(text: string): string | null;
   /** Oldest first. */
   listQuestionnaires(): QuestionnaireFile[];
   readQuestionnaire(name: string): string;

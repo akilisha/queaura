@@ -7,6 +7,8 @@ import { Button, Card, ErrorText, Muted, Screen } from '../../components/ui';
 import { questions } from '../../data/db';
 import { libraryChanged, useLibrary } from '../../data/library';
 import { gamesUsing } from '../../data/usage';
+import { blockedMessage } from '../../game/copy';
+import GameServer from '../../../modules/game-server/src/GameServerModule';
 import {
   MAX_CHOICE,
   MAX_CHOICES,
@@ -22,6 +24,18 @@ import {
 } from '../../game/question';
 import { color, font, radius, size, space, text } from '../../theme';
 
+/** The first word the on-device list refuses (spec §9), in the parts of the draft that are kept. */
+function blockedWord(d: QuestionDraft): string | null {
+  const parts = [d.text];
+  if (d.answerType === 'multipleChoice') parts.push(...d.choices);
+  if (d.answerType !== 'freeText' && d.graded) parts.push(d.explanation);
+  for (const part of parts) {
+    const word = part.trim() ? GameServer.findBlocked(part) : null;
+    if (word) return word;
+  }
+  return null;
+}
+
 /** Write or edit one question by hand (spec §5.3). `/questions/new` starts a blank one. */
 export default function EditQuestion() {
   // `type` starts a new question on an answer type (the game wizard asks for numbers in closest-guess rounds).
@@ -32,7 +46,8 @@ export default function EditQuestion() {
   const [draft, setDraft] = useState<QuestionDraft>(() => (existing ? draftOf(existing) : { ...emptyDraft(), answerType: type === 'multipleChoice' || type === 'freeText' ? type : 'numeric', graded: survey !== '1' }));
   const [triedSave, setTriedSave] = useState(false);
   const [dialog, confirm] = useConfirm();
-  const problems = problemsOf(draft);
+  const blocked = blockedWord(draft);
+  const problems = [...problemsOf(draft), ...(blocked ? [blockedMessage(blocked, 'questions')] : [])];
   const usedIn = existing ? gamesUsing(existing.id, library.games) : [];
 
   const set = (patch: Partial<QuestionDraft>) => setDraft((d) => ({ ...d, ...patch }));

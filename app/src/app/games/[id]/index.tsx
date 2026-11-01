@@ -4,7 +4,8 @@ import { Field, OptionCard } from '../../../components/form';
 import { Card, ErrorText, Muted, Screen } from '../../../components/ui';
 import { NextButton, StepFooter, StepHeader, Stepper } from '../../../components/wizard';
 import { useLibrary } from '../../../data/library';
-import { KINDS, plural } from '../../../game/copy';
+import { blockedMessage, KINDS, plural } from '../../../game/copy';
+import GameServer from '../../../../modules/game-server/src/GameServerModule';
 import { kindOf, MAX_ROUNDS, MAX_TITLE, maxQuestions, titleProblem, withKind, withQuestionCount, withRoundCount, type GameKind } from '../../../game/format';
 import { useWizard } from '../../../wizard/draft';
 
@@ -17,7 +18,8 @@ export default function NameStep() {
   const library = useLibrary();
   // Questions without a right answer taken out by switching back to a quiz, so the host is told.
   const [cleared, setCleared] = useState(0);
-  const problem = titleProblem(draft);
+  const blocked = draft.title.trim() ? GameServer.findBlocked(draft.title) : null;
+  const problem = titleProblem(draft) ?? (blocked ? blockedMessage(blocked, 'game names') : null);
   const kind = kindOf(draft);
 
   const chooseKind = (next: GameKind) => {

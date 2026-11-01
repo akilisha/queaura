@@ -1,0 +1,79 @@
+# Entries of en.txt we do not block, with why. Quiz questions are written by the host and never
+# published (spec §9); Kick and Skip remain the backstops.
+
+# Titles, names and places
+octopussy        # Bond film
+lolita           # novel
+tainted love     # song
+santorum         # politician's surname
+intercourse      # town in Pennsylvania
+hooker           # rugby position; John Lee Hooker
+dick             # Moby Dick, Philip K. Dick, a first name
+negro            # Rio Negro, Montenegro's rivers
+twinkie          # snack brand
+playboy          # magazine, a historical trivia subject
+escort           # Ford Escort
+kinky            # Kinky Boots
+cumming          # surname (Alan Cumming)
+barenaked        # Barenaked Ladies
+girl on          # The Girl on the Train
+big black        # band; ordinary description
+viagra           # drug, a science trivia subject
+cialis           # drug
+
+# Everyday words and other meanings
+suck
+sucks
+butt
+tit              # the bird
+scat             # jazz singing
+snatch
+domination       # world domination
+tied up
+hard core
+hardcore
+bareback         # riding
+snowballing
+shrimping
+skeet            # Olympic shooting
+pegging          # currency pegging
+undressing
+lovemaking
+swinger
+nude
+nudity
+erotic
+sadism
+voyeur
+topless
+swastika         # history
+eunuch           # history
+taste my
+tongue in a
+jelly donut
+hot chick
+tight white
+huge fat
+how to kill
+how to murder
+xx               # chromosome; Roman numeral
+xxx              # Roman numeral (Super Bowl XXX)
+s&m              # reads as "SM" once punctuation is removed
+
+# Anatomy and biology, fair game in science questions
+sex
+sexual
+sexually
+sexuality
+genitals
+nipple
+nipples
+penis
+vagina
+vulva
+clitoris
+rectum
+anus
+semen
+ejaculation
+fecal
