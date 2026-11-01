@@ -31,7 +31,13 @@ export function ScoresView() {
           {g.phase === 'roundBreak' && g.remainingMs !== null && (
             <Seconds remainingMs={g.remainingMs} receivedAt={store.receivedAt.value} paused={g.paused} label="Next round in" />
           )}
-          {final && <p class={styles.muted}>Waiting for the host…</p>}
+          {/* The play-another window (spec §5.6): say what happens and when, so nobody feels stuck. */}
+          {final && g.remainingMs !== null && (
+            <>
+              <Seconds remainingMs={g.remainingMs} receivedAt={store.receivedAt.value} paused={false} label="Another game, or lights out, in" />
+              <p class={styles.muted}>Stay for another round with the same players, or you're free to go.</p>
+            </>
+          )}
         </Card>
         <Card fill={isTv}>
           <ScoreList
