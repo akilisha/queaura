@@ -55,7 +55,7 @@ class GameServerModule : Module() {
     Function("isBatteryRestricted") {
       if (Build.VERSION.SDK_INT < 23) return@Function false
       val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-      !power.isIgnoringBatteryOptimizations(context.packageName)
+      power.isIgnoringBatteryOptimizations(context.packageName).not()
     }
 
     /** The app's own settings page; on Samsung, Battery → Unrestricted is one tap from here. */
