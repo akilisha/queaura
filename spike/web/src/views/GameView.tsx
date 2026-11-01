@@ -19,7 +19,7 @@ export function GameView() {
   const me = store.me.value;
 
   return (
-    <Screen title={me ? `${me.emoji} ${me.name}` : 'Triviocity'} status={store.connection.value} fit={!isPlayer}>
+    <Screen title={me ? `${me.emoji} ${me.name}` : 'Queaura'} status={store.connection.value} fit={!isPlayer}>
       <div class={isPlayer ? styles.column : styles.board}>
         <Card fill={!isPlayer}>
           <div class={styles.stats}>

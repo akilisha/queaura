@@ -12,8 +12,8 @@ function detect(): Row[] {
   const brands = nav.userAgentData?.brands?.map((b) => `${b.brand} ${b.version}`).join(', ') ?? '–';
   let storage = false;
   try {
-    localStorage.setItem('triviocity.diag', '1');
-    localStorage.removeItem('triviocity.diag');
+    localStorage.setItem('queaura.diag', '1');
+    localStorage.removeItem('queaura.diag');
     storage = true;
   } catch {
     storage = false;

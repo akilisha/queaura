@@ -1,6 +1,6 @@
 {
   "platforms": ["android"],
   "android": {
-    "modules": ["com.triviocity.spike.SpikeServerModule"]
+    "modules": ["com.queaura.spike.SpikeServerModule"]
   }
 }

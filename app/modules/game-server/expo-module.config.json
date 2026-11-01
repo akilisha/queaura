@@ -1,6 +1,6 @@
 {
   "platforms": ["android"],
   "android": {
-    "modules": ["com.triviocity.gameserver.GameServerModule"]
+    "modules": ["com.queaura.gameserver.GameServerModule"]
   }
 }

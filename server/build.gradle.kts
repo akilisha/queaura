@@ -25,6 +25,6 @@ tasks.test {
 // tests:  gradle devServer   (then open http://localhost:8080)
 tasks.register<JavaExec>("devServer") {
   classpath = sourceSets["test"].runtimeClasspath
-  mainClass.set("com.triviocity.server.DevServerKt")
+  mainClass.set("com.queaura.server.DevServerKt")
   args("../web/dist")
 }

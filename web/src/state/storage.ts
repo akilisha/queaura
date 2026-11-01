@@ -1,6 +1,6 @@
 // The seat token survives refreshes and reopened tabs (spec §3.5). Storage can be unavailable
 // (private mode, blocked site data), so every access is guarded.
-const KEY = 'triviocity.token';
+const KEY = 'queaura.token';
 
 export function loadToken(): string | null {
   try {

@@ -18,7 +18,7 @@
 
   <application>
     <service
-      android:name="com.triviocity.spike.SpikeService"
+      android:name="com.queaura.spike.SpikeService"
       android:exported="false"
       android:foregroundServiceType="connectedDevice" />
   </application>

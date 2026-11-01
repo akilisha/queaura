@@ -4,7 +4,7 @@ import { connection } from '../state/store';
 
 export function ConnectingView() {
   return (
-    <Screen title="Triviocity" status={connection.value}>
+    <Screen title="Queaura" status={connection.value}>
       <Card>
         <p>Connecting to the game…</p>
       </Card>

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Triviocity Spike",
-    "slug": "triviocity-spike",
+    "name": "Queaura Spike",
+    "slug": "queaura-spike",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.triviocity.spike.host"
+      "package": "com.queaura.spike.host"
     },
     "web": {
       "favicon": "./assets/favicon.png"

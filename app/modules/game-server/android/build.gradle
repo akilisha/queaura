@@ -3,7 +3,7 @@ plugins {
   id 'expo-module-gradle-plugin'
 }
 
-group = 'com.triviocity.gameserver'
+group = 'com.queaura.gameserver'
 version = '0.1.0'
 
 // The game server lives in server/ (plain Kotlin, unit-tested on a desktop JVM). This module
@@ -14,7 +14,7 @@ def webDist = file("$projectDir/../../../../web/dist")
 def webAssets = layout.buildDirectory.dir("generated/webAssets")
 
 android {
-  namespace "com.triviocity.gameserver"
+  namespace "com.queaura.gameserver"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"

@@ -11,7 +11,7 @@
 
   <application>
     <service
-      android:name="com.triviocity.gameserver.GameService"
+      android:name="com.queaura.gameserver.GameService"
       android:exported="false"
       android:foregroundServiceType="connectedDevice" />
   </application>

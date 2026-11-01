@@ -3,11 +3,11 @@ plugins {
   id 'expo-module-gradle-plugin'
 }
 
-group = 'com.triviocity.spike'
+group = 'com.queaura.spike'
 version = '0.1.0'
 
 android {
-  namespace "com.triviocity.spike"
+  namespace "com.queaura.spike"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"

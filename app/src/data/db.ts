@@ -5,7 +5,7 @@ import type { BankQuestion, GameFormat } from './types';
 // The question bank and game formats live on this device only (spec §4). Rows hold JSON; the
 // data is small and always read whole.
 
-const db = openDatabaseSync('triviocity.db');
+const db = openDatabaseSync('queaura.db');
 
 export function initDatabase(): void {
   db.execSync(`

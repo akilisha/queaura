@@ -46,7 +46,7 @@ can't reach Expo's servers, set `EXPO_OFFLINE=1`.
 
 ## Phone setup before testing
 
-- S21: Settings → Apps → Triviocity Spike → Battery → **Unrestricted**. One UI kills background
+- S21: Settings → Apps → Queaura Spike → Battery → **Unrestricted**. One UI kills background
   work otherwise; the spike measures the server, not the battery walkthrough (that is Phase 2).
 - Allow notifications when asked (the foreground-service notification).
 

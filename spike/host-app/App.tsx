@@ -77,7 +77,7 @@ export default function App() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <StatusBar style="dark" />
-      <Text style={styles.title}>Triviocity spike</Text>
+      <Text style={styles.title}>Queaura spike</Text>
 
       <View style={styles.card}>
         <Button

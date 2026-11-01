@@ -17,7 +17,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.triviocity.host"
+      "package": "com.queaura.host"
     },
     "web": {
       "favicon": "./assets/favicon.png"

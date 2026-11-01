@@ -1,1 +1,1 @@
-rootProject.name = "triviocity-server"
+rootProject.name = "queaura-server"
