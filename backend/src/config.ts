@@ -31,7 +31,8 @@ const schema = z.object({
   CLERK_JWT_KEY: pem,
   CLERK_SECRET_KEY: z.string().optional(),
   /** Generation requests one host may make, as a guard against runaway use; failures count too. */
-  GENERATE_PER_MINUTE: z.coerce.number().int().min(1).default(6),
+  /** Filling a whole game makes one request per round (up to 10), close together. */
+  GENERATE_PER_MINUTE: z.coerce.number().int().min(1).default(12),
   GENERATE_PER_DAY: z.coerce.number().int().min(1).default(100),
   /** The active model's list prices in US dollars per million tokens, for the cost records. */
   AI_PRICE_INPUT: z.coerce.number().min(0).default(2),

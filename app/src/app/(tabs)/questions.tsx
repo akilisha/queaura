@@ -8,6 +8,7 @@ import { useLibrary } from '../../data/library';
 import type { BankQuestion } from '../../data/types';
 import { gamesUsing } from '../../data/usage';
 import { ANSWER_TYPES } from '../../game/copy';
+import { onTopic, topicsIn } from '../../game/fill';
 import { isGraded } from '../../game/resolve';
 import { color, font, radius, size, space, text } from '../../theme';
 
@@ -23,13 +24,20 @@ export default function Questions() {
   const library = useLibrary();
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
+  const [topic, setTopic] = useState('all');
+  const [usage, setUsage] = useState<'any' | 'unused'>('any');
+  const topics = useMemo(() => topicsIn(library.questions), [library]);
 
   const shown = useMemo(() => {
     const term = search.trim().toLowerCase();
     return library.questions.filter(
-      (q) => (filter === 'all' || q.answerType === filter) && (!term || q.text.toLowerCase().includes(term)),
+      (q) =>
+        (filter === 'all' || q.answerType === filter) &&
+        (!term || q.text.toLowerCase().includes(term)) &&
+        (topic === 'all' || onTopic(q, topic)) &&
+        (usage === 'any' || gamesUsing(q.id, library.games).length === 0),
     );
-  }, [library, filter, search]);
+  }, [library, filter, search, topic, usage]);
 
   return (
     <Screen>
@@ -38,6 +46,17 @@ export default function Questions() {
       <Card>
         <Field label="Search" value={search} onChangeText={setSearch} placeholder="Find a question" />
         <Chips options={FILTERS} value={filter} onChange={setFilter} />
+        {topics.length > 0 && (
+          <Chips options={[{ value: 'all', label: 'All topics' }, ...topics.map((t) => ({ value: t, label: t }))]} value={topic} onChange={setTopic} />
+        )}
+        <Chips
+          options={[
+            { value: 'any', label: 'In games or not' },
+            { value: 'unused', label: 'Not in any game' },
+          ]}
+          value={usage}
+          onChange={setUsage}
+        />
       </Card>
       <Muted>
         {shown.length} {shown.length === 1 ? 'question' : 'questions'}

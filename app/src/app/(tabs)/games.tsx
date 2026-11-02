@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { aiConfigured } from '../../ai/settings';
 import { StyleSheet, Text, View } from 'react-native';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Button, Card, Grid, Muted, Screen } from '../../components/ui';
@@ -30,6 +31,7 @@ export default function Games() {
     <Screen>
       {dialog}
       <Button big label="Create a game" onPress={() => router.push('/games/new')} />
+      {aiConfigured && <Button tone="secondary" label="Create a game with AI" onPress={() => router.push('/games/create-with-ai')} />}
       <Grid>
         {library.games.map((g) => {
           const problem = problemOf(g, library.byId);

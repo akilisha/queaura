@@ -1,10 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { aiConfigured } from '../../../ai/settings';
+import { Field } from '../../../components/form';
 import { Button, Card, Muted, Screen } from '../../../components/ui';
 import { NextButton, StepFooter, StepHeader } from '../../../components/wizard';
 import { useLibrary } from '../../../data/library';
 import { plural, STYLES } from '../../../game/copy';
+import { randomFill } from '../../../game/fill';
 import { emptySlots, withSlot } from '../../../game/format';
 import { color, font, radius, size, space, text } from '../../../theme';
 import { useWizard } from '../../../wizard/draft';
@@ -15,6 +18,23 @@ export default function SlotsStep() {
   const { draft, setDraft } = useWizard();
   const library = useLibrary();
   const empty = emptySlots(draft, library.byId);
+  // The slots the last random pick filled, so "Shuffle again" re-picks only those.
+  const [picked, setPicked] = useState<number[][] | null>(null);
+  const [pickNote, setPickNote] = useState<string | null>(null);
+  const [randomOpen, setRandomOpen] = useState(false);
+  const [topic, setTopic] = useState('');
+
+  const pick = (slots?: number[][]) => {
+    const result = randomFill(draft, library.questions, library.games, { topic, slots });
+    setDraft(result.game);
+    setPicked(result.picked);
+    const filled = result.picked.reduce((n, r) => n + r.length, 0);
+    setPickNote(
+      filled === 0
+        ? `None of your questions${topic.trim() ? ` about "${topic.trim()}"` : ''} fit the empty slots. Write some, or try another topic.`
+        : `Filled ${filled} ${filled === 1 ? 'slot' : 'slots'}.${result.unfilled > 0 ? ` ${result.unfilled} stayed empty: not enough unused questions fit.` : ''} Tap any question to swap it.`,
+    );
+  };
   return (
     <Screen form>
       <StepHeader
@@ -22,6 +42,22 @@ export default function SlotsStep() {
         title="Choose the questions"
         intro="Tap a slot to pick a question. You can leave slots empty and fill them later; the game just can't be played until they're full."
       />
+      {(empty > 0 || picked) && (
+        <Card title="Fill the empty slots">
+          <Muted>Let the app choose, then swap any question you don't like.</Muted>
+          {aiConfigured && empty > 0 && <Button label="With AI" onPress={() => router.push(`/games/${id}/fill-ai`)} />}
+          {!randomOpen ? (
+            empty > 0 && <Button tone={aiConfigured ? 'secondary' : 'primary'} label="From my questions" onPress={() => setRandomOpen(true)} />
+          ) : (
+            <>
+              <Field label="Only questions about (optional)" value={topic} onChangeText={setTopic} placeholder="Any topic" />
+              {empty > 0 && <Button label="Pick at random" onPress={() => pick()} />}
+              {picked && picked.some((r) => r.length > 0) && <Button tone="secondary" label="Shuffle again" onPress={() => pick(picked)} />}
+              {pickNote && <Muted>{pickNote}</Muted>}
+            </>
+          )}
+        </Card>
+      )}
       {draft.rounds.map((round, r) => (
         <Card key={r} title={round.style === 'questionnaire' ? 'Questions' : `Round ${r + 1} · ${STYLES[round.style].name}`}>
           {round.slots.map((qid, s) => {
@@ -52,13 +88,6 @@ export default function SlotsStep() {
               </View>
             );
           })}
-          {aiConfigured && round.slots.some((qid) => qid === null || !library.byId.has(qid)) && (
-            <Button
-              tone="secondary"
-              label={`Fill ${plural(round.slots.filter((qid) => qid === null || !library.byId.has(qid)).length, 'empty slot')} with AI`}
-              onPress={() => router.push(`/games/${id}/ai?round=${r}`)}
-            />
-          )}
         </Card>
       ))}
       <StepFooter>

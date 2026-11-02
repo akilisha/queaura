@@ -1,19 +1,20 @@
 import { useAuth } from '@clerk/expo';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { AiError, call, describeBalance } from '../ai/api';
 import { useBackend } from '../ai/useBalance';
-import { avoidFor, MAX_PER_REQUEST, MAX_TOPIC, toBank, type AnswerChoice, type Difficulty, type GenerateRequest, type GenerateResponse, type GeneratedQuestion } from '../ai/write';
+import { avoidFor, MAX_PER_REQUEST, MAX_TOPIC, toBank, type AnswerChoice, type Difficulty, type GenerateRequest, type GenerateResponse } from '../ai/write';
 import { useLibrary } from '../data/library';
 import type { BankQuestion } from '../data/types';
 import { newQuestionId } from '../game/question';
-import { color, font, radius, space, text } from '../theme';
+import { color, font, text } from '../theme';
+import { ReviewItem } from './AiReview';
 import { Chips, Field } from './form';
 import { Body, Button, Card, ErrorText, Muted } from './ui';
 import { Stepper } from './wizard';
 
-const DIFFICULTIES: { value: Difficulty; label: string }[] = [
+export const DIFFICULTIES: { value: Difficulty; label: string }[] = [
   { value: 'easy', label: 'Easy' },
   { value: 'medium', label: 'Medium' },
   { value: 'hard', label: 'Hard' },
@@ -102,19 +103,7 @@ export function AiWriter({
           <Muted>{describeBalance({ ...result.balance, questionsPerAiGame: 0 })}</Muted>
         </Card>
         {result.questions.map((q, i) => (
-          <Card key={i}>
-            <Text style={[styles.question, leftOut.has(i) && styles.dropped]}>{q.text}</Text>
-            <Answer question={q} />
-            {q.explanation ? <Muted>{q.explanation}</Muted> : null}
-            <Chips
-              options={[
-                { value: 'keep', label: 'Keep' },
-                { value: 'out', label: 'Leave out' },
-              ]}
-              value={leftOut.has(i) ? 'out' : 'keep'}
-              onChange={() => toggle(i)}
-            />
-          </Card>
+          <ReviewItem key={i} question={q} kept={!leftOut.has(i)} onToggle={() => toggle(i)} />
         ))}
         <Button big label={saveLabel(kept.length)} disabled={kept.length === 0} onPress={() => onSaved(toBank(kept, newQuestionId))} />
         {saveNote && <Muted>{saveNote}</Muted>}
@@ -149,27 +138,6 @@ export function AiWriter({
   );
 }
 
-/** The right answer as the host checks it: the number, or the choices with the right one marked. */
-function Answer({ question: q }: { question: GeneratedQuestion }) {
-  if (q.answerType === 'numeric') return <Text style={styles.answer}>Answer: {q.correctNumber}</Text>;
-  return (
-    <View style={styles.choices}>
-      {(q.choices ?? []).map((c) => (
-        <Text key={c.id} style={c.id === q.correctChoiceId ? styles.right : styles.choice}>
-          {c.id === q.correctChoiceId ? '✓ ' : '• '}
-          {c.text}
-        </Text>
-      ))}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   label: { fontSize: text.md, fontFamily: font.bodySemi, color: color.text },
-  question: { fontSize: text.lg, fontFamily: font.bodySemi, color: color.text },
-  dropped: { color: color.textMuted, textDecorationLine: 'line-through' },
-  answer: { fontSize: text.md, fontFamily: font.bodyBold, color: color.success },
-  choices: { gap: space[1], padding: space[3], borderRadius: radius.md, backgroundColor: color.surfaceRaised },
-  choice: { fontSize: text.md, fontFamily: font.body, color: color.text },
-  right: { fontSize: text.md, fontFamily: font.bodyBold, color: color.success },
 });
