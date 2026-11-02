@@ -74,7 +74,10 @@ Supabase. Run commands from the repository root in Git Bash, signed in with `doc
    App Platform connects over IPv4.
 4. Download the SSL certificate (project settings → Database → SSL configuration).
 
-The backend creates its tables itself on its first start.
+The backend creates its tables itself on its first start, in the schema named by
+`DATABASE_SCHEMA`: dev and prod share the one database, each in its own schema (`queaura_dev`,
+`queaura_prod`). Supabase's Data API only serves the `public` schema by default, so it doesn't
+see these either.
 
 ### 2. The app
 

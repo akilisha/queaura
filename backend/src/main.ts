@@ -7,11 +7,11 @@ import { providerFrom } from './generation/index.ts';
 import { WordFilter } from './moderation/wordFilter.ts';
 
 const config = loadConfig();
-const db = createDb(config.DATABASE_URL, config.DATABASE_CA_CERT);
+const db = createDb(config.DATABASE_URL, config.DATABASE_CA_CERT, config.DATABASE_SCHEMA);
 const signIn = config.CLERK_JWT_KEY || config.CLERK_SECRET_KEY;
 if (!signIn) console.warn(JSON.stringify({ level: 'warn', message: 'No Clerk keys: every signed-in request will be refused.' }));
 const authenticate = signIn ? clerkAuthenticator({ jwtKey: config.CLERK_JWT_KEY, secretKey: config.CLERK_SECRET_KEY }) : notConfigured;
-await migrateToLatest(db);
+await migrateToLatest(db, config.DATABASE_SCHEMA);
 
 const server = createApp({ config, db, authenticate, provider: providerFrom(config), filter: WordFilter.load() }).listen(config.PORT, () => {
   console.log(JSON.stringify({ level: 'info', message: `Listening on port ${config.PORT}` }));

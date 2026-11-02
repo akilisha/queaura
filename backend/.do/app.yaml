@@ -20,6 +20,11 @@ services:
     health_check:
       http_path: /health
     envs:
+      # Dev and prod share one Supabase database; each environment keeps its tables in its own
+      # schema. This app follows the development branch, so it is dev. Prod gets queaura_prod.
+      - key: DATABASE_SCHEMA
+        scope: RUN_TIME
+        value: queaura_dev
       - key: AI_PROVIDER
         scope: RUN_TIME
         value: anthropic

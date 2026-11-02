@@ -25,7 +25,7 @@ If someone installs the app and can't figure out how to create or run a game, th
 | Embedded game server | HTTP + WebSocket server inside the host app; authoritative game state | Host device |
 | Player client | Web page served by the host device; joined by QR code; no install | Players' phone browsers |
 | TV display | Same web client in a read-only display mode, no input controls | Samsung / LG smart TV browser |
-| Cloud backend | AI question generation, moderation, metering, AI game balances and purchases | Cloud: Node.js with Express 5 on DigitalOcean App Platform; Kysely over Postgres on Supabase (the backend's tables only, with row-level security on and Supabase's Data API off) |
+| Cloud backend | AI question generation, moderation, metering, AI game balances and purchases | Cloud: Node.js with Express 5 on DigitalOcean App Platform; Kysely over Postgres on Supabase: one database, each environment in its own schema (`queaura_dev`, `queaura_prod`), row-level security on, Supabase's Data API off |
 
 Gameplay is LAN-only. The cloud backend is involved only for AI generation and buying AI games; a game with manual questions never touches it.
 

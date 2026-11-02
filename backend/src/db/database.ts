@@ -1,4 +1,4 @@
-import { Kysely, PostgresDialect, type ColumnType, type Generated } from 'kysely';
+import { CompiledQuery, Kysely, PostgresDialect, type ColumnType, type Generated } from 'kysely';
 import pg from 'pg';
 
 // The backend's records (spec §8): accounts and their AI-game balances. Questions, games and
@@ -52,14 +52,28 @@ export interface Database {
   generations: GenerationTable;
 }
 
+/** A schema name we can safely put in SQL: lowercase letters, digits and underscores. */
+export const SCHEMA_NAME = /^[a-z_][a-z0-9_]{0,62}$/;
+
 /**
- * [caCert] is the database's certificate authority (DigitalOcean provides it): with it the
+ * [caCert] is the database's certificate authority (Supabase provides it): with it the
  * connection is encrypted and the server's certificate is checked against it.
+ *
+ * [schema] keeps one environment's tables apart from another's in the same database (dev and
+ * prod share one Supabase database): every connection looks only in that schema.
  */
-export function createDb(url: string, caCert?: string): Kysely<Database> {
+export function createDb(url: string, caCert?: string, schema = 'public'): Kysely<Database> {
+  if (!SCHEMA_NAME.test(schema)) throw new Error(`Not a usable schema name: ${schema}`);
   // BIGINT sums come back as strings by default; balances are small, so read them as numbers.
   pg.types.setTypeParser(pg.types.builtins.INT8, (v) => Number(v));
-  return new Kysely<Database>({ dialect: new PostgresDialect({ pool: new pg.Pool({ ...connection(url, caCert), max: 10 }) }) });
+  return new Kysely<Database>({
+    dialect: new PostgresDialect({
+      pool: new pg.Pool({ ...connection(url, caCert), max: 10 }),
+      onCreateConnection: async (conn) => {
+        await conn.executeQuery(CompiledQuery.raw(`set search_path to "${schema}"`));
+      },
+    }),
+  });
 }
 
 /** pg lets `sslmode` in the URL override the ssl option, so with a certificate it is taken out. */

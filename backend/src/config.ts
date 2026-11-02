@@ -11,6 +11,8 @@ const schema = z.object({
   DATABASE_URL: z.string().url(),
   /** The database's certificate authority (PEM); set it for managed databases that require TLS. */
   DATABASE_CA_CERT: pem,
+  /** This environment's schema (dev and prod share one database), e.g. queaura_dev. */
+  DATABASE_SCHEMA: z.string().regex(/^[a-z_][a-z0-9_]{0,62}$/, 'lowercase letters, digits and underscores').default('public'),
   /** AI games a new account starts with (spec §8: starting value 1 to 2). */
   FREE_AI_GAMES: z.coerce.number().int().min(0).default(2),
   /** Generated questions in one AI game, regenerations included (spec §8: starting value 50). */

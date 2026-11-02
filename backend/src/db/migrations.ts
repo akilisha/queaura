@@ -72,8 +72,10 @@ const migrations: Record<string, Migration> = {
   },
 };
 
-export async function migrateToLatest(db: Kysely<any>): Promise<void> {
-  const migrator = new Migrator({ db, provider: { getMigrations: async () => migrations } });
+/** Creates [schema] if needed and brings its tables up to date; each schema keeps its own history. */
+export async function migrateToLatest(db: Kysely<any>, schema = 'public'): Promise<void> {
+  await db.schema.createSchema(schema).ifNotExists().execute();
+  const migrator = new Migrator({ db, provider: { getMigrations: async () => migrations }, migrationTableSchema: schema });
   const { error, results } = await migrator.migrateToLatest();
   for (const r of results ?? []) {
     if (r.status === 'Error') console.error(`Migration ${r.migrationName} failed`);
