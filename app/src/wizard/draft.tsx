@@ -15,6 +15,8 @@ interface Wizard {
   /** Saved and on the way out of the wizard. */
   closing: boolean;
   saveAndClose: () => void;
+  /** The host chose to throw the changes away: nothing to ask about any more. */
+  discard: () => void;
 }
 
 const Context = createContext<Wizard | null>(null);
@@ -38,6 +40,7 @@ export function WizardProvider({ initial, isNew, children }: { initial: GameForm
       setDirty(false);
       setClosing(true);
     },
+    discard: () => setDirty(false),
   };
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

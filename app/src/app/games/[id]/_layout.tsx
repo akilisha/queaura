@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams, useNavigation, usePreventRemove } from 'expo-router';
+import { router, Stack, useLocalSearchParams, usePreventRemove } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { useLibrary } from '../../../data/library';
@@ -21,13 +21,12 @@ export default function WizardLayout() {
 }
 
 function WizardStack() {
-  const { dirty, isNew, closing } = useWizard();
+  const { dirty, isNew, closing, discard } = useWizard();
   const [dialog, confirm] = useConfirm();
-  const navigation = useNavigation();
   const title = isNew ? 'NEW GAME' : 'EDIT GAME';
 
   // Leaving with unsaved changes asks first; the draft is never saved by accident.
-  usePreventRemove(dirty, ({ data }) =>
+  usePreventRemove(dirty, ({ repeat }) =>
     confirm({
       title: isNew ? 'Discard this game?' : 'Discard your changes?',
       message: 'Nothing has been saved yet. Save it from the summary step to keep it.',
@@ -35,7 +34,12 @@ function WizardStack() {
       cancelLabel: 'Keep editing',
       danger: true,
       // Carry on with the navigation that was held back (back button, gesture, header arrow).
-      onConfirm: () => navigation.dispatch(data.action),
+      // repeat() lifts the guard before re-sending it; re-sending it directly would be held back
+      // again and reopen this dialog.
+      onConfirm: () => {
+        discard();
+        repeat();
+      },
     }),
   );
 

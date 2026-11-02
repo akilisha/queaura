@@ -13,9 +13,23 @@ export function AiAccount() {
 
 function Account() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { signOut } = useClerk();
+  const { signOut, status } = useClerk();
   const { balance, error } = useBalance();
-  if (!isLoaded) return null;
+  // Never vanish: a host looking for sign-in should always find this card and learn why it waits.
+  if (status === 'error') {
+    return (
+      <Card title="AI questions">
+        <ErrorText>Sign-in couldn't load. Check that this phone is online, then close and reopen the app.</ErrorText>
+      </Card>
+    );
+  }
+  if (!isLoaded) {
+    return (
+      <Card title="AI questions">
+        <Muted>Connecting to sign-in…</Muted>
+      </Card>
+    );
+  }
   if (!isSignedIn) {
     return (
       <Card title="AI questions">
