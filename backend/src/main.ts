@@ -13,7 +13,11 @@ if (!signIn) console.warn(JSON.stringify({ level: 'warn', message: 'No Clerk key
 const authenticate = signIn ? clerkAuthenticator({ jwtKey: config.CLERK_JWT_KEY, secretKey: config.CLERK_SECRET_KEY }) : notConfigured;
 await migrateToLatest(db, config.DATABASE_SCHEMA);
 
-const server = createApp({ config, db, authenticate, provider: providerFrom(config), filter: WordFilter.load() }).listen(config.PORT, () => {
+const provider = providerFrom(config);
+if (!provider) {
+  console.warn(JSON.stringify({ level: 'warn', message: `No key for the AI provider "${config.AI_PROVIDER}": generation will answer that AI questions are unavailable.` }));
+}
+const server = createApp({ config, db, authenticate, provider, filter: WordFilter.load() }).listen(config.PORT, () => {
   console.log(JSON.stringify({ level: 'info', message: `Listening on port ${config.PORT}` }));
 });
 

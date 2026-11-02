@@ -93,7 +93,10 @@ doctl apps update <app-id> --spec backend/.do/app.yaml
 ```
 
 Then, in the dashboard, open the app → Settings → `api` → Environment Variables, fill in the
-secrets, and save (it redeploys):
+secrets, and save (it redeploys). Updating from `backend/.do/app.yaml` can leave secrets empty,
+since the file holds none: check afterwards, or update from the live spec instead
+(`doctl apps spec get <app-id> > live-spec.yaml`, edit, then `doctl apps update <app-id> --spec live-spec.yaml`).
+The start-up log warns about a missing Clerk or AI key.
 - `DATABASE_URL`: the session pooler connection string from step 1.
 - `DATABASE_CA_CERT`: the text of the certificate file from step 1.
 - `CLERK_JWT_KEY`: Clerk dashboard → API keys → JWT public key (the PEM text).
