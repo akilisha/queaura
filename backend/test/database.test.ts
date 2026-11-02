@@ -12,3 +12,11 @@ describe('database connection', () => {
     });
   });
 });
+
+describe('PEM settings', () => {
+  it('accepts a certificate entered on one line with \\n', async () => {
+    const { loadConfig } = await import('../src/config.ts');
+    const config = loadConfig({ DATABASE_URL: 'postgres://h/db', DATABASE_CA_CERT: '-----BEGIN CERTIFICATE-----\\nABC\\n-----END CERTIFICATE-----' });
+    expect(config.DATABASE_CA_CERT).toBe('-----BEGIN CERTIFICATE-----\nABC\n-----END CERTIFICATE-----');
+  });
+});

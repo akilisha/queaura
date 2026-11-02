@@ -3,11 +3,14 @@ import { z } from 'zod';
 // Everything that changes per deployment comes from the environment, checked once at start.
 // Prices and allowances are configuration, never an app update (spec §8).
 
+/** PEM text entered on one line, with its line breaks written as \n, becomes PEM again. */
+const pem = z.string().optional().transform((v) => v?.replace(/\\n/g, '\n'));
+
 const schema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
   DATABASE_URL: z.string().url(),
   /** The database's certificate authority (PEM); set it for managed databases that require TLS. */
-  DATABASE_CA_CERT: z.string().optional(),
+  DATABASE_CA_CERT: pem,
   /** AI games a new account starts with (spec §8: starting value 1 to 2). */
   FREE_AI_GAMES: z.coerce.number().int().min(0).default(2),
   /** Generated questions in one AI game, regenerations included (spec §8: starting value 50). */
@@ -23,7 +26,7 @@ const schema = z.object({
   DEEPSEEK_API_KEY: z.string().optional(),
   MOONSHOT_API_KEY: z.string().optional(),
   /** Sign-in (Clerk): the JWT public key (PEM, checks without a network call) and/or the secret key. */
-  CLERK_JWT_KEY: z.string().optional(),
+  CLERK_JWT_KEY: pem,
   CLERK_SECRET_KEY: z.string().optional(),
   /** Generation requests one host may make, as a guard against runaway use; failures count too. */
   GENERATE_PER_MINUTE: z.coerce.number().int().min(1).default(6),
