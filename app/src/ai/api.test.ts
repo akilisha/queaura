@@ -28,6 +28,10 @@ describe('call', () => {
     const { backend: b } = backend(json(402, { error: 'You have no AI games left.' }));
     await expect(call(b, '/v1/generate', {})).rejects.toEqual(new AiError(402, 'You have no AI games left.'));
   });
+  it('names the status when the reply is not ours (a gateway timing out)', async () => {
+    const { backend: b } = backend(async () => new Response('<html>504 Gateway Time-out</html>', { status: 504 }));
+    await expect(call(b, '/v1/generate', {})).rejects.toEqual(new AiError(504, 'Something went wrong (error 504). Please try again.'));
+  });
   it('explains being offline and being signed out, without calling', async () => {
     const offline = backend(async () => {
       throw new TypeError('Network request failed');

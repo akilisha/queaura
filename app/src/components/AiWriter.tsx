@@ -76,7 +76,7 @@ export function AiWriter({
       setResult(response);
       setLeftOut(new Set());
     } catch (e) {
-      setError(e instanceof AiError ? e.message : 'Something went wrong. Please try again.');
+      setError(e instanceof AiError ? e.message : `Something went wrong in the app (${e instanceof Error ? e.message : String(e)}). Please try again.`);
     } finally {
       setWriting(false);
     }

@@ -38,7 +38,8 @@ export async function call<T>(backend: Backend, path: string, body?: unknown): P
     throw new AiError(0, "Can't reach the AI service. Check that this phone is online, then try again.");
   }
   const data = await res.json().catch(() => null);
-  if (!res.ok) throw new AiError(res.status, typeof data?.error === 'string' ? data.error : 'Something went wrong. Please try again.');
+  // A reply without our JSON came from something in between (a gateway timing out, say): say which.
+  if (!res.ok) throw new AiError(res.status, typeof data?.error === 'string' ? data.error : `Something went wrong (error ${res.status}). Please try again.`);
   return data as T;
 }
 

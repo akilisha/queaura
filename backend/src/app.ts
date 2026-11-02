@@ -86,8 +86,10 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
     }
 
     const started = Date.now();
-    const record = (outcome: GenerationOutcome, delivered: number, rejected: Record<string, number>, tokens = { input: 0, output: 0 }, model = provider.model) =>
-      db
+    const record = (outcome: GenerationOutcome, delivered: number, rejected: Record<string, number>, tokens = { input: 0, output: 0 }, model = provider.model) => {
+      // One line per generation, so the logs show how long each took and how it ended.
+      console.log(JSON.stringify({ level: 'info', message: 'generation', outcome, model, requested: request.count, delivered, durationMs: Date.now() - started, rejected }));
+      return db
         .insertInto('generations')
         .values({
           account_id: id,
@@ -103,6 +105,7 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
           outcome,
         })
         .execute();
+    };
 
     let result;
     try {
