@@ -24,6 +24,16 @@ export interface Deps {
 export function createApp({ config, db, authenticate, provider, filter }: Deps) {
   const app = express();
   app.disable('x-powered-by');
+  // One line per request: route, status and time taken (never bodies, tokens or keys).
+  // Health checks are left out; the platform makes them every few seconds.
+  app.use((req, res, next) => {
+    const started = Date.now();
+    res.on('finish', () => {
+      if (req.path === '/health') return;
+      console.log(JSON.stringify({ level: 'info', message: 'request', method: req.method, path: req.path, status: res.statusCode, ms: Date.now() - started }));
+    });
+    next();
+  });
   app.use(express.json({ limit: '64kb' }));
 
   /** The signed-in account, created with its free allowance the first time it is seen. */
