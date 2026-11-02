@@ -6,7 +6,7 @@ region: nyc
 services:
   - name: api
     github:
-      repo: akilisha/triviocity
+      repo: akilisha/queaura
       # The branch Phase 3 is built on; switch to the main branch once it is merged.
       branch: claude/sleepy-mayer-6dff0q
       deploy_on_push: true
