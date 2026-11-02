@@ -59,42 +59,71 @@ npm run typecheck
 
 ## Deploy (DigitalOcean App Platform)
 
-`.do/app.yaml` describes the service and its Postgres database. One-time setup, from the
-repository root:
+`.do/app.yaml` describes the service; it uses a managed Postgres cluster created first. Run from
+the repository root in Git Bash, signed in with `doctl auth init`.
 
-1. In the DigitalOcean dashboard, connect GitHub (Apps → Create App → GitHub) and give it access
-   to this repository. You can leave the wizard once GitHub is connected.
-2. Install `doctl` (on Windows: `winget install DigitalOcean.Doctl`) and sign it in with a token
-   from API → Tokens:
+### 1. The database (once)
 
-   ```bash
-   doctl auth init
-   ```
+Create the cluster (it takes a few minutes to come online; the second command waits for it):
 
-3. Check the spec, then create the app (it starts building straight away):
+```bash
+doctl databases create queaura-db --engine pg --version 17 --region nyc1 --size db-s-1vcpu-1gb --num-nodes 1
+```
 
-   ```bash
-   doctl apps spec validate backend/.do/app.yaml
-   ```
+```bash
+CLUSTER=$(doctl databases list --format ID,Name --no-header | awk '$2=="queaura-db"{print $1}'); until doctl databases get $CLUSTER --format Status --no-header | grep -q online; do sleep 15; done; echo online
+```
 
-   ```bash
-   doctl apps create --spec backend/.do/app.yaml
-   ```
+Create the app's database and user, then make the user its owner (Postgres 15+ lets only the
+owner create tables). This step uses the cluster's admin connection, so do it before step 2,
+which limits who may connect to the app:
 
-4. In the dashboard, open the app → Settings → `api` → Environment Variables, fill in the two
-   secrets, and save (it redeploys):
-   - `CLERK_JWT_KEY`: Clerk dashboard → API keys → JWT public key (the PEM text).
-   - `ANTHROPIC_API_KEY`: from the Anthropic console. Set a spending limit there.
-5. Find the app's address and check it:
+```bash
+doctl databases db create $CLUSTER queaura
+```
 
-   ```bash
-   doctl apps list --format Spec.Name,DefaultIngress
-   ```
+```bash
+doctl databases user create $CLUSTER queaura
+```
 
-   ```bash
-   curl https://<address>/health
-   ```
+```bash
+cd backend && DATABASE_URL="$(doctl databases connection $CLUSTER --format URI --no-header)" DATABASE_CA_CERT="$(doctl databases get-ca $CLUSTER --format Certificate --no-header)" npm run db:own -- queaura queaura; cd ..
+```
 
-   It answers `{"ok":true}`. Put the address in `app/.env.local` as `EXPO_PUBLIC_AI_BACKEND_URL`.
+It prints `queaura now owns queaura.`
 
-Later pushes to the branch named in the spec deploy automatically.
+### 2. The app
+
+The first time, create it; after that, apply spec changes with update (`doctl apps list` shows
+the app's ID):
+
+```bash
+doctl apps create --spec backend/.do/app.yaml
+```
+
+```bash
+doctl apps update <app-id> --spec backend/.do/app.yaml
+```
+
+Then, in the dashboard, open the app → Settings → `api` → Environment Variables, fill in the two
+secrets, and save (it redeploys):
+- `CLERK_JWT_KEY`: Clerk dashboard → API keys → JWT public key (the PEM text).
+- `ANTHROPIC_API_KEY`: from the Anthropic console. Set a spending limit there.
+
+### 3. Check it
+
+```bash
+doctl apps list --format Spec.Name,DefaultIngress
+```
+
+```bash
+curl https://<address>/health
+```
+
+It answers `{"ok":true}`. Put the address in `app/.env.local` as `EXPO_PUBLIC_AI_BACKEND_URL`.
+Later pushes to the branch named in the spec deploy automatically. If a deploy fails, its logs
+show why:
+
+```bash
+doctl apps logs <app-id> --type deploy
+```

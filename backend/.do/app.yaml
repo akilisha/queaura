@@ -54,8 +54,11 @@ services:
         scope: RUN_TIME
         type: SECRET
 databases:
-  # A development database: enough for testing. Move to a managed cluster before real users.
+  # A managed cluster, created beforehand (see README → Deploy). The app connects as its own user,
+  # which owns its own database.
   - name: db
     engine: PG
-    version: "16"
-    production: false
+    production: true
+    cluster_name: queaura-db
+    db_name: queaura
+    db_user: queaura
