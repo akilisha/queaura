@@ -29,7 +29,12 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
   /** The signed-in account, created with its free allowance the first time it is seen. */
   async function account(req: Request): Promise<string> {
     const id = await authenticate(req);
-    if (!id) throw new HttpError(401, 'Please sign in to use AI questions.');
+    if (!id) {
+      // A token that was sent but refused is a different problem from no token at all.
+      throw req.header('authorization')
+        ? new HttpError(401, "Your sign-in couldn't be checked. Please sign out and sign in again.")
+        : new HttpError(401, 'Please sign in to use AI questions.');
+    }
     await ensureAccount(db, id, config.FREE_AI_GAMES);
     return id;
   }

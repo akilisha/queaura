@@ -41,6 +41,11 @@ describe.skipIf(!url)('HTTP API (needs TEST_DATABASE_URL)', () => {
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: 'Please sign in to use AI questions.' });
   });
+  it('tells a refused sign-in apart from no sign-in', async () => {
+    const res = await fetch(`${base}/v1/balance`, { headers: { authorization: 'Bearer not-valid' } });
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "Your sign-in couldn't be checked. Please sign out and sign in again." });
+  });
   it('shows a new account its free allowance', async () => {
     const res = await fetch(`${base}/v1/balance`, { headers: { 'x-test-user': user } });
     expect(await res.json()).toEqual({ aiGames: 2, questionsLeft: 0, questionsPerAiGame: 50 });

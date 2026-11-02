@@ -20,7 +20,9 @@ export function clerkAuthenticator(options: { jwtKey?: string; secretKey?: strin
       // Throws on a forged, expired or malformed token.
       const payload = await verifyToken(token, { ...options, clockSkewInMs: 10_000 });
       return typeof payload.sub === 'string' && payload.sub ? payload.sub : null;
-    } catch {
+    } catch (e) {
+      // Why a token was refused (expired, wrong key, wrong instance); never the token itself.
+      console.warn(JSON.stringify({ level: 'warn', message: 'sign-in token refused', reason: e instanceof Error ? e.message : String(e) }));
       return null;
     }
   };
