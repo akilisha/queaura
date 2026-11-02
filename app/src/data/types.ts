@@ -10,6 +10,9 @@ export interface BankQuestion {
   choices?: Choice[];
   explanation?: string;
   source: 'manual' | 'ai';
+  /** What it's about; AI questions carry the topic they were written for (spec §4). */
+  category?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
   /** Shipped with the app (the starter bank). */
   builtIn?: boolean;
 }

@@ -64,6 +64,7 @@ function WizardStack() {
     <>
       <Stack screenOptions={options}>
         <Stack.Screen name="pick" options={{ title: 'CHOOSE A QUESTION', presentation: 'modal' }} />
+        <Stack.Screen name="ai" options={{ title: 'FILL WITH AI' }} />
       </Stack>
       {dialog}
     </>

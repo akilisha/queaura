@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Card, Muted, Screen } from '../../../components/ui';
+import { aiConfigured } from '../../../ai/settings';
+import { Button, Card, Muted, Screen } from '../../../components/ui';
 import { NextButton, StepFooter, StepHeader } from '../../../components/wizard';
 import { useLibrary } from '../../../data/library';
 import { plural, STYLES } from '../../../game/copy';
@@ -51,6 +52,13 @@ export default function SlotsStep() {
               </View>
             );
           })}
+          {aiConfigured && round.slots.some((qid) => qid === null || !library.byId.has(qid)) && (
+            <Button
+              tone="secondary"
+              label={`Fill ${plural(round.slots.filter((qid) => qid === null || !library.byId.has(qid)).length, 'empty slot')} with AI`}
+              onPress={() => router.push(`/games/${id}/ai?round=${r}`)}
+            />
+          )}
         </Card>
       ))}
       <StepFooter>

@@ -165,6 +165,7 @@ The wizard steps through: title and kind (**quiz** or **questionnaire**) → num
 - A standalone activity, independent of any game.
 - Manual entry: text, answer type, answer (and choices), optional explanation. A free-text question has no answer or explanation and fits questionnaires only. Number and choice questions ask "Is there a right answer?"; with no, they have no answer or explanation and fit questionnaires only. Writing a new question from a questionnaire's slot starts on no.
 - AI generation (signed-in users with AI games available; see §8): pick category, difficulty, answer type, and count → questions go into the bank. Alternatively, inside a game: "fill the empty slots in this round."
+  - Built (Phase 3, milestone 4): "Write questions with AI" on the Questions tab's AI card (topic, difficulty, answer type, 1 to 20 questions), and "Fill N empty slots with AI" on each round in the wizard's questions step (as many as there are empty slots, with answers that fit the round's style, the game's name as the suggested topic). Both end on a review screen showing each question with its answer and explanation, where the host keeps or leaves out each one; only kept questions are saved (left-out ones still count toward the AI game, and the screen says so). Questions filling slots are saved to the bank too, so discarding the game doesn't lose them. The host's existing questions on the topic are sent so they aren't repeated. AI questions carry their topic as their category.
 - All questions pass moderation before entering the bank (§9).
 
 ### 5.4 Lobby
