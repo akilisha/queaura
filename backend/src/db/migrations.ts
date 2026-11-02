@@ -54,6 +54,22 @@ const migrations: Record<string, Migration> = {
       await db.schema.dropTable('generations').execute();
     },
   },
+  // Hosted Postgres such as Supabase serves tables in the public schema through its own web API
+  // to anyone holding the project's public key, unless row-level security is on. With it on and
+  // no policies, that API sees nothing; the backend connects as the tables' owner, which bypasses
+  // it. Harmless on plain Postgres.
+  '0003_row_level_security': {
+    async up(db: Kysely<any>) {
+      for (const table of ['accounts', 'ledger', 'generations', 'kysely_migration', 'kysely_migration_lock']) {
+        await sql`alter table ${sql.table(table)} enable row level security`.execute(db);
+      }
+    },
+    async down(db: Kysely<any>) {
+      for (const table of ['accounts', 'ledger', 'generations', 'kysely_migration', 'kysely_migration_lock']) {
+        await sql`alter table ${sql.table(table)} disable row level security`.execute(db);
+      }
+    },
+  },
 };
 
 export async function migrateToLatest(db: Kysely<any>): Promise<void> {

@@ -57,40 +57,24 @@ TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/queaura_test npm test
 npm run typecheck
 ```
 
-## Deploy (DigitalOcean App Platform)
+## Deploy
 
-`.do/app.yaml` describes the service; it uses a managed Postgres cluster created first. Run from
-the repository root in Git Bash, signed in with `doctl auth init`.
+The service runs on DigitalOcean App Platform (`.do/app.yaml`); its Postgres database is on
+Supabase. Run commands from the repository root in Git Bash, signed in with `doctl auth init`.
 
-### 1. The database (once)
+### 1. The database (Supabase, once)
 
-Create the cluster (it takes a few minutes to come online; the second command waits for it):
+1. Create a Supabase project in the region nearest the app (the spec uses DigitalOcean `nyc`, so
+   US East). Keep the database password it asks for.
+2. Turn off Supabase's automatic Data API (project settings → Data API); the backend doesn't use
+   it. As a second guard, the backend switches row-level security on for its tables, so that API
+   would see nothing even if it were on.
+3. Copy the **Session pooler** connection string (the Connect button; port 5432), with your
+   password in place of `[YOUR-PASSWORD]`. Use the pooler: the direct address is IPv6-only, and
+   App Platform connects over IPv4.
+4. Download the SSL certificate (project settings → Database → SSL configuration).
 
-```bash
-doctl databases create queaura-db --engine pg --version 17 --region nyc1 --size db-s-1vcpu-1gb --num-nodes 1
-```
-
-```bash
-CLUSTER=$(doctl databases list --format ID,Name --no-header | awk '$2=="queaura-db"{print $1}'); until doctl databases get $CLUSTER --format Status --no-header | grep -q online; do sleep 15; done; echo online
-```
-
-Create the app's database and user, then make the user its owner (Postgres 15+ lets only the
-owner create tables). This step uses the cluster's admin connection, so do it before step 2,
-which limits who may connect to the app:
-
-```bash
-doctl databases db create $CLUSTER queaura
-```
-
-```bash
-doctl databases user create $CLUSTER queaura
-```
-
-```bash
-cd backend && DATABASE_URL="$(doctl databases connection $CLUSTER --format URI --no-header)" DATABASE_CA_CERT="$(doctl databases get-ca $CLUSTER --format Certificate --no-header)" npm run db:own -- queaura queaura; cd ..
-```
-
-It prints `queaura now owns queaura.`
+The backend creates its tables itself on its first start.
 
 ### 2. The app
 
@@ -105,8 +89,10 @@ doctl apps create --spec backend/.do/app.yaml
 doctl apps update <app-id> --spec backend/.do/app.yaml
 ```
 
-Then, in the dashboard, open the app → Settings → `api` → Environment Variables, fill in the two
+Then, in the dashboard, open the app → Settings → `api` → Environment Variables, fill in the
 secrets, and save (it redeploys):
+- `DATABASE_URL`: the session pooler connection string from step 1.
+- `DATABASE_CA_CERT`: the text of the certificate file from step 1.
 - `CLERK_JWT_KEY`: Clerk dashboard → API keys → JWT public key (the PEM text).
 - `ANTHROPIC_API_KEY`: from the Anthropic console. Set a spending limit there.
 
@@ -127,3 +113,6 @@ show why:
 ```bash
 doctl apps logs <app-id> --type deploy
 ```
+
+Supabase's free plan pauses a project after a week without activity; fine for testing, but move
+to a paid plan before real users.

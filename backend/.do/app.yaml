@@ -1,4 +1,5 @@
-# DigitalOcean App Platform: the backend service and its Postgres database (spec §2, §8).
+# DigitalOcean App Platform: the backend service (spec §2, §8). Its Postgres database is on
+# Supabase; the connection is a secret like the keys.
 # Create once with `doctl apps create --spec backend/.do/app.yaml` (see backend/README.md).
 # Secrets have no value here on purpose: enter them in the app's settings on DigitalOcean.
 name: queaura-backend
@@ -19,12 +20,6 @@ services:
     health_check:
       http_path: /health
     envs:
-      - key: DATABASE_URL
-        scope: RUN_TIME
-        value: ${db.DATABASE_URL}
-      - key: DATABASE_CA_CERT
-        scope: RUN_TIME
-        value: ${db.CA_CERT}
       - key: AI_PROVIDER
         scope: RUN_TIME
         value: anthropic
@@ -47,18 +42,15 @@ services:
         scope: RUN_TIME
         value: "50"
       # Secrets: set in the dashboard (Settings → api → Environment Variables), encrypted there.
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: DATABASE_CA_CERT
+        scope: RUN_TIME
+        type: SECRET
       - key: ANTHROPIC_API_KEY
         scope: RUN_TIME
         type: SECRET
       - key: CLERK_JWT_KEY
         scope: RUN_TIME
         type: SECRET
-databases:
-  # A managed cluster, created beforehand (see README → Deploy). The app connects as its own user,
-  # which owns its own database.
-  - name: db
-    engine: PG
-    production: true
-    cluster_name: queaura-db
-    db_name: queaura
-    db_user: queaura
