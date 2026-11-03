@@ -23,6 +23,8 @@ export interface LedgerTable {
   kind: LedgerKind;
   /** What caused it, such as a Google purchase token; one entry per kind and ref, ever. */
   ref: string | null;
+  /** Why, for entries made by hand (admin grants). */
+  note: ColumnType<string | null, string | null | undefined, string | null>;
   created_at: ColumnType<Date, never, never>;
 }
 

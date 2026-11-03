@@ -30,10 +30,10 @@ export async function balanceOf(db: Kysely<Database>, id: string): Promise<Balan
  * Adds or takes back AI games for a reason that must count once (a purchase token, a refund).
  * Returns false if that reason was already recorded, so repeated notifications change nothing.
  */
-export async function credit(db: Kysely<Database>, id: string, delta: number, kind: Exclude<LedgerKind, 'use'>, ref: string): Promise<boolean> {
+export async function credit(db: Kysely<Database>, id: string, delta: number, kind: Exclude<LedgerKind, 'use'>, ref: string, note?: string): Promise<boolean> {
   const row = await db
     .insertInto('ledger')
-    .values({ account_id: id, delta, kind, ref })
+    .values({ account_id: id, delta, kind, ref, note: note ?? null })
     .onConflict((c) => c.columns(['kind', 'ref']).where('ref', 'is not', null).doNothing())
     .returning('id')
     .executeTakeFirst();

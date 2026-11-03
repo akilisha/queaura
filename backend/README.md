@@ -23,6 +23,9 @@ over Postgres for the records, zod to check what comes in.
 | `GET /health` | The service and its database are up |
 | (all `/v1/` routes) | Need `Authorization: Bearer <Clerk session token>`; checked with Clerk's JWT public key, no network call |
 | `GET /v1/balance` | The signed-in host's AI games and questions left in the open one |
+| `POST /v1/purchases` | `{productId, purchaseToken}` → confirmed with Google Play, the pack's AI games credited once |
+| `POST /google/rtdn` | Google Play's purchase notifications (Pub/Sub push, Google-signed); a refund takes its AI games back |
+| `POST /admin/grants` | Grants AI games by hand (needs `ADMIN_TOKEN`); see below |
 | `POST /v1/generate` | `{topic, difficulty, answerType, count, avoid}` → checked questions in the app's shape, and the new balance |
 
 Generation pays before calling the model and gives back whatever isn't delivered, so a failure
@@ -122,3 +125,18 @@ doctl apps logs <app-id> --type deploy
 
 Supabase's free plan pauses a project after a week without activity; fine for testing, but move
 to a paid plan before real users.
+
+## Granting AI games by hand (promos, customer care, demos)
+
+`POST /admin/grants` with `Authorization: Bearer <ADMIN_TOKEN>`. Give the account's Clerk user id
+(`account`) or its email (`email`, which needs `CLERK_SECRET_KEY`); the person must have signed in
+to QueAura once. `aiGames` is 1 to 1000, or down to -100 to correct a mistake. The `reason` is kept
+with the grant in the ledger. `ref` is optional: the same ref grants only once, so a repeated
+request is harmless.
+
+```bash
+curl -X POST https://<backend>/admin/grants -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" -d '{"email":"host@example.com","aiGames":5,"reason":"Customer care: generation failed twice","ref":"care-2026-11-03-1"}'
+```
+
+The answer gives the account, whether it was granted (false if the ref was used before), and the
+new balance.

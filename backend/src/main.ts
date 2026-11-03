@@ -1,4 +1,5 @@
 import { createApp } from './app.ts';
+import { createClerkClient } from '@clerk/backend';
 import { clerkAuthenticator, notConfigured } from './auth.ts';
 import { loadConfig } from './config.ts';
 import { createDb } from './db/database.ts';
@@ -22,7 +23,9 @@ const play = config.GOOGLE_SERVICE_ACCOUNT_JSON ? googlePlay(config.GOOGLE_SERVI
 if (!play) console.warn(JSON.stringify({ level: 'warn', message: 'No Google service account: purchases will be refused.' }));
 const verifyPush = config.RTDN_AUDIENCE && config.RTDN_SERVICE_ACCOUNT ? pushVerifier(config.RTDN_AUDIENCE, config.RTDN_SERVICE_ACCOUNT) : null;
 if (!verifyPush) console.warn(JSON.stringify({ level: 'warn', message: 'Purchase notifications not set up: refunds will not take AI games back.' }));
-const server = createApp({ config, db, authenticate, providers: chain, filter: WordFilter.load(), play, verifyPush }).listen(config.PORT, () => {
+const clerk = config.CLERK_SECRET_KEY ? createClerkClient({ secretKey: config.CLERK_SECRET_KEY }) : null;
+const findAccountByEmail = clerk ? async (email: string) => (await clerk.users.getUserList({ emailAddress: [email], limit: 1 })).data[0]?.id ?? null : null;
+const server = createApp({ config, db, authenticate, providers: chain, filter: WordFilter.load(), play, verifyPush, findAccountByEmail }).listen(config.PORT, () => {
   console.log(JSON.stringify({ level: 'info', message: `Listening on port ${config.PORT}` }));
 });
 

@@ -70,6 +70,15 @@ const migrations: Record<string, Migration> = {
       }
     },
   },
+  // Why AI games were granted by hand (a promo, customer care, a demo): the audit trail.
+  '0004_ledger_note': {
+    async up(db: Kysely<any>) {
+      await db.schema.alterTable('ledger').addColumn('note', 'text').execute();
+    },
+    async down(db: Kysely<any>) {
+      await db.schema.alterTable('ledger').dropColumn('note').execute();
+    },
+  },
 };
 
 /** Creates [schema] if needed and brings its tables up to date; each schema keeps its own history. */

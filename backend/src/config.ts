@@ -96,6 +96,8 @@ const schema = z.object({
   /** Purchase notifications (Pub/Sub push): our endpoint's URL as the token audience, and the pushing service account. */
   RTDN_AUDIENCE: z.string().optional(),
   RTDN_SERVICE_ACCOUNT: z.string().optional(),
+  /** Protects /admin routes (granting AI games); long and random. Without it they don't exist. */
+  ADMIN_TOKEN: z.string().min(32, 'at least 32 characters').optional(),
   /** The active model's list prices in US dollars per million tokens, for the cost records. */
   AI_PRICE_INPUT: z.coerce.number().min(0).default(0.1),
   AI_PRICE_OUTPUT: z.coerce.number().min(0).default(0.5),

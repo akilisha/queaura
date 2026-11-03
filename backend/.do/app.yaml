@@ -70,3 +70,20 @@ services:
       - key: CLERK_JWT_KEY
         scope: RUN_TIME
         type: SECRET
+      # Admin grants: ADMIN_TOKEN protects them; CLERK_SECRET_KEY lets them find accounts by email.
+      - key: ADMIN_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      - key: CLERK_SECRET_KEY
+        scope: RUN_TIME
+        type: SECRET
+      # Google Play purchases and refund notifications.
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        scope: RUN_TIME
+        type: SECRET
+      - key: RTDN_AUDIENCE
+        scope: RUN_TIME
+        value: https://queaura-backend-whhaq.ondigitalocean.app/google/rtdn
+      - key: RTDN_SERVICE_ACCOUNT
+        scope: RUN_TIME
+        type: SECRET

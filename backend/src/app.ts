@@ -2,6 +2,7 @@ import express, { type Request } from 'express';
 import { sql, type Kysely } from 'kysely';
 import type { Authenticator } from './auth.ts';
 import type { Config } from './config.ts';
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import { purchaseAccountId, type GooglePlay } from './billing/google.ts';
 import { balanceOf, charge, credit, ensureAccount, giveBack, purchaseOf } from './credits/ledger.ts';
@@ -24,12 +25,25 @@ export interface Deps {
   play: GooglePlay | null;
   /** Checks a purchase notification came from Google; null when notifications aren't set up. */
   verifyPush: ((authorization: string | undefined) => Promise<boolean>) | null;
+  /** Finds an account (Clerk user id) by email, for admin grants; null without Clerk's secret key. */
+  findAccountByEmail?: ((email: string) => Promise<string | null>) | null;
 }
+
+const grantRequest = z
+  .object({
+    account: z.string().min(1).max(100).optional(),
+    email: z.string().email().max(200).optional(),
+    aiGames: z.number().int().min(-100).max(1000).refine((n) => n !== 0, 'not zero'),
+    reason: z.string().trim().min(3).max(200),
+    /** Makes the grant happen once however often it's sent, e.g. "promo-nov-2026-alex". */
+    ref: z.string().trim().min(1).max(100).optional(),
+  })
+  .refine((g) => (g.account ? 1 : 0) + (g.email ? 1 : 0) === 1, 'give either account or email');
 
 const purchaseRequest = z.object({ productId: z.string().min(1).max(100), purchaseToken: z.string().min(1).max(1000) });
 
 /** The HTTP API. Built from its dependencies so tests can run it against a test database. */
-export function createApp({ config, db, authenticate, providers, filter, play, verifyPush }: Deps) {
+export function createApp({ config, db, authenticate, providers, filter, play, verifyPush, findAccountByEmail = null }: Deps) {
   const app = express();
   app.disable('x-powered-by');
   // One line per request: route, status and time taken (never bodies, tokens or keys).
@@ -217,6 +231,40 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
     }
     // Acknowledge everything else too, or Pub/Sub keeps redelivering it.
     res.status(204).end();
+  });
+
+  /** The admin secret, compared in constant time; without ADMIN_TOKEN the admin routes don't exist. */
+  function admin(req: Request): void {
+    if (!config.ADMIN_TOKEN) throw new HttpError(404, 'Not found.');
+    const header = req.header('authorization') ?? '';
+    const given = header.startsWith('Bearer ') ? header.slice(7) : '';
+    const digest = (s: string) => createHash('sha256').update(s).digest();
+    if (!given || !timingSafeEqual(digest(given), digest(config.ADMIN_TOKEN))) {
+      console.warn(JSON.stringify({ level: 'warn', message: 'admin request refused' }));
+      throw new HttpError(401, 'Not allowed.');
+    }
+  }
+
+  /**
+   * Grants AI games by hand: promos, customer care, demos (a negative number corrects a mistake).
+   * Every grant is in the ledger with its reason, and a ref makes it happen only once.
+   */
+  app.post('/admin/grants', async (req, res) => {
+    admin(req);
+    const parsed = grantRequest.safeParse(req.body);
+    if (!parsed.success) throw new HttpError(400, parsed.error.issues.map((i) => `${i.path.join('.') || 'request'}: ${i.message}`).join('; '));
+    const g = parsed.data;
+    let id = g.account ?? null;
+    if (g.email) {
+      if (!findAccountByEmail) throw new HttpError(503, 'Finding accounts by email needs CLERK_SECRET_KEY; give the account id instead.');
+      id = await findAccountByEmail(g.email);
+      if (!id) throw new HttpError(404, 'No account with that email. The person needs to sign in to QueAura once first.');
+    }
+    await ensureAccount(db, id!, config.FREE_AI_GAMES);
+    const ref = g.ref ?? `grant-${randomUUID()}`;
+    const granted = await credit(db, id!, g.aiGames, 'adjustment', ref, g.reason);
+    console.log(JSON.stringify({ level: 'info', message: 'admin grant', account: id, aiGames: g.aiGames, reason: g.reason, ref, granted }));
+    res.json({ account: id, granted, ref, balance: await balanceOf(db, id!) });
   });
 
   app.use((_req, _res) => {
