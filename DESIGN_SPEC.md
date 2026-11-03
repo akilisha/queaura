@@ -27,6 +27,8 @@ If someone installs the app and can't figure out how to create or run a game, th
 | TV display | Same web client in a read-only display mode, no input controls | Samsung / LG smart TV browser |
 | Cloud backend | AI question generation, moderation, metering, AI game balances and purchases | Cloud: Node.js with Express 5 on DigitalOcean App Platform; Kysely over Postgres on Supabase: one database, each environment in its own schema (`queaura_dev`, `queaura_prod`), row-level security on, Supabase's Data API off |
 
+The website, queaura.com, is static pages in `site/` (home, privacy policy, terms of service) on Cloudflare Pages. The privacy policy describes what the code actually does with data: when that changes, update `site/privacy.html` in the same change.
+
 Gameplay is LAN-only. The cloud backend is involved only for AI generation and buying AI games; a game with manual questions never touches it.
 
 ### 2.1 Stack guidance

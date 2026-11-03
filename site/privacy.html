@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy · QueAura</title>
+  <meta name="description" content="What QueAura collects, why, where it goes, and how to have it deleted.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main>
+  <header>
+    <a class="logo" href="/"><span class="que">Que</span><span class="aura">Aura</span></a>
+    <nav><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  </header>
+
+  <h1>Privacy policy</h1>
+  <p class="muted">Effective 3 November 2026</p>
+
+  <p>QueAura is a trivia game. A host runs it from an Android app; players join from their phone's web browser on the same Wi-Fi. This policy explains what information is involved, where it goes, and your choices. QueAura is operated by [OPERATOR NAME] ("we"). Questions: <a href="mailto:support@queaura.com">support@queaura.com</a>.</p>
+
+  <div class="card">
+    <p><strong>In short:</strong> games run on the host's own phone and Wi-Fi, not on our servers. Players give only a nickname, which never leaves the host's phone. We only receive information when a host signs in to use AI-written questions or buys AI games, and then only what that needs. We don't sell information, show ads, or use tracking or analytics in the game.</p>
+  </div>
+
+  <h2>Playing a game (players and the TV)</h2>
+  <p>Players join by opening a web page served by the host's phone over the local network. They choose a nickname and an emoji; no name, email or account is asked for. The nickname, the emoji and the answers stay on the host's phone for the game and are not sent to us or anyone else. The page stores one random token in the browser so a player who reloads gets their seat back; it identifies nothing else. The pages use no cookies, analytics, ads or outside services.</p>
+  <p>The host's phone keeps a technical log of connections (when players join and leave, their nickname and their phone's local network address) to help with connection problems. It stays on the host's phone.</p>
+
+  <h2>Hosting without an account</h2>
+  <p>The host's questions, games and questionnaire results are stored only on the host's phone. A host can export questionnaire results as a file and share it with apps they choose; we never receive it. A questionnaire collects only what its questions ask, so a host shouldn't ask for information players wouldn't want shared.</p>
+
+  <h2>AI-written questions (signed-in hosts)</h2>
+  <p>To use AI-written questions a host signs in, with an email code or a Google account. Then:</p>
+  <table>
+    <thead><tr><th>What</th><th>Why</th><th>Where it goes</th></tr></thead>
+    <tbody>
+      <tr><td>Email address, and with Google sign-in the name and profile picture from Google</td><td>To sign the host in</td><td>Clerk, our sign-in provider</td></tr>
+      <tr><td>An account id, the host's balance of AI games and its history (allowance, purchases, use, refunds, grants)</td><td>To keep track of AI games</td><td>Our backend, hosted on DigitalOcean, with its database on Supabase (both in the United States)</td></tr>
+      <tr><td>The topic, difficulty and type of questions asked for, and the host's existing questions on that topic (so they aren't repeated)</td><td>To write the questions</td><td>Passed through our backend to an AI provider: Anthropic, and if it is unavailable OpenAI or DeepSeek. We don't keep the topic or the questions.</td></tr>
+      <tr><td>For each request: when it was made, which AI model answered, how many questions, how long it took and what it cost us</td><td>To run the service, find problems and set prices</td><td>Our backend</td></tr>
+    </tbody>
+  </table>
+  <p>The AI providers process requests under their own terms for business customers. Anthropic and OpenAI are in the United States; DeepSeek is in China. Requests contain the quiz topic and questions, not the host's name or email.</p>
+
+  <h2>Buying AI games</h2>
+  <p>Purchases are made through Google Play, which handles payment; we never see card details. We receive from Google the product bought, the order and purchase identifiers, and whether it was paid or refunded, so we can add or take back AI games. Each purchase carries a scrambled form of the host's account id, so we can match it to the right account; it reveals nothing about the host.</p>
+
+  <h2>Server logs</h2>
+  <p>Our backend logs each request's route, result and duration, and events such as purchases and sign-in failures, to keep the service working. Logs don't contain questions, topics, passwords or payment details. Our hosting provider may also record technical details such as IP addresses.</p>
+
+  <h2>How long we keep it</h2>
+  <p>Account information and AI-game history are kept while the account exists, and purchase records as long as the law requires for accounting. Logs are kept for a limited time by our hosting provider. Ask us to delete your account and we delete it, except purchase records we must keep.</p>
+
+  <h2>Your choices and rights</h2>
+  <p>You can use QueAura without an account. Signed-in hosts can ask us at <a href="mailto:support@queaura.com">support@queaura.com</a> for a copy of their information, to correct it, or to delete their account. Depending on where you live (for example the EU, the UK or California) you may have further rights, including to object or complain to your data protection authority. We don't sell or share personal information for advertising.</p>
+
+  <h2>Children</h2>
+  <p>Hosting and signing in are for adults. Anyone may play at a host's invitation; players give only a nickname, which stays on the host's phone. We don't knowingly collect personal information from children. If you believe a child has signed in, contact us and we'll delete the account.</p>
+
+  <h2>Security</h2>
+  <p>Our backend is reached only over encrypted connections, and its database connection is encrypted too. Games on the local network use plain web pages, which is why nothing personal is asked of players.</p>
+
+  <h2>Changes</h2>
+  <p>We'll post any changes here with a new effective date, and tell signed-in hosts in the app if a change is significant.</p>
+
+  <footer>© 2026 QueAura · <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of service</a> · <a href="mailto:support@queaura.com">support@queaura.com</a></footer>
+</main>
+</body>
+</html>
