@@ -23,7 +23,7 @@ describe.skipIf(!url)('HTTP API (needs TEST_DATABASE_URL)', () => {
     db = await freshDb();
     const config = loadConfig({ DATABASE_URL: url, FREE_AI_GAMES: '2', GENERATE_PER_MINUTE: '6' });
     // Test sign-in: the header names the account. Production uses Clerk.
-    const app = createApp({ config, db, authenticate: async (req) => req.header('x-test-user') ?? null, provider: { name: 'fake', model: 'fake-1', complete: (s, u) => provider!.complete(s, u) }, filter: WordFilter.load() });
+    const app = createApp({ config, db, authenticate: async (req) => req.header('x-test-user') ?? null, providers: [{ provider: { name: 'fake', model: 'fake-1', complete: (s: string, u: string) => provider!.complete(s, u) }, price: { input: 2, output: 10 } }], filter: WordFilter.load() });
     server = app.listen(0);
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   });

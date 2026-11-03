@@ -32,14 +32,15 @@ export class ProviderError extends Error {
 }
 
 const MAX_TOKENS = 16000;
-const TIMEOUT_MS = 90_000;
+/** Per attempt. With fallbacks configured, a provider that hangs costs one timeout, then the next one is tried. */
+const TIMEOUT_MS = 60_000;
 
 /** Models that accept the server-side refusal fallback (Claude API, `fallbacks: "default"`). */
 const FALLBACK_MODELS = /^claude-(fable-5|opus-5|sonnet-5-5)/;
 
 /** [baseURL] is for tests, which point the adapter at a local fake. */
-export function anthropicProvider(apiKey: string, model: string, effort: 'low' | 'medium' | 'high', baseURL?: string): Provider {
-  const client = new Anthropic({ apiKey, timeout: TIMEOUT_MS, maxRetries: 1, ...(baseURL ? { baseURL } : {}) });
+export function anthropicProvider(apiKey: string, model: string, effort: 'low' | 'medium' | 'high', baseURL?: string, retries = 1): Provider {
+  const client = new Anthropic({ apiKey, timeout: TIMEOUT_MS, maxRetries: retries, ...(baseURL ? { baseURL } : {}) });
   return {
     name: 'anthropic',
     model,
@@ -73,9 +74,9 @@ export const COMPATIBLE = {
   moonshot: { baseURL: 'https://api.moonshot.ai/v1', tokenParam: 'max_tokens' },
 } as const;
 
-export function compatibleProvider(name: keyof typeof COMPATIBLE, apiKey: string, model: string, baseURLOverride?: string): Provider {
+export function compatibleProvider(name: keyof typeof COMPATIBLE, apiKey: string, model: string, baseURLOverride?: string, retries = 1): Provider {
   const { baseURL, tokenParam } = COMPATIBLE[name];
-  const client = new OpenAI({ apiKey, baseURL: baseURLOverride ?? baseURL, timeout: TIMEOUT_MS, maxRetries: 1 });
+  const client = new OpenAI({ apiKey, baseURL: baseURLOverride ?? baseURL, timeout: TIMEOUT_MS, maxRetries: retries });
   return {
     name,
     model,

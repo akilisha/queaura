@@ -6,8 +6,8 @@ import { balanceOf, charge, ensureAccount, giveBack } from './credits/ledger.ts'
 import type { Database, GenerationOutcome } from './db/database.ts';
 import { generateRequest } from './generation/contract.ts';
 import { generate } from './generation/generate.ts';
-import { costMicroUsd } from './generation/index.ts';
-import { ProviderError, type Provider } from './generation/providers.ts';
+import { costMicroUsd, type Link } from './generation/index.ts';
+import { ProviderError } from './generation/providers.ts';
 import { errorHandler, HttpError } from './http.ts';
 import type { WordFilter } from './moderation/wordFilter.ts';
 
@@ -15,13 +15,13 @@ export interface Deps {
   config: Config;
   db: Kysely<Database>;
   authenticate: Authenticator;
-  /** Null when no AI provider is configured: generation answers that it is unavailable. */
-  provider: Provider | null;
+  /** The providers to try in order (spec §8); empty means generation answers it is unavailable. */
+  providers: Link[];
   filter: WordFilter;
 }
 
 /** The HTTP API. Built from its dependencies so tests can run it against a test database. */
-export function createApp({ config, db, authenticate, provider, filter }: Deps) {
+export function createApp({ config, db, authenticate, providers, filter }: Deps) {
   const app = express();
   app.disable('x-powered-by');
   // One line per request: route, status and time taken (never bodies, tokens or keys).
@@ -85,7 +85,7 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
     const request = parsed.data;
     const word = filter.find(request.topic);
     if (word) throw new HttpError(400, `"${word}" can't be used in a topic: questions show on shared screens like the TV.`);
-    if (!provider) throw new HttpError(503, 'AI questions are not available right now. Please try again later.');
+    if (providers.length === 0) throw new HttpError(503, 'AI questions are not available right now. Please try again later.');
     await withinLimits(id);
 
     const paid = await charge(db, id, request.count, config.QUESTIONS_PER_AI_GAME);
@@ -95,48 +95,64 @@ export function createApp({ config, db, authenticate, provider, filter }: Deps) 
         : new HttpError(400, `Ask for at most ${config.QUESTIONS_PER_AI_GAME} questions at a time.`);
     }
 
-    const started = Date.now();
-    const record = (outcome: GenerationOutcome, delivered: number, rejected: Record<string, number>, tokens = { input: 0, output: 0 }, model = provider.model) => {
-      // One line per generation, so the logs show how long each took and how it ended.
-      console.log(JSON.stringify({ level: 'info', message: 'generation', outcome, model, requested: request.count, delivered, durationMs: Date.now() - started, rejected }));
+    /** Every attempt is recorded with the model that made it and what it cost. */
+    const record = (link: Link, attempt: number, started: number, outcome: GenerationOutcome, delivered: number, rejected: Record<string, number>, tokens = { input: 0, output: 0 }, model = link.provider.model) => {
+      console.log(JSON.stringify({ level: 'info', message: 'generation', attempt, provider: link.provider.name, outcome, model, requested: request.count, delivered, durationMs: Date.now() - started, rejected }));
       return db
         .insertInto('generations')
         .values({
           account_id: id,
-          provider: provider.name,
+          provider: link.provider.name,
           model,
           requested: request.count,
           delivered,
           rejected: JSON.stringify(rejected),
           input_tokens: tokens.input,
           output_tokens: tokens.output,
-          cost_micro_usd: costMicroUsd(config, tokens.input, tokens.output),
+          cost_micro_usd: costMicroUsd(link.price, tokens.input, tokens.output),
           duration_ms: Date.now() - started,
           outcome,
         })
         .execute();
     };
 
-    let result;
-    try {
-      result = await generate(provider, filter, request);
-    } catch (e) {
-      await giveBack(db, id, request.count);
-      const kind = e instanceof ProviderError ? e.kind : 'failed';
-      console.error(JSON.stringify({ level: 'error', message: 'generation failed', kind, detail: String(e instanceof Error ? e.message : e) }));
-      await record(kind === 'refused' ? 'refused' : 'failed', 0, {});
-      throw kind === 'refused'
-        ? new HttpError(422, "The AI couldn't write questions on that topic. Try a different one.")
-        : new HttpError(503, "The AI couldn't write questions just now. Nothing was used up; please try again.");
+    // The main provider first, then each fallback (spec §8). Fail over when a provider is down,
+    // out of credit, slow, cut off, refuses, or returns nothing usable; never when the model judges
+    // the topic unsuitable, or a bad topic would just be shopped around until one model agreed.
+    let lastFailure: 'refused' | 'failed' | 'unusable' = 'failed';
+    for (const [attempt, link] of providers.entries()) {
+      const started = Date.now();
+      let result;
+      try {
+        result = await generate(link.provider, filter, request);
+      } catch (e) {
+        const refused = e instanceof ProviderError && e.kind === 'refused';
+        console.error(JSON.stringify({ level: 'error', message: 'generation failed', attempt, provider: link.provider.name, model: link.provider.model, kind: e instanceof ProviderError ? e.kind : 'failed', detail: String(e instanceof Error ? e.message : e) }));
+        await record(link, attempt, started, refused ? 'refused' : 'failed', 0, {});
+        lastFailure = refused ? 'refused' : 'failed';
+        continue;
+      }
+      const { questions, declined, rejected, completion } = result;
+      const tokens = { input: completion.inputTokens, output: completion.outputTokens };
+      if (questions.length === 0 && !declined) {
+        await record(link, attempt, started, 'unusable', 0, rejected, tokens, completion.model);
+        lastFailure = 'unusable';
+        continue;
+      }
+      if (questions.length < request.count) await giveBack(db, id, request.count - questions.length);
+      await record(link, attempt, started, questions.length > 0 ? 'ok' : 'declined', questions.length, rejected, tokens, completion.model);
+      if (questions.length === 0) throw new HttpError(422, "That topic isn't suitable for a family-friendly quiz. Try a different one.");
+      res.json({ questions, balance: await balanceOf(db, id) });
+      return;
     }
 
-    const { questions, declined, rejected, completion } = result;
-    if (questions.length < request.count) await giveBack(db, id, request.count - questions.length);
-    const outcome: GenerationOutcome = questions.length > 0 ? 'ok' : declined ? 'declined' : 'unusable';
-    await record(outcome, questions.length, rejected, { input: completion.inputTokens, output: completion.outputTokens }, completion.model);
-    if (outcome === 'declined') throw new HttpError(422, "That topic isn't suitable for a family-friendly quiz. Try a different one.");
-    if (outcome === 'unusable') throw new HttpError(503, "The AI's questions didn't pass our checks. Nothing was used up; please try again.");
-    res.json({ questions, balance: await balanceOf(db, id) });
+    // Every provider failed: nothing was delivered, so nothing is used up.
+    await giveBack(db, id, request.count);
+    throw lastFailure === 'refused'
+      ? new HttpError(422, "The AI couldn't write questions on that topic. Try a different one.")
+      : lastFailure === 'unusable'
+        ? new HttpError(503, "The AI's questions didn't pass our checks. Nothing was used up; please try again.")
+        : new HttpError(503, "The AI couldn't write questions just now. Nothing was used up; please try again.");
   });
 
   app.use((_req, _res) => {

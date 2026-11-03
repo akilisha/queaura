@@ -3,7 +3,7 @@ import { clerkAuthenticator, notConfigured } from './auth.ts';
 import { loadConfig } from './config.ts';
 import { createDb } from './db/database.ts';
 import { migrateToLatest } from './db/migrations.ts';
-import { providerFrom } from './generation/index.ts';
+import { chainFrom } from './generation/index.ts';
 import { WordFilter } from './moderation/wordFilter.ts';
 
 const config = loadConfig();
@@ -13,11 +13,11 @@ if (!signIn) console.warn(JSON.stringify({ level: 'warn', message: 'No Clerk key
 const authenticate = signIn ? clerkAuthenticator({ jwtKey: config.CLERK_JWT_KEY, secretKey: config.CLERK_SECRET_KEY }) : notConfigured;
 await migrateToLatest(db, config.DATABASE_SCHEMA);
 
-const provider = providerFrom(config);
-if (!provider) {
-  console.warn(JSON.stringify({ level: 'warn', message: `No key for the AI provider "${config.AI_PROVIDER}": generation will answer that AI questions are unavailable.` }));
-}
-const server = createApp({ config, db, authenticate, provider, filter: WordFilter.load() }).listen(config.PORT, () => {
+const { chain, skipped } = chainFrom(config);
+for (const s of skipped) console.warn(JSON.stringify({ level: 'warn', message: `No key for ${s}: left out of the AI providers.` }));
+if (chain.length === 0) console.warn(JSON.stringify({ level: 'warn', message: 'No AI provider has a key: generation will answer that AI questions are unavailable.' }));
+console.log(JSON.stringify({ level: 'info', message: 'AI providers, in order', providers: chain.map((l) => `${l.provider.name}:${l.provider.model}`) }));
+const server = createApp({ config, db, authenticate, providers: chain, filter: WordFilter.load() }).listen(config.PORT, () => {
   console.log(JSON.stringify({ level: 'info', message: `Listening on port ${config.PORT}` }));
 });
 

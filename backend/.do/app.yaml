@@ -30,16 +30,21 @@ services:
         value: anthropic
       - key: AI_MODEL
         scope: RUN_TIME
-        value: claude-sonnet-5-5
+        value: claude-haiku-5-5
       - key: AI_EFFORT
         scope: RUN_TIME
         value: medium
       - key: AI_PRICE_INPUT
         scope: RUN_TIME
-        value: "2"
+        value: "0.1"
       - key: AI_PRICE_OUTPUT
         scope: RUN_TIME
-        value: "10"
+        value: "0.5"
+      # Tried in order when the main provider fails (docs/MODEL_COMPARISON.md):
+      # provider:model:input price:output price, in US dollars per million tokens.
+      - key: AI_FALLBACKS
+        scope: RUN_TIME
+        value: openai:gpt-6.1-sol:2:10,deepseek:deepseek-flash:0.3:1.2
       - key: FREE_AI_GAMES
         scope: RUN_TIME
         value: "2"
@@ -54,6 +59,12 @@ services:
         scope: RUN_TIME
         type: SECRET
       - key: ANTHROPIC_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: OPENAI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: DEEPSEEK_API_KEY
         scope: RUN_TIME
         type: SECRET
       - key: CLERK_JWT_KEY
