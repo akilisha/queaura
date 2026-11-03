@@ -365,6 +365,16 @@ Backend: Clerk auth, AI games (free allowance, packs through Google Play Billing
 
 → **Usability test with the remaining 2 testers.**
 
+### Phase 4 — Production readiness
+Before real users: observability, logging and error alerting across every part, so problems are seen and acted on before hosts report them.
+- **Backend:** structured logs kept and searchable beyond the platform's short window; request metrics (rate, errors, latency per route); AI metrics (per provider: failures, failovers, latency, cost per AI game); alerts on error spikes, every provider failing, a provider's credit running low, slow responses, and the health check failing; uptime checks from outside.
+- **Host app:** crash and error reporting with enough context to reproduce (app version, device, screen), never questions, answers or player names; a way for a host to send a problem report.
+- **Game server on the phone:** its event log (spec §3.5) attached to a problem report when the host chooses to send one.
+- **Player and TV pages:** client errors reported back to the host's phone, and from there with a problem report.
+- **Payments:** alerts on failed purchase confirmations and on refunds.
+- **Privacy:** nothing collected that identifies players; hosts' data only as needed, said plainly in the privacy policy.
+Tools to choose then (see §12). Also in this phase: the production database plan and backups, moving dev and prod apart, the licenses screen (fonts, word list), and the store listing.
+
 ---
 
 ## 12. Open decisions
@@ -376,3 +386,4 @@ Backend: Clerk auth, AI games (free allowance, packs through Google Play Billing
 5. Prices, pack sizes, the subscription's limit and the size of the free allowance: configurable, set from measured cost data (§8).
 6. Default durations per style: starting values set (§6.3); tune in usability tests.
 7. ~~Closest-without-going-over tie and exact-answer rules.~~ Decided for Phase 1: tied winners each earn full points, exact answers earn a 50-point bonus (§6.5); tune in testing.
+8. Observability tools (Phase 4): where logs are kept, metrics and alerts (for example the hosting platform's own, or a service such as Sentry or Grafana Cloud), and crash reporting for the app.
