@@ -68,7 +68,8 @@ if (args.includes('--list-models')) {
 }
 
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null;
-const candidates = config.candidates.filter((c) => !only || c.model.includes(only));
+// --only takes one or more comma-separated parts of model names: --only gpt,deepseek
+const candidates = config.candidates.filter((c) => !only || only.split(',').some((part) => c.model.includes(part)));
 const missing = [...new Set(candidates.filter((c) => !KEYS[c.provider]).map((c) => c.provider)), ...(KEYS.anthropic ? [] : ['anthropic (fact-checker)'])];
 if (missing.length) {
   console.error(`Missing keys: ${[...new Set(missing)].join(', ')}`);
