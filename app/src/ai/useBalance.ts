@@ -1,6 +1,7 @@
 import { useAuth } from '@clerk/expo';
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useStore } from './Store';
 import { AI_BACKEND_URL } from './settings';
 import { AiError, getBalance, type Backend, type Balance } from './api';
 
@@ -26,5 +27,10 @@ export function useBalance() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
   useFocusEffect(refresh);
+  // A purchase just added AI games: show them straight away.
+  const purchases = useStore()?.version ?? 0;
+  useEffect(() => {
+    if (purchases > 0) refresh();
+  }, [purchases, refresh]);
   return { balance, error, refresh };
 }

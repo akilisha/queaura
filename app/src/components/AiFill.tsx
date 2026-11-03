@@ -122,6 +122,7 @@ export function AiFill({ game, topic: suggested, onSaved }: { game: GameFormat; 
         {results.map((r) => (
           <Card key={r.round} title={`Round ${r.round + 1} · ${STYLES[game.rounds[r.round].style].name} · ${r.topic}`}>
             {r.error && <ErrorText>{r.error}</ErrorText>}
+            {r.error?.includes('no AI games left') && <Button label="Get more AI games" onPress={() => router.push('/get-ai-games')} />}
             {!r.error && r.questions.length < (plan.find((p) => p.round === r.round)?.count ?? 0) && (
               <Muted>Some questions didn't pass our checks and weren't counted; their slots stay empty.</Muted>
             )}

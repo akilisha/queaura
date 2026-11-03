@@ -3,6 +3,7 @@ import { tokenCache } from '@clerk/expo/token-cache';
 import { useFonts } from 'expo-font';
 import type { ReactNode } from 'react';
 import { aiConfigured, CLERK_PUBLISHABLE_KEY } from '../ai/settings';
+import { StoreProvider } from '../ai/Store';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -44,6 +45,7 @@ export default function Layout() {
         <Stack.Screen name="questions/[id]" options={{ title: 'QUESTION' }} />
         <Stack.Screen name="ai-write" options={{ title: 'WRITE WITH AI' }} />
         <Stack.Screen name="games/create-with-ai" options={{ title: 'GAME WITH AI' }} />
+        <Stack.Screen name="get-ai-games" options={{ title: 'AI GAMES', presentation: 'modal' }} />
         <Stack.Screen name="sign-in" options={{ title: 'SIGN IN', presentation: 'modal' }} />
         <Stack.Screen name="results/[id]" options={{ title: 'RESULTS' }} />
         {/* The wizard has its own stack and headers. */}
@@ -58,7 +60,7 @@ function Accounts({ children }: { children: ReactNode }) {
   if (!aiConfigured) return <>{children}</>;
   return (
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache}>
-      {children}
+      <StoreProvider>{children}</StoreProvider>
     </ClerkProvider>
   );
 }

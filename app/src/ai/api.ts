@@ -6,6 +6,8 @@ export interface Balance {
   /** Questions left in the AI game already opened. */
   questionsLeft: number;
   questionsPerAiGame: number;
+  /** Sent with each purchase so Google returns it and the backend can match the account. */
+  purchaseAccountId?: string;
 }
 
 /** A failure the host can read as is. */

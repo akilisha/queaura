@@ -29,7 +29,8 @@
       "expo-sharing",
       "@clerk/expo",
       "expo-secure-store",
-      "@clerk/expo-google-signin"
+      "@clerk/expo-google-signin",
+      "expo-iap"
     ],
     "scheme": "queaura",
     "backgroundColor": "#120A1F"

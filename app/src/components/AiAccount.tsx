@@ -44,6 +44,7 @@ function Account() {
       {!balance && !error && <Muted>Checking your AI games…</Muted>}
       {error && <ErrorText>{error}</ErrorText>}
       <Button label="Write questions with AI" onPress={() => router.push('/ai-write')} />
+      <Button tone="secondary" label="Get more AI games" onPress={() => router.push('/get-ai-games')} />
       <Button tone="secondary" label="Sign out" onPress={() => void signOut()} />
     </Card>
   );

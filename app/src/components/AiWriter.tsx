@@ -133,6 +133,7 @@ export function AiWriter({
         </Muted>
       )}
       {error && <ErrorText>{error}</ErrorText>}
+      {error?.includes('no AI games left') && <Button label="Get more AI games" onPress={() => router.push('/get-ai-games')} />}
       <Button big label={writing ? 'Writing… (up to a minute)' : 'Write questions'} disabled={writing || !topic.trim()} onPress={write} />
     </Card>
   );
