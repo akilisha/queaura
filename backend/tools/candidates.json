@@ -1,10 +1,64 @@
 {
-  "_about": "Models to compare (Phase 3, milestone 6). Prices: list prices in US dollars per million tokens (input, output). Anthropic's are from its published price list (checked 2026-10); fill in the others from each provider's pricing page before running.",
+  "_about": "Models to compare (Phase 3, milestone 6). Prices: list prices in US dollars per million tokens (input, output); null where not yet looked up, in which case the report gives token counts and cost is worked out afterwards.",
   "candidates": [
-    { "provider": "anthropic", "model": "claude-haiku-5-5", "input": 0.1, "output": 0.5 },
-    { "provider": "anthropic", "model": "claude-sonnet-5-5", "input": 2, "output": 10 },
-    { "provider": "anthropic", "model": "claude-opus-5-5", "input": 4, "output": 20 }
+    {
+      "provider": "anthropic",
+      "model": "claude-haiku-5-5",
+      "input": 0.1,
+      "output": 0.5
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-sonnet-5-5",
+      "input": 2,
+      "output": 10
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-opus-5-5",
+      "input": 4,
+      "output": 20
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-6.1-sol",
+      "input": null,
+      "output": null
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "input": null,
+      "output": null
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "input": null,
+      "output": null
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "input": null,
+      "output": null
+    },
+    {
+      "provider": "moonshot",
+      "model": "kimi-k3.1-pro",
+      "input": null,
+      "output": null
+    }
   ],
-  "topics": ["Space", "World geography", "1990s music", "Football", "The human body", "Famous paintings", "Food and cooking", "Inventions"],
+  "topics": [
+    "Space",
+    "World geography",
+    "1990s music",
+    "Football",
+    "The human body",
+    "Famous paintings",
+    "Food and cooking",
+    "Inventions"
+  ],
   "questionsPerTopic": 10
 }

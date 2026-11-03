@@ -35,11 +35,14 @@ const JUDGE_PRICE = { input: 4, output: 20, perSearch: 0.01 };
 const QUESTIONS_PER_AI_GAME = 50;
 const PACK = { price: 4.99, games: 10, storeCut: 0.15 };
 
+// With COMPARE_KEYS_FROM_PROXY=1, a network proxy adds the real keys to requests (Claude Code's
+// network secrets do this), so the script sends a placeholder the proxy replaces.
+const viaProxy = process.env.COMPARE_KEYS_FROM_PROXY === '1' ? 'replaced-by-proxy' : undefined;
 const KEYS: Record<ProviderName, string | undefined> = {
   anthropic: process.env.ANTHROPIC_API_KEY,
-  openai: process.env.OPENAI_API_KEY,
-  deepseek: process.env.DEEPSEEK_API_KEY,
-  moonshot: process.env.MOONSHOT_API_KEY,
+  openai: process.env.OPENAI_API_KEY ?? viaProxy,
+  deepseek: process.env.DEEPSEEK_API_KEY ?? viaProxy,
+  moonshot: process.env.MOONSHOT_API_KEY ?? viaProxy,
 };
 
 const args = process.argv.slice(2);
@@ -186,7 +189,7 @@ for (const c of candidates) {
 
 const money = (n: number) => `$${n.toFixed(n < 0.1 ? 4 : 2)}`;
 const lines = ['# Model comparison', '', `${config.topics.length} topics × ${config.questionsPerTopic} questions, mixed difficulty and answer types. Fact-checker: ${JUDGE_MODEL} with web search.`, ''];
-lines.push('| Model | Delivered | Failed checks | Correct | Wrong | Ambiguous | Seconds per 10 | Cost per AI game | Margin on a $4.99 10-pack |', '|---|---|---|---|---|---|---|---|---|');
+lines.push('| Model | Delivered | Failed checks | Correct | Wrong | Ambiguous | Seconds per 10 | Tokens per AI game (in / out) | Cost per AI game | Margin on a $4.99 10-pack |', '|---|---|---|---|---|---|---|---|---|---|');
 for (const r of results) {
   const delivered = r.written.reduce((n, w) => n + w.questions.length, 0);
   const failed = r.written.reduce((n, w) => n + Object.values(w.rejected).reduce((a, b) => a + b, 0), 0);
@@ -205,7 +208,8 @@ for (const r of results) {
     cost = money(perGame);
     margin = `${Math.round((100 * (kept - perGame * PACK.games)) / PACK.price)}%`;
   }
-  lines.push(`| ${r.candidate.model} | ${delivered} | ${failed} | ${pct(count('correct'))} | ${pct(count('wrong'))} | ${pct(count('ambiguous'))} | ${(ms / 1000).toFixed(1)} | ${cost} | ${margin} |`);
+  const perGameTokens = delivered ? `${Math.round((tokensIn / delivered) * QUESTIONS_PER_AI_GAME)} / ${Math.round((tokensOut / delivered) * QUESTIONS_PER_AI_GAME)}` : '–';
+  lines.push(`| ${r.candidate.model} | ${delivered} | ${failed} | ${pct(count('correct'))} | ${pct(count('wrong'))} | ${pct(count('ambiguous'))} | ${(ms / 1000).toFixed(1)} | ${perGameTokens} | ${cost} | ${margin} |`);
 }
 const judgeTotal = (judgeCost.input * JUDGE_PRICE.input + judgeCost.output * JUDGE_PRICE.output) / 1e6 + judgeCost.searches * JUDGE_PRICE.perSearch;
 lines.push('', `Fact-checking cost: ${money(judgeTotal)} (${judgeCost.searches} web searches).`, '', 'Margin: what is left of the pack price after the store’s 15% and the model cost of 10 AI games at 50 questions each.', '');
