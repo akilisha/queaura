@@ -63,6 +63,44 @@ for both sign-in and sign-up, and require nothing else (no password, no username
 sign-in also needs `EXPO_PUBLIC_CLERK_GOOGLE_WEB_CLIENT_ID` (see `app/.env.example`) and Google
 set up in Clerk.
 
+## Build for Google Play
+
+Play only accepts apps signed with your own **upload key**. Create it once and keep it (and its
+passwords) safe and out of the repository; losing it means asking Google to reset it.
+
+```bash
+keytool -genkeypair -v -storetype PKCS12 -keystore queaura-upload.jks -alias queaura-upload -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Tell Gradle where it is in `~/.gradle/gradle.properties` (on Windows,
+`C:\Users\<you>\.gradle\gradle.properties`), with forward slashes in the path:
+
+```
+QUEAURA_UPLOAD_STORE_FILE=D:/keys/queaura-upload.jks
+QUEAURA_UPLOAD_STORE_PASSWORD=...
+QUEAURA_UPLOAD_KEY_ALIAS=queaura-upload
+QUEAURA_UPLOAD_KEY_PASSWORD=...
+```
+
+`app/plugins/withReleaseSigning.js` makes release builds use it (without those settings they stay
+on the debug key). Raise `android.versionCode` in `app/app.json` for every upload, then build the
+bundle Play wants:
+
+```bash
+cd web && npm run build
+```
+
+```bash
+cd app && npx expo prebuild --platform android --clean
+```
+
+```bash
+cd app/android && ./gradlew bundleRelease
+```
+
+The file to upload is `app/android/app/build/outputs/bundle/release/app-release.aab`. Purchases
+only work in a build installed from Play (internal testing is enough), by a license tester.
+
 ## Installable test build (no laptop needed)
 
 ```bash

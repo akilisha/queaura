@@ -17,7 +17,8 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.queaura.host"
+      "package": "com.queaura.host",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,7 +31,15 @@
       "@clerk/expo",
       "expo-secure-store",
       "@clerk/expo-google-signin",
-      "expo-iap"
+      [
+        "expo-iap",
+        {
+          "android": {
+            "store": "play"
+          }
+        }
+      ],
+      "./plugins/withReleaseSigning"
     ],
     "scheme": "queaura",
     "backgroundColor": "#120A1F"
