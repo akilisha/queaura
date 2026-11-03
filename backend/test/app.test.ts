@@ -23,7 +23,7 @@ describe.skipIf(!url)('HTTP API (needs TEST_DATABASE_URL)', () => {
     db = await freshDb();
     const config = loadConfig({ DATABASE_URL: url, FREE_AI_GAMES: '2', GENERATE_PER_MINUTE: '6' });
     // Test sign-in: the header names the account. Production uses Clerk.
-    const app = createApp({ config, db, authenticate: async (req) => req.header('x-test-user') ?? null, providers: [{ provider: { name: 'fake', model: 'fake-1', complete: (s: string, u: string) => provider!.complete(s, u) }, price: { input: 2, output: 10 } }], filter: WordFilter.load() });
+    const app = createApp({ config, db, authenticate: async (req) => req.header('x-test-user') ?? null, providers: [{ provider: { name: 'fake', model: 'fake-1', complete: (s: string, u: string) => provider!.complete(s, u) }, price: { input: 2, output: 10 } }], filter: WordFilter.load(), play: null, verifyPush: null });
     server = app.listen(0);
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   });
@@ -48,7 +48,7 @@ describe.skipIf(!url)('HTTP API (needs TEST_DATABASE_URL)', () => {
   });
   it('shows a new account its free allowance', async () => {
     const res = await fetch(`${base}/v1/balance`, { headers: { 'x-test-user': user } });
-    expect(await res.json()).toEqual({ aiGames: 2, questionsLeft: 0, questionsPerAiGame: 50 });
+    expect(await res.json()).toMatchObject({ aiGames: 2, questionsLeft: 0, questionsPerAiGame: 50 });
   });
   it('answers unknown routes and unreadable bodies without leaking details', async () => {
     expect((await fetch(`${base}/nope`)).status).toBe(404);

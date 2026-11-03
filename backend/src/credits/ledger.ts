@@ -67,3 +67,9 @@ async function sumOf(db: Kysely<Database>, id: string): Promise<number> {
   const row = await db.selectFrom('ledger').select((eb) => eb.fn.coalesce(eb.fn.sum<number>('delta'), sql<number>`0`).as('total')).where('account_id', '=', id).executeTakeFirstOrThrow();
   return Number(row.total);
 }
+
+/** The account and AI games a purchase credited, for taking them back on a refund. */
+export async function purchaseOf(db: Kysely<Database>, purchaseToken: string): Promise<{ accountId: string; aiGames: number } | null> {
+  const row = await db.selectFrom('ledger').select(['account_id', 'delta']).where('kind', '=', 'purchase').where('ref', '=', purchaseToken).executeTakeFirst();
+  return row ? { accountId: row.account_id, aiGames: row.delta } : null;
+}

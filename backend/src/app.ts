@@ -2,7 +2,9 @@ import express, { type Request } from 'express';
 import { sql, type Kysely } from 'kysely';
 import type { Authenticator } from './auth.ts';
 import type { Config } from './config.ts';
-import { balanceOf, charge, ensureAccount, giveBack } from './credits/ledger.ts';
+import { z } from 'zod';
+import { purchaseAccountId, type GooglePlay } from './billing/google.ts';
+import { balanceOf, charge, credit, ensureAccount, giveBack, purchaseOf } from './credits/ledger.ts';
 import type { Database, GenerationOutcome } from './db/database.ts';
 import { generateRequest } from './generation/contract.ts';
 import { generate } from './generation/generate.ts';
@@ -18,10 +20,16 @@ export interface Deps {
   /** The providers to try in order (spec §8); empty means generation answers it is unavailable. */
   providers: Link[];
   filter: WordFilter;
+  /** Google Play: null when no service account is set, and purchases are refused. */
+  play: GooglePlay | null;
+  /** Checks a purchase notification came from Google; null when notifications aren't set up. */
+  verifyPush: ((authorization: string | undefined) => Promise<boolean>) | null;
 }
 
+const purchaseRequest = z.object({ productId: z.string().min(1).max(100), purchaseToken: z.string().min(1).max(1000) });
+
 /** The HTTP API. Built from its dependencies so tests can run it against a test database. */
-export function createApp({ config, db, authenticate, providers, filter }: Deps) {
+export function createApp({ config, db, authenticate, providers, filter, play, verifyPush }: Deps) {
   const app = express();
   app.disable('x-powered-by');
   // One line per request: route, status and time taken (never bodies, tokens or keys).
@@ -70,7 +78,7 @@ export function createApp({ config, db, authenticate, providers, filter }: Deps)
 
   app.get('/v1/balance', async (req, res) => {
     const id = await account(req);
-    res.json({ ...(await balanceOf(db, id)), questionsPerAiGame: config.QUESTIONS_PER_AI_GAME });
+    res.json({ ...(await balanceOf(db, id)), questionsPerAiGame: config.QUESTIONS_PER_AI_GAME, purchaseAccountId: purchaseAccountId(id) });
   });
 
   /**
@@ -153,6 +161,62 @@ export function createApp({ config, db, authenticate, providers, filter }: Deps)
       : lastFailure === 'unusable'
         ? new HttpError(503, "The AI's questions didn't pass our checks. Nothing was used up; please try again.")
         : new HttpError(503, "The AI couldn't write questions just now. Nothing was used up; please try again.");
+  });
+
+  /**
+   * A Google Play purchase (spec §8). Google, not the phone, says whether it was paid; the token
+   * is credited once however often it arrives (the app resends purchases it didn't finish).
+   */
+  app.post('/v1/purchases', async (req, res) => {
+    const id = await account(req);
+    const parsed = purchaseRequest.safeParse(req.body);
+    if (!parsed.success) throw new HttpError(400, 'That request could not be read.');
+    const { productId, purchaseToken } = parsed.data;
+    const aiGames = config.PACKS.get(productId);
+    if (!aiGames) throw new HttpError(400, "That pack isn't sold any more.");
+    if (!play) throw new HttpError(503, "Purchases can't be confirmed right now. You haven't been charged twice; please try again later.");
+
+    const purchase = await play.productPurchase(productId, purchaseToken);
+    if (!purchase) throw new HttpError(400, "Google Play doesn't know that purchase.");
+    if (purchase.obfuscatedExternalAccountId !== purchaseAccountId(id)) {
+      console.warn(JSON.stringify({ level: 'warn', message: 'purchase for another account refused', productId }));
+      throw new HttpError(403, 'That purchase belongs to a different account.');
+    }
+    if (purchase.purchaseState === 2) {
+      res.status(202).json({ pending: true, balance: await balanceOf(db, id) });
+      return;
+    }
+    if (purchase.purchaseState !== 0) throw new HttpError(400, 'That purchase was cancelled.');
+
+    const credited = await credit(db, id, aiGames, 'purchase', purchaseToken);
+    console.log(JSON.stringify({ level: 'info', message: 'purchase', productId, aiGames, credited, orderId: purchase.orderId }));
+    res.json({ credited, balance: await balanceOf(db, id) });
+  });
+
+  /**
+   * Google Play's purchase notifications, pushed through Pub/Sub. A refunded or charged-back
+   * purchase takes its AI games back (the balance may go below zero until topped up).
+   */
+  app.post('/google/rtdn', async (req, res) => {
+    if (!verifyPush || !(await verifyPush(req.header('authorization')))) throw new HttpError(401, 'Not a notification from Google.');
+    let note: { packageName?: string; voidedPurchaseNotification?: { purchaseToken?: string; orderId?: string }; testNotification?: unknown };
+    try {
+      note = JSON.parse(Buffer.from(String(req.body?.message?.data ?? ''), 'base64').toString('utf8'));
+    } catch {
+      note = {};
+    }
+    const voided = note.voidedPurchaseNotification;
+    if (note.packageName === config.GOOGLE_PLAY_PACKAGE && voided?.purchaseToken) {
+      const purchase = await purchaseOf(db, voided.purchaseToken);
+      if (purchase) {
+        const taken = await credit(db, purchase.accountId, -purchase.aiGames, 'refund', voided.purchaseToken);
+        console.log(JSON.stringify({ level: 'info', message: 'refund', aiGames: purchase.aiGames, applied: taken, orderId: voided.orderId }));
+      }
+    } else if (note.testNotification) {
+      console.log(JSON.stringify({ level: 'info', message: 'test notification from Google Play' }));
+    }
+    // Acknowledge everything else too, or Pub/Sub keeps redelivering it.
+    res.status(204).end();
   });
 
   app.use((_req, _res) => {

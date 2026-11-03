@@ -2,7 +2,7 @@
   "name": "queaura-backend",
   "private": true,
   "type": "module",
-  "description": "Cloud backend for AI question generation and AI-game balances (spec \u00a78). Gameplay never touches it.",
+  "description": "Cloud backend for AI question generation and AI-game balances (spec §8). Gameplay never touches it.",
   "engines": {
     "node": ">=22.18"
   },
@@ -18,6 +18,7 @@
     "@anthropic-ai/sdk": "^1.3.0",
     "@clerk/backend": "^3.26.5",
     "express": "^5.3.0",
+    "google-auth-library": "^11.3.2",
     "kysely": "^0.29.8",
     "openai": "^7.47.0",
     "pg": "^8.23.1",

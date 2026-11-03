@@ -39,6 +39,27 @@ const fallbacks = z
     return parsed;
   });
 
+/**
+ * "ai_games_1:1,ai_games_5:5,ai_games_10:10": each Google Play product id and the AI games it
+ * gives (spec §8). Prices live in the Play Console.
+ */
+const packs = z
+  .string()
+  .default('ai_games_1:1,ai_games_5:5,ai_games_10:10')
+  .transform((value, ctx): Map<string, number> => {
+    const map = new Map<string, number>();
+    for (const entry of value.split(',').map((e) => e.trim()).filter(Boolean)) {
+      const [product, games, ...rest] = entry.split(':');
+      const n = Number(games);
+      if (!product || rest.length || !Number.isInteger(n) || n < 1) {
+        ctx.addIssue({ code: 'custom', message: `"${entry}" should be product id:AI games` });
+        return z.NEVER;
+      }
+      map.set(product, n);
+    }
+    return map;
+  });
+
 const schema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
   DATABASE_URL: z.string().url(),
@@ -67,6 +88,14 @@ const schema = z.object({
   /** Filling a whole game makes one request per round (up to 10), close together. */
   GENERATE_PER_MINUTE: z.coerce.number().int().min(1).default(12),
   GENERATE_PER_DAY: z.coerce.number().int().min(1).default(100),
+  /** Google Play (spec §8): the app's package, its packs, and a service account to confirm purchases. */
+  GOOGLE_PLAY_PACKAGE: z.string().default('com.queaura.host'),
+  PACKS: packs,
+  /** The service account's JSON key; without it purchases can't be confirmed (and are refused). */
+  GOOGLE_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  /** Purchase notifications (Pub/Sub push): our endpoint's URL as the token audience, and the pushing service account. */
+  RTDN_AUDIENCE: z.string().optional(),
+  RTDN_SERVICE_ACCOUNT: z.string().optional(),
   /** The active model's list prices in US dollars per million tokens, for the cost records. */
   AI_PRICE_INPUT: z.coerce.number().min(0).default(0.1),
   AI_PRICE_OUTPUT: z.coerce.number().min(0).default(0.5),

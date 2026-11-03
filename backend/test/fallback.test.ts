@@ -44,6 +44,8 @@ describe.skipIf(!url)('failing over to the next provider (needs TEST_DATABASE_UR
       authenticate: async (req) => req.header('x-test-user') ?? null,
       providers: [link('main', () => main, 0.1, 0.5), link('backup', () => backup, 2, 10)],
       filter: WordFilter.load(),
+      play: null,
+      verifyPush: null,
     });
     server = app.listen(0);
     base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
