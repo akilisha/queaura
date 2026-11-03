@@ -50,7 +50,7 @@ object Hotspot {
         }
       }, Handler(Looper.getMainLooper()))
     } catch (e: SecurityException) {
-      promise.reject("ERR_PERMISSION", "Queaura needs permission to create a Wi-Fi network.", e)
+      promise.reject("ERR_PERMISSION", "QueAura needs permission to create a Wi-Fi network.", e)
     } catch (e: IllegalStateException) {
       promise.reject("ERR_HOTSPOT_FAILED", "The phone couldn't create a network right now. Try again in a moment.", e)
     }

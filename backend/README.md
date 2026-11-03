@@ -1,4 +1,4 @@
-# Queaura backend
+# QueAura backend
 
 The cloud backend (spec §2, §8): AI question generation and AI-game balances. Gameplay never
 touches it; a game with hand-written questions works with no internet and no account.

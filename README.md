@@ -1,4 +1,4 @@
-# Queaura
+# QueAura
 
 A LAN trivia game. The host runs the game from an Android app; players join from their phone's
 browser by scanning a QR code; a TV can show the game to the room. Product decisions live in

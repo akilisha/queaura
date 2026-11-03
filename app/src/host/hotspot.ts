@@ -13,7 +13,7 @@ export async function createNetwork(): Promise<HotspotInfo> {
         : PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
     const result = await PermissionsAndroid.request(permission);
     if (result !== PermissionsAndroid.RESULTS.GRANTED) {
-      throw new Error('Queaura needs that permission to create a Wi-Fi network. You can allow it and try again.');
+      throw new Error('QueAura needs that permission to create a Wi-Fi network. You can allow it and try again.');
     }
   }
   return GameServer.startHotspot();

@@ -1,12 +1,12 @@
 import { StyleSheet, Text } from 'react-native';
 import { color, font, glow, space, text } from '../theme';
 
-/** "Que" in violet, "aura" in gold: the name shows its two halves (spec §2.3). */
+/** "Que" in violet, "Aura" in gold: the name shows its two halves (spec §2.3). */
 export function Logo({ size = 'large' }: { size?: 'small' | 'large' }) {
   return (
-    <Text accessibilityRole="header" accessibilityLabel="Queaura" style={[styles.logo, size === 'small' ? styles.small : styles.large]}>
+    <Text accessibilityRole="header" accessibilityLabel="QueAura" style={[styles.logo, size === 'small' ? styles.small : styles.large]}>
       <Text style={styles.que}>Que</Text>
-      <Text style={styles.aura}>aura</Text>
+      <Text style={styles.aura}>Aura</Text>
     </Text>
   );
 }

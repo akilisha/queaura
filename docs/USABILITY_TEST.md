@@ -16,8 +16,8 @@ two away from the app (and from watching this session) until after Phase 3.
    clock starts when the tester first opens the app, not at install: sideloading an APK is not
    what a real host does from the Play Store.
 2. **Fresh start:** if the app was used before on that phone, clear its data (Settings → Apps →
-   Queaura → Storage → Clear data) so the tester sees exactly what a new host sees.
-3. **Battery:** Settings → Apps → Queaura → Battery → **Unrestricted** on the host phone. (The
+   QueAura → Storage → Clear data) so the tester sees exactly what a new host sees.
+3. **Battery:** Settings → Apps → QueAura → Battery → **Unrestricted** on the host phone. (The
    in-app battery walkthrough is Phase 2; don't let One UI end the test early.)
 4. **Players:** two or three people with their own phones on the **same Wi-Fi** as the host phone.
    They should not have seen the game either, if possible; if they have, note it.

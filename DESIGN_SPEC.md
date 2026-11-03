@@ -1,6 +1,6 @@
-# Queaura — Design Spec
+# QueAura — Design Spec
 
-Name: **Queaura** ("que" for question, "aura" as in cool; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 complete; Phase 1 built and tested; Phase 2 built and awaiting device testing.
+Name: **QueAura** ("que" for question, "aura" as in cool; the capital A shows how it is said; checked by web search only, a trademark and store check is still to do). Platform for v1: Android host app. Status: Phase 0 complete; Phase 1 built and tested; Phase 2 built and awaiting device testing.
 
 ---
 
@@ -54,7 +54,7 @@ Gameplay is LAN-only. The cloud backend is involved only for AI generation and b
 
 The look is a **neon pub quiz night**: a dark bar lit by neon signs. It applies to the host app, the player pages and the TV alike, so they read as one product. Reference mockups: the "Neon pub quiz" design canvas (owner's Claude artifacts).
 
-- **Logo:** "Queaura" in Tilt Neon, "Que" glowing violet and "aura" glowing gold, so the name shows its two halves.
+- **Logo:** "QueAura" in Tilt Neon, "Que" glowing violet and "Aura" glowing gold, so the name shows its two halves.
 - **Color:** bar-at-night ground `#120A1F`, table surfaces `#1D1230` / `#2A1B44`, chalk text `#F7F0E1`, smoke for quiet text `#B9A8D6`. **Gold** `#FFC23D` is the light you chase: the main action, scores, winners, the answer reveal. **Neon violet** `#C77DFF` is the sign on the wall: headings, outlines, secondary actions. Right `#5CF2A6`, wrong or over `#FF7A59`.
 - **Answer choices:** gold, cyan, pink and violet, each with a shape (▲ ◆ ● ■); they differ in lightness as well as hue, so color-blind players can tell them apart.
 - **Glow** (layered text and box shadows) is reserved for what matters: the logo, gold actions, the current leader, right answers, the countdown.

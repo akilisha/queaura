@@ -1,6 +1,6 @@
 # Model comparison (Phase 3, milestone 6), 3 November 2026
 
-Which model should write Queaura's questions? Every candidate wrote the same 80 questions (8 topics
+Which model should write QueAura's questions? Every candidate wrote the same 80 questions (8 topics
 × 10, mixed difficulty and answer types) through the app's own pipeline (`backend/tools/compare.ts`):
 same instructions, same checks, same word list. Claude Opus 5.5 with web search fact-checked every
 question. Rerun with `npm run compare` in `backend/`.
