@@ -67,6 +67,15 @@ if (args.includes('--list-models')) {
   process.exit(0);
 }
 
+if (args.includes('--report')) {
+  const file = args[args.indexOf('--report') + 1];
+  const saved = JSON.parse(readFileSync(file, 'utf8'));
+  const lines = report(saved.results, saved.judgeCost);
+  writeFileSync(file.replace(/results\.json$/, 'report.md'), lines.join('\n') + '\n');
+  console.log(lines.join('\n'));
+  process.exit(0);
+}
+
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null;
 // --only takes one or more comma-separated parts of model names: --only gpt,deepseek
 const candidates = config.candidates.filter((c) => !only || only.split(',').some((part) => c.model.includes(part)));
@@ -188,45 +197,50 @@ for (const c of candidates) {
   writeFileSync(new URL('results.json', outDir), JSON.stringify({ results, judgeCost }, null, 2));
 }
 
-const money = (n: number) => `$${n.toFixed(n < 0.1 ? 4 : 2)}`;
-const lines = ['# Model comparison', '', `${config.topics.length} topics × ${config.questionsPerTopic} questions, mixed difficulty and answer types. Fact-checker: ${JUDGE_MODEL} with web search.`, ''];
-lines.push('| Model | Delivered | Failed checks | Correct | Wrong | Ambiguous | Seconds per 10 | Tokens per AI game (in / out) | Cost per AI game | Margin on a $4.99 10-pack |', '|---|---|---|---|---|---|---|---|---|---|');
-for (const r of results) {
-  const delivered = r.written.reduce((n, w) => n + w.questions.length, 0);
-  const failed = r.written.reduce((n, w) => n + Object.values(w.rejected).reduce((a, b) => a + b, 0), 0);
-  const all = r.graded.flat();
-  const count = (v: Verdict) => all.filter((g) => g.verdict === v).length;
-  const pct = (n: number) => (delivered ? `${Math.round((100 * n) / delivered)}%` : '–');
-  const ms = r.written.reduce((n, w) => n + w.ms, 0) / Math.max(1, r.written.length);
-  const tokensIn = r.written.reduce((n, w) => n + w.inputTokens, 0);
-  const tokensOut = r.written.reduce((n, w) => n + w.outputTokens, 0);
-  let cost = '–';
-  let margin = '–';
-  if (r.candidate.input !== null && r.candidate.output !== null && delivered > 0) {
-    const perQuestion = (tokensIn * r.candidate.input + tokensOut * r.candidate.output) / 1e6 / delivered;
-    const perGame = perQuestion * QUESTIONS_PER_AI_GAME;
-    const kept = PACK.price * (1 - PACK.storeCut);
-    cost = money(perGame);
-    margin = `${Math.round((100 * (kept - perGame * PACK.games)) / PACK.price)}%`;
+function report(results: { candidate: Candidate; written: Written[]; graded: Graded[][] }[], judgeCost: { input: number; output: number; searches: number }): string[] {
+  const money = (n: number) => `$${n.toFixed(n < 0.1 ? 4 : 2)}`;
+  const lines = ['# Model comparison', '', `${config.topics.length} topics × ${config.questionsPerTopic} questions, mixed difficulty and answer types. Fact-checker: ${JUDGE_MODEL} with web search.`, ''];
+  lines.push('| Model | Delivered | Failed checks | Correct | Wrong | Ambiguous | Seconds per 10 | Tokens per AI game (in / out) | Cost per AI game | Margin on a $4.99 10-pack |', '|---|---|---|---|---|---|---|---|---|---|');
+  for (const r of results) {
+    const delivered = r.written.reduce((n, w) => n + w.questions.length, 0);
+    const failed = r.written.reduce((n, w) => n + Object.values(w.rejected).reduce((a, b) => a + b, 0), 0);
+    const all = r.graded.flat();
+    const count = (v: Verdict) => all.filter((g) => g.verdict === v).length;
+    const pct = (n: number) => (delivered ? `${Math.round((100 * n) / delivered)}%` : '–');
+    const ms = r.written.reduce((n, w) => n + w.ms, 0) / Math.max(1, r.written.length);
+    const tokensIn = r.written.reduce((n, w) => n + w.inputTokens, 0);
+    const tokensOut = r.written.reduce((n, w) => n + w.outputTokens, 0);
+    let cost = '–';
+    let margin = '–';
+    if (r.candidate.input !== null && r.candidate.output !== null && delivered > 0) {
+      const perQuestion = (tokensIn * r.candidate.input + tokensOut * r.candidate.output) / 1e6 / delivered;
+      const perGame = perQuestion * QUESTIONS_PER_AI_GAME;
+      const kept = PACK.price * (1 - PACK.storeCut);
+      cost = money(perGame);
+      margin = `${Math.round((100 * (kept - perGame * PACK.games)) / PACK.price)}%`;
+    }
+    const perGameTokens = delivered ? `${Math.round((tokensIn / delivered) * QUESTIONS_PER_AI_GAME)} / ${Math.round((tokensOut / delivered) * QUESTIONS_PER_AI_GAME)}` : '–';
+    lines.push(`| ${r.candidate.model} | ${delivered} | ${failed} | ${pct(count('correct'))} | ${pct(count('wrong'))} | ${pct(count('ambiguous'))} | ${(ms / 1000).toFixed(1)} | ${perGameTokens} | ${cost} | ${margin} |`);
   }
-  const perGameTokens = delivered ? `${Math.round((tokensIn / delivered) * QUESTIONS_PER_AI_GAME)} / ${Math.round((tokensOut / delivered) * QUESTIONS_PER_AI_GAME)}` : '–';
-  lines.push(`| ${r.candidate.model} | ${delivered} | ${failed} | ${pct(count('correct'))} | ${pct(count('wrong'))} | ${pct(count('ambiguous'))} | ${(ms / 1000).toFixed(1)} | ${perGameTokens} | ${cost} | ${margin} |`);
-}
-const judgeTotal = (judgeCost.input * JUDGE_PRICE.input + judgeCost.output * JUDGE_PRICE.output) / 1e6 + judgeCost.searches * JUDGE_PRICE.perSearch;
-lines.push('', `Fact-checking cost: ${money(judgeTotal)} (${judgeCost.searches} web searches).`, '', 'Margin: what is left of the pack price after the store’s 15% and the model cost of 10 AI games at 50 questions each.', '');
-lines.push('## For a person to check', '', 'Every question the fact-checker marked wrong or ambiguous, and 10 it marked correct, at random.', '');
-const passed: string[] = [];
-for (const r of results) {
-  r.written.forEach((w, t) =>
-    w.questions.forEach((q, i) => {
-      const g = r.graded[t][i];
-      const line = `- **${r.candidate.model} · ${w.topic}** · ${g.verdict.toUpperCase()}: ${describe(q, i).replace(/\n\s*/g, ' — ')}  \n  _${g.reason}_`;
-      if (g.verdict === 'correct') passed.push(line);
-      else lines.push(line);
-    }),
-  );
-}
-lines.push('', '### Marked correct (sample)', '', ...passed.sort(() => Math.random() - 0.5).slice(0, 10));
+  const judgeTotal = (judgeCost.input * JUDGE_PRICE.input + judgeCost.output * JUDGE_PRICE.output) / 1e6 + judgeCost.searches * JUDGE_PRICE.perSearch;
+  lines.push('', `Fact-checking cost: ${money(judgeTotal)} (${judgeCost.searches} web searches).`, '', 'Margin: what is left of the pack price after the store’s 15% and the model cost of 10 AI games at 50 questions each.', '');
+  lines.push('## For a person to check', '', 'Every question the fact-checker marked wrong or ambiguous, and 10 it marked correct, at random.', '');
+  const passed: string[] = [];
+  for (const r of results) {
+    r.written.forEach((w, t) =>
+      w.questions.forEach((q, i) => {
+        const g = r.graded[t][i];
+        const line = `- **${r.candidate.model} · ${w.topic}** · ${g.verdict.toUpperCase()}: ${describe(q, i).replace(/\n\s*/g, ' — ')}  \n  _${g.reason}_`;
+        if (g.verdict === 'correct') passed.push(line);
+        else lines.push(line);
+      }),
+    );
+  }
+  lines.push('', '### Marked correct (sample)', '', ...passed.sort(() => Math.random() - 0.5).slice(0, 10));
+    return lines;
+  }
+
+const lines = report(results, judgeCost);
 writeFileSync(new URL('report.md', outDir), lines.join('\n') + '\n');
 console.log(lines.slice(0, results.length + 7).join('\n'));
 console.log(`\nFull report: ${new URL('report.md', outDir).pathname}`);
