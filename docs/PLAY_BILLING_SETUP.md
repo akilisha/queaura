@@ -35,9 +35,12 @@ Play re-signs the app with its own key, and Google sign-in only accepts apps who
 
    If it asks for a purchase option, use **Buy** with that price; let Play convert other
    countries' prices.
-3. Play Console (account level, the left menu outside the app) → **Settings → License testing** →
-   add the Gmail address signed in to the Play Store on your phone → **Save**. Its purchases use
-   test cards and cost nothing.
+3. Play Console → **Manage account** (left menu) → **Play apps settings** → **License testing**
+   (under Monetization settings) → add the Gmail address signed in to the Play Store on your phone
+   → **Save**. Its purchases use test cards and cost nothing: the purchase sheet shows "Test card,
+   always approves" instead of your real cards. If it still shows real cards, or a new product
+   doesn't appear, clear the Play Store's cache on the phone (Settings → Apps → Google Play Store →
+   Storage → Clear cache).
 
 ## C. Letting the backend confirm purchases (service account)
 
