@@ -3,14 +3,13 @@ import { useState } from 'react';
 import type { Style } from '../../../../protocol/src';
 import { AiFill } from '../../components/AiFill';
 import { Field, OptionCard } from '../../components/form';
-import { Button, Card, ErrorText, Muted, Screen } from '../../components/ui';
+import { Button, Card, Muted, Screen } from '../../components/ui';
 import { Stepper } from '../../components/wizard';
 import { games } from '../../data/db';
 import { libraryChanged } from '../../data/library';
 import type { GameFormat } from '../../data/types';
-import { blockedMessage, plural, SCORINGS, STYLES } from '../../game/copy';
+import { plural, SCORINGS, STYLES } from '../../game/copy';
 import { MAX_TITLE, newGameId, newRound } from '../../game/format';
-import GameServer from '../../../modules/game-server/src/GameServerModule';
 
 const STYLE_ORDER: Style[] = ['multipleChoice', 'closestWithoutGoingOver', 'fastestFinger'];
 const MAX_AI_ROUNDS = 6;
@@ -26,7 +25,6 @@ export default function CreateWithAi() {
   const [style, setStyle] = useState<Style>('multipleChoice');
   const [game, setGame] = useState<GameFormat | null>(null);
 
-  const blocked = title.trim() ? GameServer.findBlocked(title) : null;
 
   if (game) {
     return (
@@ -48,7 +46,6 @@ export default function CreateWithAi() {
     <Screen form>
       <Card title="A new game, written by AI">
         <Field label="Game name" value={title} onChangeText={setTitle} placeholder="Friday pub quiz" maxLength={MAX_TITLE} autoFocus />
-        {blocked && <ErrorText>{blockedMessage(blocked, 'game names')}</ErrorText>}
         <Stepper label="Rounds" value={rounds} min={1} max={MAX_AI_ROUNDS} onChange={setRounds} unit={(n) => plural(n, 'round')} />
         <Stepper label="Questions per round" value={perRound} min={1} max={20} onChange={setPerRound} />
       </Card>
@@ -63,7 +60,7 @@ export default function CreateWithAi() {
       <Button
         big
         label="Next: topics"
-        disabled={!title.trim() || blocked !== null}
+        disabled={!title.trim()}
         onPress={() =>
           setGame({
             id: newGameId(),
