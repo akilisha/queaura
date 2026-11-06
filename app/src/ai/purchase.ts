@@ -19,3 +19,33 @@ export function confirmationFrom(status: number, body: unknown): PurchaseConfirm
   if (status === 400) return { status: 'invalid' };
   throw new Error(`The purchase couldn't be confirmed yet (status ${status}).`);
 }
+
+/**
+ * What to tell the host when Google Play's purchase sheet fails, by the store library's error code.
+ * Plain and safe: never the library's own text, which means nothing to a host and says more
+ * than it should. Null means say nothing (they cancelled).
+ */
+export function purchaseErrorMessage(error: unknown): string | null {
+  const code = String((error as { code?: unknown } | null)?.code ?? '');
+  switch (code) {
+    case 'user-cancelled':
+      return null;
+    case 'deferred-payment':
+    case 'pending':
+      return 'Your payment is pending. The AI games are added as soon as Google Play confirms it.';
+    case 'already-owned':
+    case 'duplicate-purchase':
+      return "Your last purchase is still being confirmed. It's added shortly, and you won't be charged twice.";
+    case 'network-error':
+    case 'service-disconnected':
+    case 'service-timeout':
+    case 'connection-closed':
+    case 'init-connection':
+      return "Couldn't reach Google Play. Check that this phone is online, then try again. You weren't charged.";
+    case 'item-unavailable':
+    case 'sku-not-found':
+      return "That pack isn't available right now. You weren't charged.";
+    default:
+      return "The purchase didn't go through, so you weren't charged. Check your payment method in Google Play, or try again.";
+  }
+}

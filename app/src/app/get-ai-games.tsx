@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { purchaseErrorMessage } from '../ai/purchase';
 import { useStore } from '../ai/Store';
 import { describeBalance } from '../ai/api';
 import { useBalance } from '../ai/useBalance';
@@ -20,9 +21,9 @@ export default function GetAiGames() {
     try {
       await store!.buy(id);
     } catch (e) {
-      // Cancelling Google's sheet isn't an error worth showing.
-      const message = e instanceof Error ? e.message : String(e);
-      if (!/cancel/i.test(message)) setError(`The purchase didn't go through: ${message}`);
+      // The library's own details stay in the device log, for diagnosis; the host gets a plain message.
+      console.warn('purchase failed', e);
+      setError(purchaseErrorMessage(e));
     } finally {
       setBusy(null);
     }
