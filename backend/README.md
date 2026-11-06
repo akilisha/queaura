@@ -25,6 +25,7 @@ over Postgres for the records, zod to check what comes in.
 | `GET /v1/balance` | The signed-in host's AI games and questions left in the open one |
 | `POST /v1/purchases` | `{productId, purchaseToken}` → confirmed with Google Play, the pack's AI games credited once |
 | `POST /google/rtdn` | Google Play's purchase notifications (Pub/Sub push, Google-signed); a refund takes its AI games back |
+| `POST /admin/check-refunds` | Runs the refund check now (it also runs every 30 minutes); needs `ADMIN_TOKEN` |
 | `POST /admin/grants` | Grants AI games by hand (needs `ADMIN_TOKEN`); see below |
 | `POST /v1/generate` | `{topic, difficulty, answerType, count, avoid}` → checked questions in the app's shape, and the new balance |
 

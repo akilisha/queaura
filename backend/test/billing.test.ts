@@ -39,6 +39,24 @@ describe('Google Play client', () => {
     expect(seen).toEqual({ path: '/androidpublisher/v3/applications/com.queaura.host/purchases/products/ai_games_5/tokens/tok%2F1', auth: 'Bearer test-token' });
     expect(await play.productPurchase('ai_games_5', 'unknown')).toBeNull();
   });
+
+  it("reads every page of Google's voided purchases", async () => {
+    server.close();
+    const seen: string[] = [];
+    server = createServer((req, res) => {
+      seen.push(req.url!);
+      const second = req.url!.includes('token=next');
+      res.writeHead(200, { 'content-type': 'application/json' }).end(
+        JSON.stringify(second ? { voidedPurchases: [{ purchaseToken: 't2' }] } : { voidedPurchases: [{ purchaseToken: 't1', orderId: 'GPA.1' }], tokenPagination: { nextPageToken: 'next' } }),
+      );
+    });
+    await new Promise<void>((r) => server.listen(0, r));
+    const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const play = googlePlay(JSON.stringify({ client_email: 'sa@test', private_key: 'unused' }), 'com.queaura.host', { baseUrl: base, headers: async () => ({}) });
+    expect(await play.voidedPurchases(1000)).toEqual([{ purchaseToken: 't1', orderId: 'GPA.1' }, { purchaseToken: 't2' }]);
+    expect(seen[0]).toBe('/androidpublisher/v3/applications/com.queaura.host/purchases/voidedpurchases?startTime=1000&type=0&maxResults=1000');
+    expect(seen[1]).toContain('token=next');
+  });
 });
 
 it('gives each account a stable purchase id that reveals nothing', () => {
@@ -54,11 +72,14 @@ describe.skipIf(!url)('buying AI games (needs TEST_DATABASE_URL)', () => {
   let base: string;
   // What Google says about each purchase token, as the test sets it.
   const google = new Map<string, ProductPurchase>();
-  const play: GooglePlay = { productPurchase: async (_product, token) => google.get(token) ?? null };
+  // What Google lists as voided, as the test sets it.
+  const voided: { purchaseToken: string; orderId?: string }[] = [];
+  const play: GooglePlay = { productPurchase: async (_product, token) => google.get(token) ?? null, voidedPurchases: async () => voided };
+  const ADMIN = 'admin-test-token-that-is-long-enough-1234';
 
   beforeAll(async () => {
     db = await freshDb();
-    const config = loadConfig({ DATABASE_URL: url, FREE_AI_GAMES: '2' });
+    const config = loadConfig({ DATABASE_URL: url, FREE_AI_GAMES: '2', ADMIN_TOKEN: ADMIN });
     const app = createApp({
       config,
       db,
@@ -132,5 +153,21 @@ describe.skipIf(!url)('buying AI games (needs TEST_DATABASE_URL)', () => {
   it('acknowledges test notifications and ones about other apps without changing anything', async () => {
     expect((await notify({ packageName: 'com.queaura.host', testNotification: { version: '1.0' } })).status).toBe(204);
     expect((await notify({ packageName: 'com.other.app', voidedPurchaseNotification: { purchaseToken: 'tok-a' } })).status).toBe(204);
+  });
+
+  it("takes back refunds Google lists, once, even when the notification never came", async () => {
+    const who = newId();
+    google.set('tok-silent', { purchaseState: 0, obfuscatedExternalAccountId: purchaseAccountId(who) });
+    await buy(who, 'ai_games_5', 'tok-silent');
+    expect(await aiGames(who)).toBe(7);
+    voided.push({ purchaseToken: 'tok-silent', orderId: 'GPA.9' }, { purchaseToken: 'tok-not-ours' });
+    const check = () => fetch(`${base}/admin/check-refunds`, { method: 'POST', headers: { authorization: `Bearer ${ADMIN}` } });
+    expect(await (await check()).json()).toEqual({ voided: 2, applied: 1 });
+    expect(await aiGames(who)).toBe(2);
+    expect(await (await check()).json()).toEqual({ voided: 2, applied: 0 });
+    // A late notification for the same refund changes nothing either.
+    await notify({ packageName: 'com.queaura.host', voidedPurchaseNotification: { purchaseToken: 'tok-silent' } });
+    expect(await aiGames(who)).toBe(2);
+    expect((await fetch(`${base}/admin/check-refunds`, { method: 'POST' })).status).toBe(401);
   });
 });

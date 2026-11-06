@@ -5,7 +5,8 @@ import type { Config } from './config.ts';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import { purchaseAccountId, type GooglePlay } from './billing/google.ts';
-import { balanceOf, charge, credit, ensureAccount, giveBack, purchaseOf } from './credits/ledger.ts';
+import { applyRefund, checkRefunds } from './billing/refunds.ts';
+import { balanceOf, charge, credit, ensureAccount, giveBack } from './credits/ledger.ts';
 import type { Database, GenerationOutcome } from './db/database.ts';
 import { generateRequest } from './generation/contract.ts';
 import { generate } from './generation/generate.ts';
@@ -221,11 +222,7 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
     }
     const voided = note.voidedPurchaseNotification;
     if (note.packageName === config.GOOGLE_PLAY_PACKAGE && voided?.purchaseToken) {
-      const purchase = await purchaseOf(db, voided.purchaseToken);
-      if (purchase) {
-        const taken = await credit(db, purchase.accountId, -purchase.aiGames, 'refund', voided.purchaseToken);
-        console.log(JSON.stringify({ level: 'info', message: 'refund', aiGames: purchase.aiGames, applied: taken, orderId: voided.orderId }));
-      }
+      await applyRefund(db, voided.purchaseToken, 'notification', voided.orderId);
     } else if (note.testNotification) {
       console.log(JSON.stringify({ level: 'info', message: 'test notification from Google Play' }));
     }
@@ -265,6 +262,13 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
     const granted = await credit(db, id!, g.aiGames, 'adjustment', ref, g.reason);
     console.log(JSON.stringify({ level: 'info', message: 'admin grant', account: id, aiGames: g.aiGames, reason: g.reason, ref, granted }));
     res.json({ account: id, granted, ref, balance: await balanceOf(db, id!) });
+  });
+
+  /** Runs the refund check now (it also runs on a timer): what Google lists as voided, and what was applied. */
+  app.post('/admin/check-refunds', async (req, res) => {
+    admin(req);
+    if (!play) throw new HttpError(503, 'No Google service account: refunds can\'t be checked.');
+    res.json(await checkRefunds(db, play));
   });
 
   app.use((_req, _res) => {

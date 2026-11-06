@@ -14,9 +14,17 @@ export interface ProductPurchase {
   orderId?: string;
 }
 
+/** A purchase Google voided: refunded, charged back, or cancelled. */
+export interface VoidedPurchase {
+  purchaseToken: string;
+  orderId?: string;
+}
+
 export interface GooglePlay {
   /** Null when Google has no such purchase. */
   productPurchase(productId: string, purchaseToken: string): Promise<ProductPurchase | null>;
+  /** One-time purchases voided since [sinceMillis] (Google keeps 30 days), every page. */
+  voidedPurchases(sinceMillis: number): Promise<VoidedPurchase[]>;
 }
 
 const SCOPE = 'https://www.googleapis.com/auth/androidpublisher';
@@ -36,6 +44,20 @@ export function googlePlay(serviceAccountJson: string, packageName: string, test
       if (res.status === 404 || res.status === 400 || res.status === 410) return null;
       if (!res.ok) throw new Error(`Google Play ${res.status}: ${await res.text()}`);
       return (await res.json()) as ProductPurchase;
+    },
+    async voidedPurchases(sinceMillis) {
+      const out: VoidedPurchase[] = [];
+      let page: string | undefined;
+      do {
+        const params = new URLSearchParams({ startTime: String(sinceMillis), type: '0', maxResults: '1000', ...(page ? { token: page } : {}) });
+        const url = `${baseUrl}/androidpublisher/v3/applications/${encodeURIComponent(packageName)}/purchases/voidedpurchases?${params}`;
+        const res = await fetch(url, { headers: test ? await test.headers() : await auth.getRequestHeaders(url) });
+        if (!res.ok) throw new Error(`Google Play ${res.status}: ${await res.text()}`);
+        const body = (await res.json()) as { voidedPurchases?: VoidedPurchase[]; tokenPagination?: { nextPageToken?: string } };
+        out.push(...(body.voidedPurchases ?? []).filter((v) => v.purchaseToken));
+        page = body.tokenPagination?.nextPageToken;
+      } while (page);
+      return out;
     },
   };
 }

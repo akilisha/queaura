@@ -5,6 +5,7 @@ import { loadConfig } from './config.ts';
 import { createDb } from './db/database.ts';
 import { migrateToLatest } from './db/migrations.ts';
 import { googlePlay, pushVerifier } from './billing/google.ts';
+import { checkRefunds } from './billing/refunds.ts';
 import { chainFrom } from './generation/index.ts';
 import { WordFilter } from './moderation/wordFilter.ts';
 
@@ -28,6 +29,17 @@ const findAccountByEmail = clerk ? async (email: string) => (await clerk.users.g
 const server = createApp({ config, db, authenticate, providers: chain, filter: WordFilter.load(), play, verifyPush, findAccountByEmail }).listen(config.PORT, () => {
   console.log(JSON.stringify({ level: 'info', message: `Listening on port ${config.PORT}` }));
 });
+
+// The refund check (spec §8): at start, then every 30 minutes, so refunds are taken back even if
+// Google's notification is late or lost.
+if (play) {
+  const check = () =>
+    checkRefunds(db, play)
+      .then((r) => console.log(JSON.stringify({ level: 'info', message: 'refund check', ...r })))
+      .catch((e) => console.error(JSON.stringify({ level: 'error', message: 'refund check failed', detail: String(e instanceof Error ? e.message : e) })));
+  void check();
+  setInterval(check, 30 * 60 * 1000).unref();
+}
 
 // The host platform stops the service with SIGTERM on each deploy: finish requests, then close.
 process.on('SIGTERM', () => {
