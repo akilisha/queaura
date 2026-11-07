@@ -337,6 +337,11 @@ Designing for these means not blocking them.
 - All-time high scores: honor-system, kept on the host device, keyed by nickname.
 - Paid storage: bring-your-own remote storage, or a premium hosted option.
 - Scheduled game start.
+- **Table kiosk mode** (proposed 2026-11-07, after v1): a venue-owned small tablet (Galaxy Tab A class) on a table or the bar, locked to QueAura (Android lock task). A patron picks a topic, pays by contactless tap on the tablet (no card swipe), AI writes the game, and it switches to play mode once payment succeeds; guests at the table join by scanning the QR code as usual and play at their own pace. The tablet resets for the next table and keeps nothing about the patron. Builds on what exists (game server, QR join, whole-game AI fill, backend ledger, venue grants, tablet layouts); new are the kiosk shell, venue setup (price per game, limits) and an external payment flow that would also serve a web subscription page for venues. Open questions before design:
+  - **Play payment policy:** a patron buys digital content used in the app, which Play normally requires Play Billing for, and Play Billing can't take a tap at a kiosk. Options to check (with legal advice): selling it as the venue's in-person service, private distribution to venues through managed Google Play, or the venue paying us (web, business purchase) and charging patrons itself.
+  - **NFC hardware:** Tap to Pay on Android (Stripe, Square, Adyen) needs NFC and a supported device; many Galaxy Tab A models have no NFC. Choose the model first, or use a small paired reader.
+  - **Money flow:** if patrons pay the venue and we take a share, payouts need something like Stripe Connect; a business-model decision.
+  - **Moderation:** strangers' topics on a venue's shared screens need the model-based tier (§9), not only the word list.
 
 ---
 
