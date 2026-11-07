@@ -6,7 +6,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import { purchaseAccountId, type GooglePlay } from './billing/google.ts';
 import { applyRefund, checkRefunds } from './billing/refunds.ts';
-import { balanceOf, charge, credit, ensureAccount, giveBack } from './credits/ledger.ts';
+import { balanceOf, charge, credit, deleteAccountData, ensureAccount, giveBack, isDeleted } from './credits/ledger.ts';
 import type { Database, GenerationOutcome } from './db/database.ts';
 import { generateRequest } from './generation/contract.ts';
 import { generate } from './generation/generate.ts';
@@ -28,6 +28,8 @@ export interface Deps {
   verifyPush: ((authorization: string | undefined) => Promise<boolean>) | null;
   /** Finds an account (Clerk user id) by email, for admin grants; null without Clerk's secret key. */
   findAccountByEmail?: ((email: string) => Promise<string | null>) | null;
+  /** Deletes the sign-in at Clerk; null without Clerk's secret key. */
+  deleteSignIn?: ((id: string) => Promise<void>) | null;
 }
 
 const grantRequest = z
@@ -44,7 +46,7 @@ const grantRequest = z
 const purchaseRequest = z.object({ productId: z.string().min(1).max(100), purchaseToken: z.string().min(1).max(1000) });
 
 /** The HTTP API. Built from its dependencies so tests can run it against a test database. */
-export function createApp({ config, db, authenticate, providers, filter, play, verifyPush, findAccountByEmail = null }: Deps) {
+export function createApp({ config, db, authenticate, providers, filter, play, verifyPush, findAccountByEmail = null, deleteSignIn = null }: Deps) {
   const app = express();
   app.disable('x-powered-by');
   // One line per request: route, status and time taken (never bodies, tokens or keys).
@@ -69,7 +71,19 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
         : new HttpError(401, 'Please sign in to use AI questions.');
     }
     await ensureAccount(db, id, config.FREE_AI_GAMES);
+    if (await isDeleted(db, id)) throw new HttpError(410, 'This account was deleted. Sign out to start again.');
     return id;
+  }
+
+  /** Deletes our data first (what matters most), then the sign-in; a failure there is logged to fix by hand. */
+  async function deleteAccount(id: string): Promise<void> {
+    await deleteAccountData(db, id);
+    try {
+      await deleteSignIn!(id);
+    } catch (e) {
+      console.error(JSON.stringify({ level: 'error', message: 'account deleted but its sign-in was not', account: id, detail: String(e instanceof Error ? e.message : e) }));
+    }
+    console.log(JSON.stringify({ level: 'info', message: 'account deleted', account: id }));
   }
 
   /** A guard against runaway use (a stuck button, a bug, a leaked session), counted from the records. */
@@ -89,6 +103,14 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
   app.get('/health', async (_req, res) => {
     await sql`select 1`.execute(db);
     res.json({ ok: true });
+  });
+
+  /** The host deletes their account from the app (Google Play requires this, spec §8). */
+  app.delete('/v1/account', async (req, res) => {
+    const id = await account(req);
+    if (!deleteSignIn) throw new HttpError(503, "Account deletion isn't available right now. Email info@kerbdrop.com and we'll do it for you.");
+    await deleteAccount(id);
+    res.json({ deleted: true });
   });
 
   app.get('/v1/balance', async (req, res) => {
@@ -262,6 +284,22 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
     const granted = await credit(db, id!, g.aiGames, 'adjustment', ref, g.reason);
     console.log(JSON.stringify({ level: 'info', message: 'admin grant', account: id, aiGames: g.aiGames, reason: g.reason, ref, granted }));
     res.json({ account: id, granted, ref, balance: await balanceOf(db, id!) });
+  });
+
+  /** Deletes an account on request by email (the web page's route), by account id or email. */
+  app.post('/admin/delete-account', async (req, res) => {
+    admin(req);
+    const body = z.object({ account: z.string().min(1).optional(), email: z.string().email().optional() }).safeParse(req.body);
+    if (!body.success || (body.data.account ? 1 : 0) + (body.data.email ? 1 : 0) !== 1) throw new HttpError(400, 'Give either account or email.');
+    if (!deleteSignIn) throw new HttpError(503, 'Deleting accounts needs CLERK_SECRET_KEY.');
+    let id = body.data.account ?? null;
+    if (body.data.email) {
+      if (!findAccountByEmail) throw new HttpError(503, 'Finding accounts by email needs CLERK_SECRET_KEY.');
+      id = await findAccountByEmail(body.data.email);
+      if (!id) throw new HttpError(404, 'No account with that email.');
+    }
+    await deleteAccount(id!);
+    res.json({ account: id, deleted: true });
   });
 
   /** Runs the refund check now (it also runs on a timer): what Google lists as voided, and what was applied. */

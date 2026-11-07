@@ -10,6 +10,8 @@ export interface AccountTable {
   created_at: ColumnType<Date, never, never>;
   /** Questions left in the AI game being used up (spec §8: a started block is used up first). */
   block_remaining: ColumnType<number, number | undefined, number>;
+  /** Set when the host deleted the account; only purchase records remain. */
+  deleted_at: ColumnType<Date | null, never, Date | null>;
 }
 
 export type LedgerKind = 'allowance' | 'purchase' | 'refund' | 'use' | 'adjustment';

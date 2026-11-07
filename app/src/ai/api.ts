@@ -26,13 +26,13 @@ export interface Backend {
   fetch?: typeof fetch;
 }
 
-export async function call<T>(backend: Backend, path: string, body?: unknown): Promise<T> {
+export async function call<T>(backend: Backend, path: string, body?: unknown, method?: 'DELETE'): Promise<T> {
   const token = await backend.getToken();
   if (!token) throw new AiError(401, 'Please sign in to use AI questions.');
   let res: Response;
   try {
     res = await (backend.fetch ?? fetch)(`${backend.baseUrl}${path}`, {
-      method: body === undefined ? 'GET' : 'POST',
+      method: method ?? (body === undefined ? 'GET' : 'POST'),
       headers: { authorization: `Bearer ${token}`, ...(body === undefined ? {} : { 'content-type': 'application/json' }) },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
@@ -46,6 +46,9 @@ export async function call<T>(backend: Backend, path: string, body?: unknown): P
 }
 
 export const getBalance = (backend: Backend) => call<Balance>(backend, '/v1/balance');
+
+/** Deletes the signed-in host's account (Google Play requires this in the app). */
+export const deleteAccount = (backend: Backend) => call<{ deleted: true }>(backend, '/v1/account', undefined, 'DELETE');
 
 /** "3 AI games left", counting the one already opened as one more when it still has questions. */
 export function describeBalance(b: Balance): string {

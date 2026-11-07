@@ -79,6 +79,15 @@ const migrations: Record<string, Migration> = {
       await db.schema.alterTable('ledger').dropColumn('note').execute();
     },
   },
+  // Account deletion (spec §8): a deleted account stays as a marker so its sign-in can't recreate it.
+  '0005_account_deleted': {
+    async up(db: Kysely<any>) {
+      await db.schema.alterTable('accounts').addColumn('deleted_at', 'timestamptz').execute();
+    },
+    async down(db: Kysely<any>) {
+      await db.schema.alterTable('accounts').dropColumn('deleted_at').execute();
+    },
+  },
 };
 
 /** Creates [schema] if needed and brings its tables up to date; each schema keeps its own history. */

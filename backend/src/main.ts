@@ -26,7 +26,9 @@ const verifyPush = config.RTDN_AUDIENCE && config.RTDN_SERVICE_ACCOUNT ? pushVer
 if (!verifyPush) console.warn(JSON.stringify({ level: 'warn', message: 'Purchase notifications not set up: refunds will not take AI games back.' }));
 const clerk = config.CLERK_SECRET_KEY ? createClerkClient({ secretKey: config.CLERK_SECRET_KEY }) : null;
 const findAccountByEmail = clerk ? async (email: string) => (await clerk.users.getUserList({ emailAddress: [email], limit: 1 })).data[0]?.id ?? null : null;
-const server = createApp({ config, db, authenticate, providers: chain, filter: WordFilter.load(), play, verifyPush, findAccountByEmail }).listen(config.PORT, () => {
+const deleteSignIn = clerk ? async (id: string) => void (await clerk.users.deleteUser(id)) : null;
+if (!clerk) console.warn(JSON.stringify({ level: 'warn', message: 'No CLERK_SECRET_KEY: account deletion and finding accounts by email are unavailable.' }));
+const server = createApp({ config, db, authenticate, providers: chain, filter: WordFilter.load(), play, verifyPush, findAccountByEmail, deleteSignIn }).listen(config.PORT, () => {
   console.log(JSON.stringify({ level: 'info', message: `Listening on port ${config.PORT}` }));
 });
 

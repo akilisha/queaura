@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AiError, call, describeBalance } from './api';
+import { AiError, call, deleteAccount, describeBalance } from './api';
 
 const backend = (reply: () => Promise<Response>, token: string | null = 'tok') => {
   const seen: { url: string; init: RequestInit }[] = [];
@@ -23,6 +23,12 @@ describe('call', () => {
     expect(await call(b, '/v1/generate', { topic: 'Space' })).toEqual({ ok: 1 });
     expect(seen[0].url).toBe('https://api.test/v1/generate');
     expect(seen[0].init).toMatchObject({ method: 'POST', headers: { authorization: 'Bearer tok', 'content-type': 'application/json' }, body: '{"topic":"Space"}' });
+  });
+  it('deletes with the DELETE method and the session token', async () => {
+    const { backend: b, seen } = backend(json(200, { deleted: true }));
+    expect(await deleteAccount(b)).toEqual({ deleted: true });
+    expect(seen[0].url).toBe('https://api.test/v1/account');
+    expect(seen[0].init).toMatchObject({ method: 'DELETE', headers: { authorization: 'Bearer tok' } });
   });
   it("passes on the backend's plain-language message", async () => {
     const { backend: b } = backend(json(402, { error: 'You have no AI games left.' }));

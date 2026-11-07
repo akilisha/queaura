@@ -73,3 +73,21 @@ export async function purchaseOf(db: Kysely<Database>, purchaseToken: string): P
   const row = await db.selectFrom('ledger').select(['account_id', 'delta']).where('kind', '=', 'purchase').where('ref', '=', purchaseToken).executeTakeFirst();
   return row ? { accountId: row.account_id, aiGames: row.delta } : null;
 }
+
+/**
+ * Deletes an account's data (spec §8): its AI-game history, its request records and its balance.
+ * Purchase and refund records stay, as bookkeeping requires; they carry no name or email. The
+ * account row stays, marked deleted, so a sign-in token still alive can't recreate it.
+ */
+export async function deleteAccountData(db: Kysely<Database>, id: string): Promise<void> {
+  await db.transaction().execute(async (tx) => {
+    await tx.deleteFrom('generations').where('account_id', '=', id).execute();
+    await tx.deleteFrom('ledger').where('account_id', '=', id).where('kind', 'not in', ['purchase', 'refund']).execute();
+    await tx.updateTable('accounts').set({ deleted_at: new Date(), block_remaining: 0 }).where('id', '=', id).execute();
+  });
+}
+
+export async function isDeleted(db: Kysely<Database>, id: string): Promise<boolean> {
+  const row = await db.selectFrom('accounts').select('deleted_at').where('id', '=', id).executeTakeFirst();
+  return Boolean(row?.deleted_at);
+}
