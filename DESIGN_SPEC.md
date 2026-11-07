@@ -342,6 +342,9 @@ Designing for these means not blocking them.
   - **Payment, no extra hardware:** a card reader on every table is ruled out (it doesn't scale). Leading option: the tablet shows a QR code and the patron pays on their own phone through a web checkout (for example Stripe Checkout, with Apple Pay or Google Pay); the tablet unlocks when the backend confirms payment. Works on any tablet, NFC or not, and matches the existing scan-to-join pattern. Tap to Pay on the tablet itself needs NFC-capable models, which Galaxy Tab A mostly aren't.
   - **Money flow:** if patrons pay the venue and we take a share, payouts need something like Stripe Connect; a business-model decision.
   - **Moderation:** strangers' topics on a venue's shared screens need the model-based tier (§9), not only the word list.
+  - **Distribution:** the kiosk is a build of the host app with kiosk mode on, installed from our website rather than Google Play, so patrons' payments stay outside Play's payment rules. Venues allow "install unknown apps" once per tablet (or push it with Samsung's business tools); the package must be registered under Kerbdrop's verified developer account (Android developer verification), and the app checks for its own updates.
+  - **Coexists with free play:** the venue can run the ordinary host app on a big screen for everyone at the same time.
+  - **Table tab (idea):** each tablet has a table id, so it could show that table's tab and reset for new patrons. Charges for games are ours to show. The venue's bar tab lives in its point-of-sale system (Toast, Square, Clover and others), so showing it means an integration per POS vendor, each with its own partner approval.
 
 ---
 
