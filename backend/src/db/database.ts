@@ -50,10 +50,21 @@ export interface GenerationTable {
   outcome: GenerationOutcome;
 }
 
+/** A venue asking about a plan (spec §8), from the form on queaura.com. */
+export interface VenueRequestTable {
+  id: Generated<string>;
+  created_at: ColumnType<Date, never, never>;
+  email: string;
+  venue: string;
+  frequency: string;
+  message: string;
+}
+
 export interface Database {
   accounts: AccountTable;
   ledger: LedgerTable;
   generations: GenerationTable;
+  venue_requests: VenueRequestTable;
 }
 
 /** A schema name we can safely put in SQL: lowercase letters, digits and underscores. */

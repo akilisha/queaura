@@ -96,6 +96,8 @@ const schema = z.object({
   /** Purchase notifications (Pub/Sub push): our endpoint's URL as the token audience, and the pushing service account. */
   RTDN_AUDIENCE: z.string().optional(),
   RTDN_SERVICE_ACCOUNT: z.string().optional(),
+  /** The website, where the venue form sends people back to. */
+  SITE_URL: z.string().url().default('https://queaura.com'),
   /** Protects /admin routes (granting AI games); long and random. Without it they don't exist. */
   ADMIN_TOKEN: z.string().min(32, 'at least 32 characters').optional(),
   /** The active model's list prices in US dollars per million tokens, for the cost records. */

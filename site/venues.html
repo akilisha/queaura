@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Venue plans · QueAura</title>
+  <meta name="description" content="Plans for venues and groups that run quiz nights regularly.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main>
+  <header>
+    <a class="logo" href="/"><span class="que">Que</span><span class="aura">Aura</span></a>
+    <nav><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  </header>
+
+  <h1>Running a weekly quiz?</h1>
+  <p>If you host quiz nights regularly, at a pub, a bar, a club or your workplace, tell us and we'll set you up with a plan for AI questions every month. We reply by email, usually within a couple of days.</p>
+  <form class="card form" method="post" action="https://queaura-backend-whhaq.ondigitalocean.app/venue-requests">
+    <label>Your email <input type="email" name="email" required maxlength="200" autocomplete="email"></label>
+    <label>Venue or group name <input type="text" name="venue" required maxlength="120"></label>
+    <label>How often do you run a quiz?
+      <select name="frequency" required>
+        <option value="weekly">Every week</option>
+        <option value="monthly">About once a month</option>
+        <option value="occasionally">Now and then</option>
+      </select>
+    </label>
+    <label>Anything else? (optional) <textarea name="message" maxlength="1000" rows="4" placeholder="How many people come, what kind of questions you like…"></textarea></label>
+    <label class="hidden" aria-hidden="true">Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+    <button type="submit">Ask about a plan</button>
+  </form>
+  <p class="muted">We use your details only to reply about a plan. See the <a href="/privacy">privacy policy</a>.</p>
+  <footer>© 2026 Kerbdrop LLC · <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of service</a> · <a href="mailto:info@kerbdrop.com">info@kerbdrop.com</a></footer>
+</main>
+</body>
+</html>

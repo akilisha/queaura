@@ -60,6 +60,8 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
     next();
   });
   app.use(express.json({ limit: '64kb' }));
+  // The website's venue form is a plain HTML form (no scripts), so it posts form-encoded.
+  app.use(express.urlencoded({ extended: false, limit: '16kb' }));
 
   /** The signed-in account, created with its free allowance the first time it is seen. */
   async function account(req: Request): Promise<string> {
@@ -103,6 +105,37 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
   app.get('/health', async (_req, res) => {
     await sql`select 1`.execute(db);
     res.json({ ok: true });
+  });
+
+  /**
+   * A venue asking about a plan (spec §8), from the plain form on queaura.com: kept for a person to
+   * reply to, then the browser goes back to the site. A hidden field catches simple spam bots, and
+   * each address may send a few requests an hour.
+   */
+  const venueForm = z.object({
+    email: z.string().trim().email().max(200),
+    venue: z.string().trim().min(1).max(120),
+    frequency: z.enum(['weekly', 'monthly', 'occasionally']),
+    message: z.string().trim().max(1000).default(''),
+    website: z.string().max(200).default(''),
+  });
+  const venueSenders = new Map<string, number[]>();
+  app.post('/venue-requests', async (req, res) => {
+    const site = config.SITE_URL.replace(/\/+$/, '');
+    const sender = String(req.header('x-forwarded-for') ?? req.socket.remoteAddress ?? '').split(',')[0].trim();
+    const now = Date.now();
+    const recent = (venueSenders.get(sender) ?? []).filter((t) => now - t < 3_600_000);
+    if (recent.length >= 5) return res.redirect(303, `${site}/venues-problem`);
+    venueSenders.set(sender, [...recent, now]);
+    const form = venueForm.safeParse(req.body);
+    if (!form.success) return res.redirect(303, `${site}/venues-problem`);
+    // Bots fill in the hidden field; thank them and keep nothing.
+    if (!form.data.website) {
+      const { email, venue, frequency, message } = form.data;
+      await db.insertInto('venue_requests').values({ email, venue, frequency, message }).execute();
+      console.log(JSON.stringify({ level: 'info', message: 'venue request', frequency }));
+    }
+    res.redirect(303, `${site}/venues-thanks`);
   });
 
   /** The host deletes their account from the app (Google Play requires this, spec §8). */
@@ -300,6 +333,12 @@ export function createApp({ config, db, authenticate, providers, filter, play, v
     }
     await deleteAccount(id!);
     res.json({ account: id, deleted: true });
+  });
+
+  /** Venue plan requests, newest first, to reply to by hand. */
+  app.get('/admin/venue-requests', async (req, res) => {
+    admin(req);
+    res.json(await db.selectFrom('venue_requests').selectAll().orderBy('id', 'desc').limit(200).execute());
   });
 
   /** Runs the refund check now (it also runs on a timer): what Google lists as voided, and what was applied. */

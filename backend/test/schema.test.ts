@@ -28,8 +28,8 @@ describe.skipIf(!url)('environments in separate schemas (needs TEST_DATABASE_URL
       select table_schema as schema, count(*)::int as n from information_schema.tables
       where table_schema in ('test_env_dev', 'test_env_prod') group by table_schema order by 1`.execute(dev);
     expect(tables.rows).toEqual([
-      { schema: 'test_env_dev', n: 5 },
-      { schema: 'test_env_prod', n: 5 },
+      { schema: 'test_env_dev', n: 6 },
+      { schema: 'test_env_prod', n: 6 },
     ]);
   });
 

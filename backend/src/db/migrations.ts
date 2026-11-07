@@ -88,6 +88,24 @@ const migrations: Record<string, Migration> = {
       await db.schema.alterTable('accounts').dropColumn('deleted_at').execute();
     },
   },
+  // Venue plan requests from queaura.com (spec §8): arranged by hand, so just kept to reply to.
+  '0006_venue_requests': {
+    async up(db: Kysely<any>) {
+      await db.schema
+        .createTable('venue_requests')
+        .addColumn('id', 'bigint', (c) => c.primaryKey().generatedAlwaysAsIdentity())
+        .addColumn('created_at', 'timestamptz', (c) => c.notNull().defaultTo(sql`now()`))
+        .addColumn('email', 'text', (c) => c.notNull())
+        .addColumn('venue', 'text', (c) => c.notNull())
+        .addColumn('frequency', 'text', (c) => c.notNull())
+        .addColumn('message', 'text', (c) => c.notNull())
+        .execute();
+      await sql`alter table venue_requests enable row level security`.execute(db);
+    },
+    async down(db: Kysely<any>) {
+      await db.schema.dropTable('venue_requests').execute();
+    },
+  },
 };
 
 /** Creates [schema] if needed and brings its tables up to date; each schema keeps its own history. */

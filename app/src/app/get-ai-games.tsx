@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 import { purchaseErrorMessage } from '../ai/purchase';
 import { useStore } from '../ai/Store';
 import { describeBalance } from '../ai/api';
@@ -69,6 +69,10 @@ export default function GetAiGames() {
       {status?.status === 'invalid' && <ErrorText>Google Play couldn't confirm that purchase, so nothing was added. If you were charged, Google refunds it automatically.</ErrorText>}
       {status?.status === 'ownership_conflict' && <ErrorText>That purchase belongs to a different QueAura account. Sign in with the account that bought it.</ErrorText>}
       {error && <ErrorText>{error}</ErrorText>}
+      <Card>
+        <Body>Running a quiz every week at a venue?</Body>
+        <Button tone="secondary" label="Ask about a venue plan" onPress={() => void Linking.openURL('https://queaura.com/venues')} />
+      </Card>
     </Screen>
   );
 }
